@@ -2183,10 +2183,17 @@ def reportpdf(request):
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
         values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'))
 
-    bamunt = ((CouponBatch.objects. \
-        values('ftype').order_by('ftype').annotate(
-        total=Sum(Cast('serial_end', FloatField())) - Sum(Cast('serial_start', FloatField())),
-        asum=Sum('totalAmount')))).filter(bdel=0, hide=0)
+    bamount = CouponBatch.objects.values('ftype').order_by('ftype').annotate(
+        minlnum=Min(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
+        maxlnum=Max(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
+    ).filter(bdel=0, hide=0)
+
+    # bamunt = CouponBatch.objects. \
+    #     values('ftype').order_by('ftype').annotate(
+    #     total=Sum(Cast('serial_end', FloatField())) - Sum(Cast('serial_start', FloatField())),
+    #     asum=Sum('totalAmount')).filter(bdel=0, hide=0, used=1)
 
     # issuers = activityReport.objects.values('issueid').aggregate(issuer= Q('issueid'),requester = Count('issueid'))
     # if books.quan == 1:
@@ -2199,10 +2206,10 @@ def reportpdf(request):
             "books": books,
             # "plt": plitre,
             # "dlt": dlitre,
-            "bamunt": bamunt,
+            "bamunt": bamount,
             "vamount": vamount,
             "damount": damount,
-            # "pamount": pamount
+            # "pamount": pamount,
             # "issuers": issuers,
         },
     )
