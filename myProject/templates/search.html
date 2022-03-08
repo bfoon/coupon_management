@@ -1,0 +1,43 @@
+{% include 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+<div class="row" style="padding: 1.1em;">
+   {% for i in lst %}
+                        <!-- Earnings (Monthly) Card Example -->
+                        <div class="col-xl-2 col-md-6 mb-4">
+                            <div class="card shadow h-100 py-2">
+<!--                            {{chart}}-->
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                              <a href="/approvalflow/{{i.rid}}">{{ i.requesterid }}</a></div>
+                                            <div class="h6 mb-0 font-weight-bold text-gray-800">{{ i.vnum }}</div>
+                                        </div>
+
+                                        <div class="col-auto">
+                                          <a href="/approvalflow/{{i.rid}}"><i class="fas fa-barcode fa-2x text-gray-300"> {{ i.amount }}</i></a>
+                                          <h6>{{ i.created_at}}</h6>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+</div>
+  {% endfor %}
+</div>
+
+
+
+
+
+
+</div>
+
+
+{% include 'footer.html' %}
+
+{% endblock %}
+

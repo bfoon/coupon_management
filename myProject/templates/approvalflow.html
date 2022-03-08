@@ -1,0 +1,463 @@
+{% include 'base.html' %}
+{% load humanize %}
+{% block content %}
+{% load static %}
+
+
+
+<div class="container-fluid">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request Item
+            {% if comm == aflow.rid  %}
+                    <a href="/itemcomment/{{aflow.rid}}" style="text-decoration: none;" class="fa fa-comments float-right" aria-hidden="true"></a>
+        {% endif %}
+        </h6>
+    </div>
+
+                        <div class="card-body">
+          {% block messages %}
+                        {% if messages %}
+                        {% for message in messages %}
+                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                               <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                                </div>
+
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+
+            {% if aflow.ret == 2 %}
+<!--                <li class="list-group-item active"><h5><strong>Request Item</strong></h5> </li>-->
+            <h1 class="text-danger"><strong>This item is deleted! </strong> <i class="fa fa-frown" aria-hidden="true"></i></h1>
+            <a href="/comments" type="button" class="btn btn-secondary btn-sm"> << Back</a>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+
+    </div>
+    </div>
+    </div>
+{% else %}
+
+
+
+<!--                <li class="list-group-item active"><h5><strong>Request Item</strong></h5> </li>-->
+                <li class="list-group-item"><h6 ><strong>Requester Name:</strong></h6><p style="text-transform:uppercase;">{{ aflow.requesterid }}</p></li>
+                <li class="list-group-item"><h6 ><strong>Vehicle Number:</strong></h6><p style="text-transform:uppercase;">{{ aflow.vnum }}</p></li>
+                <li class="list-group-item"><h6 ><strong>Fuel Type:</strong></h6> {{ aflow.ftype }}</li>
+                <li class="list-group-item"><h6 ><strong>Quantity (Litre):</strong>
+                    {% if rflow.marketrate == 0 and aflow.status == 3 %}
+                <button type="button" class="btn btn-primary float-right btn-circle btn-md" data-toggle="modal" data-target="#exampleModal">
+                <i class="fa fa-cog" aria-hidden="true"></i>
+                </button>
+
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLong">Market Rate Input</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+{% if role != 'Driver' %}
+    <form method="POST" action={% url 'approvalflow' aflow.rid %} >
+            {% csrf_token %}
+      <div class="modal-body">
+      <div class="container">
+    <div class="page-header">
+        <h3>UPDATE MARKET RATE</h3>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 body-main">
+                        <div class="col-md-12">
+                        <div class="form-group">
+                         <label for="marketrate" class="col-form-label">Market Rate:</label>
+                            <input type="number" step="0.01" min="1" max="100"class="form-control" id="marketrate" name="marketrate" required>
+                        </div>
+                        </div>
+                </div>
+                </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+         <input type="submit" class="btn btn-primary" value="Submit"/>
+              </div>
+            </div>
+          </div>
+
+        </form>
+        {% endif %}
+
+        </h6> {{ aflow.amount }}L - ({{ aflow.tankcat }})</a></li>
+        {% elif aflow.status != 3 %}
+                </h6> {{ aflow.amount }}L - ({{ aflow.tankcat }})
+
+
+<button type="button" class="btn btn-sm btn-info float-right" id="btn-modal" data-toggle="popover"><i class="fa fa-calculator" aria-hidden="true"></i></button></li>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModal">COUPON CALCULATOR</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+<div class="modal-body">
+      <div class="container">
+        <div class="input-prepend">
+          <span class="add-on">Requested Litre/s: </span> <input class="span2" id="lowSide"
+            type="text" />
+        </div>
+          <br>
+        <div class="input-prepend">
+          <span class="add-on">Coupon Rate: </span> <input class="span2" id="highSide"
+            type="text" />
+        </div>
+          <br>
+          <div class="input-prepend">
+          <span class="add-on"></span>Dimension: <input class="span3" id="metSide"
+            type="text" />
+        </div>
+          <br>
+        <button class="btn btn-sm btn-dark"
+          onClick="enteredRange(lowSide.value,highSide.value, metSide.value)">Enter</button>
+      </div>
+      <br />
+      <div class="form-inline">
+        <label>Coupons: </label> <strong><input class="text-info" id="middle" type="text" /></strong>
+      </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+
+
+
+
+{% else %}
+        </h6> {{ aflow.amount }}L - ({{ aflow.tankcat }})</a></li>
+ {% endif %}
+
+                <li class="list-group-item"><h6 ><strong>Meter Reading:</strong></h6> {{ aflow.mread | intcomma}}</li>
+                <li class="list-group-item"><h6 ><strong>Date Requested:</strong></h6> {{ aflow.created_at }}
+                    {% if rflow.sign == "1" %}
+                    <h3 class="float-right" style="background-color:powderblue; color:blue;" >Signed</h3>
+                    {% endif %}
+                </li>
+
+                <li class="list-group-item"><h6 ><strong>Note:<br></strong></h6><p class="text-justify">{{ aflow.comm }}</p>
+                    {% if rflow.sign == "0" %}
+                    <form action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file" name="uploadedFile">
+                    <button type="submit" class="btn btn-success btn-sm">Upload</button>
+                    </form>
+                    {% endif %}
+                </li>
+
+              <li class="list-group-item">
+                  {% if aflow.ret == 2 %}
+                <a href="/comments" type="button" class="btn btn-secondary btn-sm"> << Back</a>
+
+                  {% elif aflow.status == 1 and role == 'Approver' and aflow.ret == 0 or aflow.status == 1 and aflow.ret == 0 and role == 'Admin' %}
+                <a href="/approve/{{ aflow.rid }}" class="btn btn-primary btn-sm active" role="button" aria-pressed="true">Approve</a>
+                    |
+                  {% if aflow.ret == 0 %}
+                      <a href="/ret/{{ aflow.rid }}" class="btn btn-warning btn-sm active" role="button" aria-pressed="true">Return</a>
+                  |
+                  {% endif %}
+               <a href="/inbox" type="button" class="btn btn-secondary btn-sm" >Cancel</a>
+                  {% elif aflow.status == 2 and role == 'Issuer' or aflow.status == 2 and role == 'Admin'%}
+               <a href="/transac/{{ aflow.rid }}" class="btn btn-success btn-sm active" role="button" aria-pressed="true">Issue</a>
+                  |
+                  <a href="/ret/{{ aflow.rid }}" class="btn btn-danger btn-sm active" role="button" aria-pressed="true">Return</a>
+                  |
+               <a href="/inbox" type="button" class="btn btn-secondary btn-sm" id="nav-profile">Cancel</a>
+                  {% elif aflow.status == 3%}
+                <a href="/inbox" type="button" class="btn btn-secondary btn-sm">Close</a>
+                  {% if rflow.uploadedFile != "0" %}
+                  <button type="button"class="btn btn-info btn-sm" data-toggle="modal" data-target="#uploadreceipts">Attachment</button>
+                  {% endif %}
+
+ <!-- Button trigger modal -->
+<button type="button" class="btn btn-success float-right btn-circle btn-md" data-toggle="modal" data-target="#exampleModalCenter">
+    <i class="fa fa-print" aria-hidden="true"></i>
+</button>
+
+<style>
+@media screen {
+  #printSection {
+      display: none;
+  }
+}
+
+@media print {
+  body * {
+    visibility:hidden;
+  }
+  #printSection, #printSection * {
+    visibility:visible;
+  }
+  #printSection {
+    position:absolute;
+    left:0;
+    top:0;
+  }
+}
+
+
+#bg-text
+{
+    color:lightgrey;
+    font-size:12px;
+    transform:rotate(300deg);
+}
+
+</style>
+{% load qr_code %}
+<!-- Modal -->
+<div id="printThis">
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered " role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">Fuel Coupon Receipt</h5>
+        <button type="button" class="close d-print-none" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <div class="container">
+    <div class="page-header">
+        <h3>UNDP THE GAMBIA<sup>&reg;</sup></h3>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 body-main">
+                <div class="col-md-12">
+                    <h5 style="text-transform:uppercase;">{{aflow.requesterid}} </h5>
+                    <i class="progress-bar-md bg-warning" style="text-transform:uppercase;">{{rflow.serialno}}-{{rflow.maxserialno}}</i>
+
+                    <h6> ReceiptNo : <i class="text-danger">{{rflow.sid |stringformat:"04d"}}</i></h6>
+                    <div class="row">
+                        </div>
+                    </div> <br />
+                    <div>
+                        <i  style="text-transform:uppercase;">{{aflow.vnum}}</i><i class="float-right" style="text-transform:uppercase;">{{aflow.amount}}L</i>
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                    <td class="text-right">
+                                        <p> <strong>Unit:</strong> </p>
+                                        <p> <strong>Fuel: </strong> </p>
+                                        <p> <strong>CouponRate: </strong> </p>
+                                        <p> <strong>MarketRate: </strong> </p>
+                                        <p> <strong>Coupons: </strong> </p>
+                                        <p> <strong>Approver: </strong> </p>
+                                        <p> <strong>Issuer: </strong> </p>
+<!--                                        <p> <strong>Serial: </strong> </p>-->
+                                        <p> <strong>Note: </strong> </p>
+                                    </td>
+                                    <td>
+                                        <p> <strong><i ></i> {{rflow.unit}} </strong> </p>
+                                        <p> <strong><i></i> {{rflow.ftype}} </strong> </p>
+                                        <p> <strong><i></i> {{rflow.quantity | floatformat:2}}L </strong> </p>
+                                        <p> <strong><i></i> {{lit.makrate | floatformat:2}}L </strong> </p>
+                                        <p> <strong><i></i>{{rflow.cnumber}} </strong> </p>
+                                        <p> <strong><i></i>{{aflow.approverid}} </strong> </p>
+                                        <p> <strong><i></i>{{aflow.issueid}} </strong> </p>
+<!--                                        <p> <strong><i></i>{{rflow.serialno}} </strong> </p>-->
+                                        <p> <i></i>{{aflow.comm}} </p>
+                                    </td>
+                                </tr>
+                                <tr style="color: #F81D2D;">
+                                    <td class="text-right">
+                                        <h4><strong>Total:</strong></h4>
+                                    </td>
+                                    <td class="text-left">
+                                        <h4><strong><i area-hidden="true"></i>D{{rflow.totalamount | floatformat:2 | intcomma}} </strong></h4>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div>
+                        <div class="col-md-12">
+                            <p><b>Date :</b> {{rflow.created_at | date:"M d, Y"}}</p> <br />
+                            <form method="POST" action={% url 'approvalflow' aflow.rid %} >
+                            {% csrf_token %}
+                            <p><b>Signature</b>
+                                {% if rflow.sign == "0" and aflow.requesterid == request.user.username %}
+                         <input type="checkbox" id="unsign" name="sign" value="1">
+                                {% if rflow.marketrate != 0 and rflow.uploadedFile != "0" %}
+                                <input type="submit" class="btn btn-primary btn-sm float-right" value="Sign"/>
+                                {% endif %}
+                        </form>
+                                {% elif  rflow.sign == "1" %}
+                            <input type="checkbox" id="sign" name="scales" checked disabled></p>
+                            {% endif %}
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+                </div>
+                </div>
+
+                </div>
+<p class="float-right">{% qr_from_text rflow.sid size="T" %}</p>
+
+
+      </div>
+        {% if rflow.marketrate != 0 and aflow.status == 3 %}
+        <h8 class="text-info">The market rate on {{rflow.datemodified}} is {{rflow.marketrate}} and coupon rate is {{rflow.rate}}</h8>
+        {% endif %}
+      <div class="modal-footer ">
+        <button type="button" class="btn btn-secondary d-print-none" data-dismiss="modal">Close</button>
+          {% if rflow.sign == "1" %}
+        <button type="button" id="btnPrint" class="btn btn-primary d-print-none" onclick="window.print();">Print</button>
+          {% endif %}
+
+
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- This is for the physical receipt modal and it displays or uploads scan receipts-->
+
+<div id="printThisa">
+<div class="modal fade" id="uploadreceipts" tabindex="-1" role="dialog" aria-labelledby="Title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered " role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadreceiptsTitle">Receipts Upload</h5>
+
+        <button type="button" class="close d-print-none" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+
+      </div>
+      <div class="modal-body">
+      <div class="container">
+    <div class="page-header">
+       <table border="1">
+           <tr>
+            <td>Tittle</td>
+            <td>Date attached</td>
+         </tr>
+         <tr>
+             <td><a href="{{rflow.uploadedFile.url}}" target="_blank">{{rflow.uploadedFile.name|slice:"15:"}}</a></td>
+            <td>10/02/2022</td>
+         </tr>
+       </table>
+
+
+
+</div>
+
+
+
+<script>
+document.getElementById("btnPrint").onclick = function () {
+    printElement(document.getElementById("printThis"));
+}
+
+function printElement(elem) {
+    var domClone = elem.cloneNode(true);
+
+    var $printSection = document.getElementById("printSection");
+
+    if (!$printSection) {
+        var $printSection = document.createElement("div");
+        $printSection.id = "printSection";
+        document.body.appendChild($printSection);
+    }
+
+    $printSection.innerHTML = "";
+    $printSection.appendChild(domClone);
+    window.print();
+}
+
+</script>
+{% endif %}
+          {% endif %}
+
+{% if aflow.ret == 1 and role == 'Driver' %}
+                  <a href="/inbox" type="button" class="btn btn-secondary btn-sm">Close</a>
+                  |
+                 <a href="/requestEdit/{{ aflow.rid }}" class="btn btn-info btn-sm active" role="button" aria-pressed="true">Edit</a>
+                  |
+                  <a href="/delete/{{ aflow.rid }}" class="btn btn-danger btn-sm active" role="button" onclick="return confirm('Are you sure to delete this item?');" aria-pressed="true">Delete</a>
+{% elif aflow.ret == 1 %}
+                 <a href="/inbox" type="button" class="btn btn-secondary btn-sm">Close</a>
+          {% elif aflow.ret == 0 and role == 'Driver' %}
+                 <a href="/inbox" type="button" class="btn btn-secondary btn-sm">Close</a>
+                {% endif %}
+                </li>
+
+        </ul>
+
+    </div>
+
+    </div>
+
+    </div>
+    </div>
+
+    </div>
+    </div>
+    </div>
+
+
+
+<script type='text/javascript'>
+function enteredRange(x, y, z) {
+    var low = parseFloat(x);
+    var high = parseFloat(y);
+    var met = parseFloat(z);
+    var rate = low * high;
+    var middle1 = rate / met;
+    middle.value = middle1;
+    document.getElementById('middle').value = middle1;
+}
+$(document).ready(function () {
+    $('#myModal').bind('show', function () {
+        //do stuf on show
+    });
+    $('#btn-modal').click(function() {
+        $('#myModal').modal('show');
+    });
+});
+function closeDialog() {
+    $('#myModal').modal('hide');
+};
+function okClicked() {
+    closeDialog();
+};
+</script>
+
+{% include 'footer.html' %}
+
+{% endblock %}

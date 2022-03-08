@@ -1,0 +1,36 @@
+{% include 'base.html' %}
+{% load humanize %}
+{% block content %}
+{% load static %}
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- 404 Error Text -->
+                    <div class="text-center">
+
+             {% block messages %}
+                        {% if messages %}
+                        {% for message in messages %}
+                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                               <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                                </div>
+
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+
+                        <div class="error mx-auto" data-text="404">404</div>
+                        <p class="lead text-gray-800 mb-5">You have no permission on this page</p>
+                        <p class="text-gray-500 mb-0">It looks like you found a glitch in the matrix...</p>
+                        <a href="/inbox">&larr; Back to Dashboard</a>
+                    </div>
+
+                </div>
+                <!-- /.container-fluid -->
+</div>
+{% include 'footer.html' %}
+{% endblock %}

@@ -1,0 +1,236 @@
+{% include 'base.html' %}
+{% load humanize %}
+{% block content %}
+{% load static %}
+<div class="container bootstrap snippets bootdey">
+    <div class="row">
+        <div class="col-lg-12">
+              {% block messages %}
+                        {% if messages %}
+                        {% for message in messages %}
+                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                               <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                                </div>
+
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+            <div class="card shadow mb-4">
+
+                        <div class="card-header py-3">
+                             <button type="button" class="btn btn-success btn-circle btn-md float-right" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">
+                          <i class="fa fa-car" aria-hidden="true"></i>
+                      </button>
+                            <h5 align="center"><strong>List of Vehicles</strong></h5>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Add Vehicle <i class="fa fa-car" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action="vehicles">
+                                    {% csrf_token %}
+                                  <div class="form-group">
+                                    <label for="asunit" class="col-form-label">Unit:</label>
+                                    <select class="form-control" id="asunit" name="asunit" required>
+                                    <option></option>
+                                    {% for u in ulist %}
+                                    <option value="{{u.uname}}" style="text-transform:uppercase;">{{u.uname}}</option>
+                                    {% endfor %}
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="vnum" class="col-form-label">Vehicle Number:</label>
+                                    <input type="text" class="form-control" id="vnum" name="vnum" style="text-transform:uppercase;" required>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="driver" class="col-form-label">Driver:</label>
+                                    <select class="form-control text-capitalize" id="driver" name="driver" required>
+                                          <option></option>
+                                        {% for p in plist %}
+                                          <option value="{{p.id}}">{{p.user}}</option>
+                                         {% endfor %}
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="imile" class="col-form-label">Initial Miles:</label>
+                                    <input type="number" class="form-control" id="imile" name="imile" required>
+                                  </div>
+                                    <div class="form-group">
+                                    <label for="ftype" class="col-form-label">Fuel Type:</label>
+                                    <select class="form-control" id="ftype" name="ftype" required>
+                                          <option></option>
+                                          <option>Petrol</option>
+                                          <option>Diesel</option>
+                                     </select>
+                                        <div class="form-group">
+                                    <label for="vtype" class="col-form-label">Vehicle Type:</label>
+                                    <input type="text" class="form-control" id="vtype" name="vtype" style="text-transform: capitalize;" required>
+                                  </div>
+                                        <div class="form-group">
+                                    <label for="tankcap" class="col-form-label">Tank Capacity:</label>
+                                    <input type="number" class="form-control" id="tankcap" name="tankcap" style="text-transform: capitalize;" required>
+                                  </div>
+
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary"/>
+                                </form>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                        </div>
+<!--            <div class="main-box no-header clearfix">-->
+
+                <div class="main-box-body clearfix">
+
+                    <div class="table-responsive">
+                        <table class="table user-list">
+
+                            <thead>
+                                <tr>
+                                <th><span class="text-capitalize">Driver</span></th>
+                                <th><span>Vehicle Number</span></th>
+                                <th><span>Initial Milage</span></th>
+                                <th class="text-center"><span>Unit</span></th>
+                                <th><span>Fuel Type</span></th>
+                                <th><span>Tank(Liter)</span></th>
+                                <th>&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for v in vlist %}
+                                <tr>
+                                    <td>
+<!--                                        <img src="{{ BASIC_DIR }}/{{v.pic}}" alt="">-->
+                                        <a href="/user_profile/{{v.driver.id}}" class="user-link" style="text-transform: capitalize;">{{v.driver}}</a>
+<!--                                        <span class="user-subhead">Member</span>-->
+                                    </td>
+                                    <td style="text-transform:uppercase;">{{v.vnum}}</td>
+                                    <td style="text-transform:uppercase;">{{v.imile | intcomma}}</td>
+                                    <td class="text-center" style="text-transform:uppercase;">
+                                        <span class="label label-default" >{{v.asunit}}</span>
+                                    </td>
+                                    <td>
+                                        <a href="#">{{v.ftype}}</a>
+                                    </td>
+                                    <td style="text-transform:uppercase;">{{v.tankcap | intcomma}}</td>
+                                    <td style="width: 20%;">
+                                        <a href="#" class="table-link text-warning">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        <a href="#" class="table-link text-info">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-text-width fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                        <a href="/vehdel/{{v.vid}}" class="table-link danger" onclick="return confirm('Are you sure to delete this item?');">
+                                            <span class="fa-stack">
+                                                <i class="fa fa-square fa-stack-2x"></i>
+                                                <i class="fa fa-trash fa-stack-1x fa-inverse"></i>
+                                            </span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style type="text/css">
+body{
+    background:#eee;    
+}
+.main-box.no-header {
+    padding-top: 20px;
+}
+.main-box {
+    background: #FFFFFF;
+    -webkit-box-shadow: 1px 1px 2px 0 #CCCCCC;
+    -moz-box-shadow: 1px 1px 2px 0 #CCCCCC;
+    -o-box-shadow: 1px 1px 2px 0 #CCCCCC;
+    -ms-box-shadow: 1px 1px 2px 0 #CCCCCC;
+    box-shadow: 1px 1px 2px 0 #CCCCCC;
+    margin-bottom: 16px;
+    -webikt-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+.table a.table-link.danger {
+    color: #e74c3c;
+}
+.label {
+    border-radius: 3px;
+    font-size: 0.875em;
+    font-weight: 600;
+}
+.user-list tbody td .user-subhead {
+    font-size: 0.875em;
+    font-style: italic;
+}
+.user-list tbody td .user-link {
+    display: block;
+    font-size: 1.25em;
+    padding-top: 3px;
+    margin-left: 60px;
+}
+a {
+    color: #3498db;
+    outline: none!important;
+}
+.user-list tbody td>img {
+    position: relative;
+    max-width: 50px;
+    float: left;
+    margin-right: 15px;
+}
+
+.table thead tr th {
+    text-transform: uppercase;
+    font-size: 0.875em;
+}
+.table thead tr th {
+    border-bottom: 2px solid #e7ebee;
+}
+.table tbody tr td:first-child {
+    font-size: 1.125em;
+    font-weight: 300;
+}
+.table tbody tr td {
+    font-size: 0.875em;
+    vertical-align: middle;
+    border-top: 1px solid #e7ebee;
+    padding: 12px 8px;
+}
+a:hover{
+text-decoration:none;
+}
+</style>
+
+<script type="text/javascript">
+
+</script>
+</div>
+{% include 'footer.html' %}
+
+{% endblock %}
+</div>

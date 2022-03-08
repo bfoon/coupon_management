@@ -1,0 +1,98 @@
+{% include 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container bootstrap snippets bootdey">
+    <div class="row">
+        <div class="col-lg-12">
+                <div class="card-body align-self-center">
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Coupon Issue Form
+                    <i class="fas fa fa-list-alt float-right"></i>
+        </h6>
+    </div>
+    <div class="card-body">
+   {% block messages %}
+   {% if messages %}
+   {% for message in messages %}
+   <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+   <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+   <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+  {% endfor %}
+  {% endif %}
+  {% endblock %}
+        <form method="POST" action="transac">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="tid" class="col-form-label">Transaction ID:</label>
+            <input type="number" class="form-control" id="tid" name ="tid" value="{{issue.rid}}" readonly>
+        </div>
+          <div class="form-group">
+            <label for="requesterid" class="col-form-label">Requerter:</label>
+            <input type="text" class="form-control" id="requesterid"  value="{{issue.requesterid}}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="vnum" class="col-form-label">Vehicle Number:</label>
+           <input type="text" class="form-control" id="vnum" value="{{ issue.vnum }}" readonly>
+        </div>
+          <div class="form-group">
+            <label for="ftype" class="col-form-label">Fuel Type:</label>
+            <input type="text" class="form-control" id="ftype" name ="ftype" value="{{issue.ftype}}" readonly>
+        </div>
+        <div class="form-group">
+            <label for="amount" class="col-form-label">Quantity (Litre):</label>
+            <input type="number" class="form-control" id="amount" value="{{issue.amount}}" readonly>
+        </div>
+
+         <div class="form-group">
+             <label for="unit" class="col-form-label">Unit:</label>
+             <select class="form-control" id="unit" name="unit" required>
+                 <option></option>
+                 {% for u in ulist %}
+                 <option value="{{u.uname}}">{{u.uname}}</option>
+                 {% endfor %}
+             </select>
+         </div>
+
+
+        <div class="form-group">
+            <label for="cdimension" class="col-form-label">Dimension:</label>
+            <input type="number" class="form-control" id="cdimension" name="cdimension" required>
+        </div>
+
+          <div class="form-group">
+            <label for="cnumber" class="col-form-label">Number of Coupons:</label>
+            <input type="number" class="form-control" id="cnumber" name="cnumber" required>
+        </div>
+
+          <div class="form-group">
+            <label for="rate" class="col-form-label">Coupon Rate:</label>
+            <input type="number" step="0.01" class="form-control" id="rate" name="rate"required>
+        </div>
+<!--        <div class="form-group">-->
+<!--            <label for="serialno" class="col-form-label">Coupon Serial No:</label>-->
+<!--            <textarea class="form-control" id="serialno" name="serialno" rows="3" required></textarea>-->
+<!--        </div>-->
+
+        <div class="form-group">
+            <label for="comm" class="col-form-label">Note (Optional):</label>
+            <textarea class="form-control" id="comm" name="note" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+            <a href="/approvalflow/{{issue.rid}}" type="button" class="btn btn-secondary" >Cancel</a>
+            <input type="submit" class="btn btn-primary" value="Submit"/>
+    </form>
+</div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+            <!-- End of Main Content -->
+{% include 'footer.html' %}
+{% endblock %}

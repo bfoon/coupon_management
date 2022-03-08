@@ -1,0 +1,91 @@
+{% include 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+
+
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+
+                    <!-- <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
+                        For more information about DataTables, please visit the <a target="_blank"
+                            href="https://datatables.net">official DataTables documentation</a>.</p> -->
+
+                    <!-- DataTales Example -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">My Requests</h6>
+                        </div>
+                        <div class="card-body"  >
+                            <div class="table-responsive">
+                                <div class="dashcontrol">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead >
+                                        <tr>
+                                          <th>Vehicle Number</th>
+                                            <th>Fuel Type</th>
+                                            <th>Quantity (litre)</th>
+                                            <th>Status</th>
+                                            <th>Status Detail</th>
+                                            <th>Date modified</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Vehicle Number</th>
+                                            <th>Fuel Type</th>
+                                            <th>Quantity (litre)</th>
+                                            <th>Status</th>
+                                            <th>Status Detail</th>
+                                            <th>Date modified</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody >
+                                    {% for request in requests %}
+                                        <tr>
+                                            <td><a href="/approvalflow/{{request.rid}}">{{request.vnum}}</a></td>
+                                            <td>{{request.ftype}}</td>
+                                            <td>{{request.amount }}</td>
+                                             <td> {% if request.ret == 1 %}
+                                            <h6 class="text-danger">Request returned by {{request.retid}}</h6>
+                                                 {% elif request.ret == 0 and  request.status == 3 %}
+                                                 <h6 class="text-success">Complete!</h6>
+                                                 {% else%}
+                                            <h6 class="text-warning">Processing...</h6>
+                                            {% endif %}</td>
+                                             <td>{% if request.status == 1 %}
+                                            <h6>Pending Approval</h6>
+                                                {% elif request.status == 2 %}
+                                            <h6>Approved by <a class="text-capitalize">{{request.approverid}}</a></h6>
+                                                {% elif request.status == 3 %}
+                                            <h6>Issued by <a class="text-capitalize">{{request.issueid}}</a></h6>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{request.datemodified}}</td>
+
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+</div>
+<script>
+
+    setInterval(function() {
+      $.get("/requests", function(data, status){
+        $("body").html(data);
+    });
+}, 1500000);
+    </script>
+                <!-- /.container-fluid -->
+
+            <!-- End of Main Content -->
+{% include 'footer.html' %}
+
+{% endblock %}

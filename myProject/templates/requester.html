@@ -1,0 +1,84 @@
+{% include 'base.html' %}
+
+{% block content %}
+{% load static %}
+ <ul class="container">
+        <div class="row">
+            <div class="col-md-12">
+            <ul class="list-group list-group-flush">
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request For Coupon
+                    <i class="fas fa fa-credit-card rotate-n-15 "></i>
+        </h6>
+    </div>
+    <div class="card-body">
+        <div class="modal-body">
+            <div class="card-body">
+          {% block messages %}
+                        {% if messages %}
+                        {% for message in messages %}
+                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                               <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                                </div>
+
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+
+    <form method="POST" action="requester">
+        {% csrf_token %}
+
+          <div class="form-group">
+            <label for="requesterid" class="col-form-label">Requerter:</label>
+            <input type="text" class="form-control" id="requesterid" name="requesterid" placeholder="{{user.first_name}} {{user.last_name}}" readonly>
+        </div>
+<!--        {{ stats }}-->
+        <div class="form-group">
+            <label for="vnum" class="col-form-label">Vehicle Number:</label>
+            <select class="form-control" id="vnum" name="vnum" style="text-transform:uppercase;" required>
+                <option></option>
+                {% for v in vlist %}
+                        <option value="{{v.vnum}}" style="text-transform:uppercase;">{{v.vnum}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="mread" class="col-form-label">Meter Reading:</label>
+            <input type="number" class="form-control" min="1" max="900000" id="mread" name="mread" required>
+        </div>
+         <div class="form-group">
+            <label for="tankcat" class="col-form-label">Tank Status:</label>
+            <select class="form-control" id="tankcat" name="tankcat" style="text-transform:uppercase;" required>
+                <option></option>
+                <option style="text-transform:uppercase;">empty</option>
+                <option style="text-transform:uppercase;">quarter</option>
+                <option style="text-transform:uppercase;">half</option>
+                <option style="text-transform:uppercase;">3quarter</option>
+            </select>
+        </div>
+
+
+        <div class="form-group">
+            <label for="comm" class="col-form-label">Note (Optional):</label>
+            <textarea class="form-control" id="comm" name="comm" rows="3"></textarea>
+        </div>
+        <div class="modal-footer">
+            <a href="/inbox" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
+            <input type="submit" class="btn btn-primary" value="Submit"/>
+    </form>
+</div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+</ul>
+</div>
+
+{% include 'footer.html' %}
+
+{% endblock %}

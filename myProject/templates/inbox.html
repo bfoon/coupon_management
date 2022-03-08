@@ -1,0 +1,249 @@
+{% include 'base.html' %}
+{% load humanize %}
+{% block content %}
+{% load static %}
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+            <section id="tabs" class="project-tab">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        {% block messages %}
+                        {% if messages %}
+                        {% for message in messages %}
+                             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                               <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                                </div>
+
+                        {% endfor %}
+                        {% endif %}
+                        {% endblock %}
+                        {% if role == 'Driver' or role == 'Admin'%}
+                            <a href="/requester" type="button" class="btn btn-success btn-circle btn-md float-right">
+                          <i class="fas fa-plus"></i>
+                      </a>
+                        {% endif %}
+                        <nav>
+                            <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Unapprove</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="">Approved</a>
+                                <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="">Issued</a>
+                            </div>
+                        </nav>
+                        <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                                <div class="table-responsive">
+                                <table class="table table-bordred table-striped" cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Vehicle Number</th>
+                                            <th>Fuel Type</th>
+                                            <th>Quantity (Litre)</th>
+                                            <th>Request date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for i in page_obj_unap reversed %}
+                                        <tr>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;" >{{i.vnum}}</a></td>
+                                            <td>{{ i.ftype }}</td>
+                                            <td>{{ i.amount  }}</td>
+                                            <td>{{ i.created_at }}</td>
+                                            {% if i.ret == 1 %}
+<!--                                            <td><a href="#" style="color:#FF0000;" >Returned request</a></td>-->
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-danger" data-container="body" title="{{i.retid}}" data-content="....">Returned request</a></td>
+                                            {% else %}
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning" data-container="body" title="{{i.requesterid}}" data-content="..?">Pending approval</a></td></td>
+                                            {% endif %}
+                                            <td> <a href="requestEdit/{{ i.rid }}" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
+                                                |
+                                                {% if i.ret == 1 %}
+                                                <a href="delete/{{ i.rid }}" class="text-danger" onclick="return confirm('Are you sure to delete this item?');"><i class="fa fa-fw fa-trash"></i></a>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <nav aria-label="...">
+                                <ul class="pagination">
+                                    {% if page_obj_unap.has_previous %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo; first</a>
+                                    </li>
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj_unap.previous_page_number }} tabindex=-1">Previous</a>
+                                     </li>
+                                    {% endif %}
+                                      <li class="page-item">
+                                          <a class="page-link">Page {{ page_obj_unap.number }} of {{ page_obj_unap.paginator.num_pages }}.
+                                          </a>
+                                      </li>
+                                    {% if page_obj_unap.has_next %}
+                                        <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_unap.next_page_number }}">Next</a>
+                                        </li>
+                                    <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_unap.paginator.num_pages }}">last &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                                </nav>
+                        </div>
+                        </div>
+                            <!-- Approval table begins-->
+                            <div class="tab-pane fade show fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                              <div class="table-responsive">
+                                <table class="table table-bordred table-striped" cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Vehicle Number</th>
+                                            <th>Fuel Type</th>
+                                            <th>Quantity (Litre)</th>
+                                            <th>Request date</th>
+                                            <th>Status</th>
+                                            <th>Approved by</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for i in page_obj_app reversed %}
+                                        <tr>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;">{{i.vnum}}</a></td>
+                                            <td>{{ i.ftype }}</td>
+                                            <td>{{ i.amount }}</td>
+                                            <td>{{ i.created_at }}</td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning" data-container="body" title="{{i.requesterid}}" data-content="....">Pending issuance</a></td>
+<!--                                            <td>{{ i.status }}</td>-->
+                                            <td class="text-capitalize">{{ i.approverid }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <nav aria-label="...">
+                                <ul class="pagination">
+                                    {% if page_obj_app.has_previous %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo; first</a>
+                                    </li>
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj_app.previous_page_number }}">Previous</a>
+                                     </li>
+                                    {% endif %}
+                                      <li class="page-item">
+                                          <a class="page-link">Page {{ page_obj_app.number }} of {{ page_obj_app.paginator.num_pages }}.
+                                          </a>
+                                      </li>
+                                    {% if page_obj_app.has_next %}
+                                        <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_app.next_page_number }}">Next</a>
+                                        </li>
+                                    <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_app.paginator.num_pages }}">last &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                                </nav>
+                        </div>
+                        </div>
+                              <!-- Approval table begins-->
+                            <div class="tab-pane fade show fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                                <div class="table-responsive">
+                                <table class="table table-bordred table-striped" cellspacing="0" >
+                                    <thead>
+                                        <tr>
+                                            <th>Vehicle Number</th>
+                                            <th>Fuel Type</th>
+                                            <th>Quantity (Litre)</th>
+                                            <th>Request date</th>
+                                            <th>Approver</th>
+                                            <th>Issuer</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for i in page_obj_iss %}
+                                    {% if i.marketrate == 0.0 and i.status == 3 %}
+                                        <tr>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-success " data-container="body" title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
+                                            </td>
+                                            <td>{{ i.ftype }}</td>
+                                            <td>{{ i.amount }}</td>
+                                            <td>{{ i.reqdate |date:'Y-m-d'}}</td>
+                                            <td class="text-capitalize">{{ i.approverid }}</td>
+                                            <td class="text-capitalize">{{ i.issueid }}</td>
+                                        </tr>
+                                    {% else %}
+                                    <tr>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary " data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
+                                            {% if i.sign == "1" %}
+                                                <sup class="badge badge-danger badge-counter"> Signed</sup>
+                                             {% endif %}
+                                            </td>
+                                            <td>{{ i.ftype }}</td>
+                                            <td>{{ i.amount }}</td>
+                                            <td>{{ i.reqdate |date:'Y-m-d'}}</td>
+                                            <td class="text-capitalize">{{ i.approverid }}</td>
+                                            <td class="text-capitalize">{{ i.issueid }}</td>
+                                        </tr>
+                                    {% endif %}
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                                <nav aria-label="...">
+                                <ul class="pagination">
+                                    {% if page_obj_iss.has_previous %}
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page=1">&laquo; first</a>
+                                    </li>
+                                    <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj_iss.previous_page_number }} tabindex=-1">Previous</a>
+                                     </li>
+                                    {% endif %}
+                                      <li class="page-item">
+                                          <a class="page-link">Page {{ page_obj_iss.number }} of {{ page_obj_iss.paginator.num_pages }}.
+                                          </a>
+                                      </li>
+                                    {% if page_obj_iss.has_next %}
+                                        <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_iss.next_page_number }}">Next</a>
+                                        </li>
+                                    <li class="page-item">
+                                          <a class="page-link" href="?page={{ page_obj_iss.paginator.num_pages }}">last &raquo;</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                                </nav>
+                        </div>
+                            </div>
+                            </section>
+                        </div>
+                        </div>
+<script>
+    $(document).ready(function() {
+    if (location.hash) {
+        $("a[href='" + location.hash + "']").tab("show");
+    }
+    $(document.body).on("click", "a[data-toggle='tab']", function(event) {
+        location.hash = this.getAttribute("href");
+    });
+});
+$(window).on("popstate", function() {
+    var anchor = location.hash || $("a[data-toggle='tab']").first().attr("href");
+    $("a[href='" + anchor + "']").tab("show");
+});
+</script>
+
+<script>
+    setInterval(function() {
+      $.get("/inbox", function(data, status){
+        $("body").html(data);
+    });
+}, 150000);
+</script>
+{% include 'footer.html' %}
+</div>
+                {% endblock %}

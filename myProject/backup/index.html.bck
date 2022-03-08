@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>myapp</title>
+    <h1> Input your text below: </h1>
+</head>
+<body>
+<form method="POST" action="counter">
+    {% csrf_token%}
+    <textarea name="text" rows="25" cols="100"></textarea><br>
+    <input type="submit"/>
+</form>
+</body>
+</html>

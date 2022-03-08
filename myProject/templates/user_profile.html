@@ -1,0 +1,379 @@
+{% include 'base.html' %}
+<!--<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">-->
+<!--<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+{% load static %}
+{% block content %}
+{% load humanize %}
+
+<style>
+
+    body{
+    background: -webkit-linear-gradient(left, #3931af, #00c6ff);
+}
+.emp-profile{
+    padding: 3%;
+    margin-top: 3%;
+    margin-bottom: 3%;
+    border-radius: 0.5rem;
+    background: #fff;
+}
+.profile-img{
+    text-align: center;
+}
+.profile-img img{
+    width: 70%;
+    height: 100%;
+}
+.profile-img .file {
+    position: relative;
+    overflow: hidden;
+    margin-top: -20%;
+    width: 70%;
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+    background: #212529b8;
+}
+.profile-img .file input {
+    position: absolute;
+    opacity: 0;
+    right: 0;
+    top: 0;
+}
+.profile-head h5{
+    color: #333;
+}
+.profile-head h6{
+    color: #0062cc;
+}
+.profile-edit-btn{
+    border: none;
+    border-radius: 1.5rem;
+    width: 70%;
+    padding: 2%;
+    font-weight: 600;
+    color: #6c757d;
+    cursor: pointer;
+}
+.proile-rating{
+    font-size: 12px;
+    color: #818182;
+    margin-top: 5%;
+}
+.proile-rating span{
+    color: #495057;
+    font-size: 15px;
+    font-weight: 600;
+}
+.profile-head .nav-tabs{
+    margin-bottom:5%;
+}
+.profile-head .nav-tabs .nav-link{
+    font-weight:600;
+    border: none;
+}
+.profile-head .nav-tabs .nav-link.active{
+    border: none;
+    border-bottom:2px solid #0062cc;
+}
+.profile-work{
+    padding: 14%;
+    margin-top: -15%;
+}
+.profile-work p{
+    font-size: 12px;
+    color: #818182;
+    font-weight: 600;
+    margin-top: 10%;
+}
+.profile-work a{
+    text-decoration: none;
+    color: #495057;
+    font-weight: 600;
+    font-size: 14px;
+}
+.profile-work ul{
+    list-style: none;
+}
+.profile-tab label{
+    font-weight: 600;
+}
+.profile-tab p{
+    font-weight: 600;
+    color: #0062cc;
+}
+
+</style>
+
+<!------ Include the above in your HEAD tag ---------->
+<div class="container-fluid">
+<div class="container emp-profile">
+<!--            <form method="POST" action="" enctype="multipart/form-data">-->
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="profile-img">
+                            <img src="{{pic.pic.url}}">
+                            <br>
+                            <br>
+<!--                            <div class=" btn btn-lg btn-dark">-->
+                            <form action="" method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                            <input type="file" name="pic">
+<!--                                {{prof.fname}} {{prof.lname}}-->
+                            </input>
+                            <button class="btn btn-sm btn-dark float-right" type="submit">change</button>
+                            </form>
+<!--                            </div>-->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="profile-head">
+                                    <h5>
+                                        {{prof.fname}} {{prof.lname}}
+                                    </h5>
+                                    <h6>
+                                        {{prof.role}}
+                                    </h6>
+                            {% if prof.status == 'active' %}
+                                    <p class="proile-rating">STATUS : <span class="badge badge-success" style="text-transform:uppercase;">{{prof.status}}</span></p>
+                            {% elif prof.status == 'pending' %}
+                                    <p class="proile-rating">STATUS : <span class="badge badge-warning" style="text-transform:uppercase;">{{prof.status}}</span></p>
+                            {% elif prof.status == 'inactive' %}
+                                    <p class="proile-rating">STATUS : <span class="badge badge-danger" style="text-transform:uppercase;">{{prof.status}}</span></p>
+                            {% endif %}
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">About</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Timeline</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                            <button type="button" class="profile-edit-btn float-right" data-toggle="modal" data-target="#exampleModal">
+                <i>Edit Profile</i>
+                </button>
+                         </div>
+                </div>
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLong">Edit Profile</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+<form method="POST" action={% url 'user_profile' prof.id %} >
+            {% csrf_token %}
+      <div class="modal-body">
+      <div class="container">
+    <div class="page-header">
+        <h3>Update User Profile</h3>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 col-md-offset-3 body-main">
+                        <div class="col-md-12">
+                             <div class="form-group">
+                         <label for="pid" class="col-form-label">ID:</label>
+                            <input type="text"  class="form-control" id="pid" value="{{prof.id}}" readonly>
+                        </div>
+                        <div class="form-group">
+                         <label for="fname" class="col-form-label">First Name:</label>
+                            <input type="text"  class="form-control" id="fname" name="fname" value="{{prof.fname}}" required>
+                        </div>
+                          <div class="form-group">
+                         <label for="lname" class="col-form-label">Last Name:</label>
+                            <input type="text"  class="form-control" id="lname" name="lname" value="{{prof.lname}}" required>
+                        </div>
+                             <div class="form-group">
+                         <label for="email" class="col-form-label">Emial:</label>
+                            <input type="text" class="form-control" id="email" name="email" value="{{prof.email1}}" readonly>
+                        </div>
+                              <div class="form-group">
+                         <label for="role" class="col-form-label">Role:</label>
+                                  <select class="form-control" id="role" name="role" style="text-transform:uppercase;" required>
+                                  <option>{{prof.role}}</option>
+                                <option></option>
+                                      {% for u in ug %}
+                                      {% if role == 'Admin' %}
+                                <option value="{{ u.groupname }}">{{ u.groupname }}</option>
+                                      {% endif %}
+                                    {% endfor %}
+                                </select>
+                        </div>
+                          <div class="form-group">
+                         <label for="unit" class="col-form-label">Unit:</label>
+                            <input type="text"  class="form-control" id="unit" name="unit" value="{{prof.unit}}" required>
+                        </div>
+                         <div class="form-group">
+                            <label for="status" class="col-form-label">Status:</label>
+                            <select class="form-control" id="status" name="status" style="text-transform:uppercase;" required>
+                                <option>{{prof.status}}</option>
+                                <option></option>
+                                {% if role == 'Admin' %}
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="inactive">Inactive</option>
+                                {% endif %}
+
+                            </select>
+                             <br>
+<!--                                {{ pic.as_p }}-->
+<!--                              <label for="pic">Select a file:</label>-->
+<!--                            <input type="file" id="pic" ><br><br>-->
+                        </div>
+
+
+                        </div>
+                </div>
+                </div>
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+         <input type="submit" class="btn btn-primary" value="Submit"/>
+              </div>
+            </div>
+          </div>
+
+        </form>
+    </div>
+    </div>
+    </div>
+
+
+
+                <div class="row ">
+<!--                    <div class="col-md-4">-->
+<!--                        <div class="profile-work">-->
+<!--                            <p>WORK LINK</p>-->
+<!--                            <a href="">Website Link</a><br/>-->
+<!--                            <a href="">Bootsnipp Profile</a><br/>-->
+<!--                            <a href="">Bootply Profile</a>-->
+<!--                            <p>SKILLS</p>-->
+<!--                            <a href="">Web Designer</a><br/>-->
+<!--                            <a href="">Web Developer</a><br/>-->
+<!--                            <a href="">WordPress</a><br/>-->
+<!--                            <a href="">WooCommerce</a><br/>-->
+<!--                            <a href="">PHP, .Net</a><br/>-->
+<!--                        </div>-->
+<!--                    </div>-->
+                    <div class="col-md-8 ">
+                        <div class="tab-content profile-tab" id="myTabContent">
+                            <div class="tab-pane fade show active float-right" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>User Id</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{prof.user1}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Name</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{prof.fname}} {{prof.lname}}</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Email</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{prof.email}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>User Role</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{prof.role}}</p>
+                                            </div>
+                                        </div>
+                            </div>
+
+                            <div class="tab-pane fade float-right" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Department:</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{ prof.unit }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Transactions:</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{ tranam }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Pending:</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{ tranpen }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label>Last Transac:</label>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p>{{ tranlast.created_at | naturaltime }}</p>
+                                            </div>
+                                        </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label>Total:</label>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p>D{{ trantotal.total | intcomma}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<script>
+$('#myTab a').click(function(e) {
+  e.preventDefault();
+  $(this).tab('show');
+});
+
+// store the currently selected tab in the hash value
+$("ul.nav-tabs > li > a").on("shown.bs.tab", function(e) {
+  var id = $(e.target).attr("href").substr(1);
+  window.location.hash = id;
+});
+
+// on load of the page: switch to the currently selected tab
+var hash = window.location.hash;
+$('#myTab a[href="' + hash + '"]').tab('show');
+</script>
+
+     {% if role == "Admin" %}
+                            <a class="btn btn-dark" href="/profile"> << Back </a>
+                            {% else %}
+                            <a class="btn btn-dark" href="/inbox"> << Back </a>
+                            {% endif %}
+        </div>
+        </div>
+        </div>
+
+{% include 'footer.html' %}
+{% endblock %}

@@ -1,0 +1,220 @@
+{% include 'base.html' %}
+{% load humanize %}
+{% block content %}
+{% load static %}
+<style>
+.add {
+  background-color : #42f5a1;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 30px;
+  border-color: #f7f7f7;
+  opacity: 1;
+}
+
+#mybutton {
+  position: fixed;
+  bottom: -1px;
+  right: 80px;
+}
+
+</style>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="h3 mb-2 text-gray-800" align="center">Coupon Books
+                    <button class="btn btn-success"><a href="/couponbooksreport" class="fa fa-download fa-sm" style="text-decoration:none; color: inherit;">
+                        </a>
+                    </button>
+
+                </h1>
+                    {% block messages %}
+   {% if messages %}
+   {% for message in messages %}
+   <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+   <strong>{{ message.tags }}! </strong>  {{ message | safe }}
+   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+   <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+  {% endfor %}
+  {% endif %}
+  {% endblock %}
+
+
+
+<div class="table-responsive">
+ <table id="dtMaterialDesignExample" class="table table-striped" cellspacing="0" width="100%">
+  <thead>
+    <tr>
+      <th class="th-sm">Book
+      </th>
+      <th class="th-sm">Serial Number
+      </th>
+      <th class="th-sm">Unit
+      </th>
+        <th class="th-sm">Fuel Type
+      </th>
+      <th class="th-sm">Dimension
+      </th>
+      <th class="th-sm">Quantity
+      </th>
+      <th class="th-sm">Total Amount
+      </th>
+      <th class="th-sm">Start Date
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for book in books reversed %}
+    <tr>
+      {% if book.used == 0 %}
+      <td><a style="text-decoration:none; color: inherit;" href="coupondetail/{{book.id}}" >Book {{book.book_id}}</a></td>
+      <td>{{book.serial_start}}-{{book.serial_end}}</td>
+      <td>{{book.unit}}</td>
+      <td>{{book.ftype}}</td>
+      <td>{{book.dim}}</td>
+      <td>{% widthratio book.totalAmount book.dim 1 %}{{notused.count}}</td>
+      <td>D{{book.totalAmount | intcomma}}</td>
+      <td>{{book.created_at | date:'Y-m-d'}}</td>
+      {% else %}
+      <td><a style="text-decoration:none; color: inherit;" href="coupondetail/{{book.id}}" > Book {{book.book_id}} <sup class="badge badge-danger badge-counter"> Used</sup> </a></td>
+      <td>{{book.serial_start}}-{{book.serial_end}}</td>
+      <td>{{book.unit}}</td>
+      <td>{{book.ftype}}</td>
+      <td>{{book.dim}}</td>
+      <td>{% widthratio book.totalAmount book.dim 1 %}</td>
+      <td>D{{book.totalAmount | intcomma}}</td>
+      <td>{{book.created_at | date:'Y-m-d'}}</td>
+      {% endif %}
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th>Book
+      </th>
+      <th>Serial Numbers
+      </th>
+      <th>Unit
+      </th>
+      <th>Fuel Type
+      </th>
+      <th>Dimension
+      </th>
+      <th>Quantity
+      </th>
+      <th>Total Amount
+      </th>
+       <th>Start Date
+      </th>
+    </tr>
+  </tfoot>
+</table>
+</div>
+
+{% if role == "Owner" or role == "Admin" %}
+<div id="mybutton">
+<button class="add" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">
+    <i class="fas fa-plus"></i>
+</button>
+</div>
+{% endif %}
+
+                <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Add book</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action="couponBatch">
+                                    {% csrf_token %}
+                                  <div class="form-group">
+                                    <label for="unit" class="col-form-label">Book Number:</label>
+                                    <input type="number" class="form-control" min="1" max="1000" id="book_id" name="book_id" required>
+                                  </div>
+                                    <label class="col-form-label">Serial Number:</label>
+                                    <div class="row mb-4">
+
+                                    <div class="col">
+                                  <div class="form-outline">
+                                    <input type="text" id="serial_start" name="serial_start" class="form-control" required/>
+                                    <label class="form-label" for="serial_start">Start No:</label>
+                                  </div>
+                                </div>
+                                <div class="col">
+                                  <div class="form-outline">
+                                    <input type="text" id="serial_end" name="serial_end" class="form-control" required/>
+                                    <label class="form-label" for="serial_end">End No:</label>
+                                  </div>
+                                </div>
+                                </div>
+
+                                  <div class="form-group">
+                                    <label for="dim" class="col-form-label">Dimension:</label>
+                                    <input type="number" class="form-control" min="1" max="1000" id="dim" name="dim" required>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="ftype" class="col-form-label">Fuel type:</label>
+                                    <select class="form-control" id="ftype" name="ftype" required>
+                                          <option></option>
+                                          <option>Petrol</option>
+                                          <option>Diesel</option>
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="unit" class="col-form-label">Unit:</label>
+                                    <select class="form-control" id="unit" name="unit" required>
+                                        <option></option>
+                                        {% for u in ulist %}
+                                           <option value="{{u.uname}}">{{u.uname}}</option>
+                                        {% endfor %}
+                                     </select>
+                                  </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary"/>
+                                </form>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+
+            </div>
+            </div>
+            </div>
+            </div>
+
+{% include 'footer.html' %}
+
+{% endblock %}
+<script>
+    // Material Design example
+$(document).ready(function () {
+  $('#dtMaterialDesignExample').DataTable();
+  $('#dtMaterialDesignExample_wrapper').find('label').each(function () {
+    $(this).parent().append($(this).children());
+  });
+  $('#dtMaterialDesignExample_wrapper .dataTables_filter').find('input').each(function () {
+    const $this = $(this);
+    $this.attr("placeholder", "Search");
+    $this.removeClass('form-control-sm');
+  });
+  $('#dtMaterialDesignExample_wrapper .dataTables_length').addClass('d-flex flex-row');
+  $('#dtMaterialDesignExample_wrapper .dataTables_filter').addClass('md-form');
+  $('#dtMaterialDesignExample_wrapper select').removeClass(
+  'custom-select custom-select-sm form-control form-control-sm');
+  $('#dtMaterialDesignExample_wrapper select').addClass('mdb-select');
+  $('#dtMaterialDesignExample_wrapper .mdb-select').materialSelect();
+  $('#dtMaterialDesignExample_wrapper .dataTables_filter').find('label').remove();
+});
+</script>
+
+</div>
+</div>
