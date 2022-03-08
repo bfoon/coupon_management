@@ -117,8 +117,10 @@ table.center {
 
   </tbody>
 </table>
+{{bamunt}}
+
 {% for ba in bamunt %}
-<h6 class="text-dark">{{ ba.ftype }} Total: D{{ ba.totalAmount__sum | intcomma }}   |   Remaining coupons: </h6>
+<h6 class="text-dark">{{ ba.ftype }} Total: D{{ ba.minlnum | intcomma }}   |   Remaining coupons: {{ ba.maxlnum |sub:ba.minlnum}} </h6>
 {% endfor %}
 <!--<h6 class="text-dark">Petrol Total: D{{ pamount.asum |intcomma}}   |   Litre: {{ plt.lt |floatformat }}</h6>-->
 <br>

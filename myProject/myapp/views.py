@@ -2183,12 +2183,20 @@ def reportpdf(request):
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
         values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'))
 
-    bamount = CouponBatch.objects.values('ftype').order_by('ftype').annotate(
+    bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end').annotate(
+        quan=Count(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
         minlnum=Min(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
-        maxlnum=Max(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
     ).filter(bdel=0, hide=0)
+
+    for i in bamount:
+        if i.quan == 1:
+            pass
+
+
+
+
 
     # bamunt = CouponBatch.objects. \
     #     values('ftype').order_by('ftype').annotate(
