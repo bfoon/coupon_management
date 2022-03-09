@@ -2190,9 +2190,19 @@ def reportpdf(request):
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
     ).filter(bdel=0, hide=0)
 
+    # diesel = 0
+    # for i in bamount:
+    #     if i['quan'] == 1 and i['ftype']=='Diesel':
+    #         diesel += i['quan']
+    diesel = 0
+    petrol = 0
     for i in bamount:
-        if i.quan == 1:
-            pass
+        if i['quan'] == 1 and i['ftype'] == 'Diesel':
+            d = int(i['serial_end']) - i['minlnum']
+            diesel += d+1
+        elif i['quan'] == 1 and i['ftype'] == 'Petrol':
+            d = int(i['serial_end']) - i['minlnum']
+            petrol += d+1
 
 
 
@@ -2214,7 +2224,8 @@ def reportpdf(request):
             "books": books,
             # "plt": plitre,
             # "dlt": dlitre,
-            "bamunt": bamount,
+            "diesel": diesel,
+            "petrol": petrol,
             "vamount": vamount,
             "damount": damount,
             # "pamount": pamount,
