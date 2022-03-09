@@ -2151,38 +2151,32 @@ def signed(request):
 
 @login_required(login_url='login')
 def reportpdf(request):
-    today = datetime.datetime.now()
-    template_name = "report.html"
+    today = datetime.datetime.now() # This is to generate the date today.
+    template_name = "report.html" # This is the template to generate pdf
+
+    # This is for the request
     logs = activityReport.objects.filter(created_at__year=today.year, created_at__month=today.month).order_by("ftype", "-created_at")
 
+    # Report on transaction per request.
     damount = activityReport.objects.\
         filter(created_at__year=today.year, created_at__month=today.month).\
         values('ftype').annotate(asum = Sum('totalamount'), lt=Sum('litre'))
 
-    # pamount = activityReport.objects. \
-    #     filter(created_at__year=today.year, created_at__month=today.month, ftype="Petrol"). \
-    #     aggregate(asum=Sum('totalamount'))
-    #
-    # dlitre = activityReport.objects.values('litre'). \
-    #     filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel").order_by("ftype", "-created_at"). \
-    #     aggregate(lt=Sum('litre'))
-    #
-    # plitre = activityReport.objects.values('litre'). \
-    #     filter(created_at__year=today.year, created_at__month=today.month, ftype="Petrol").order_by("ftype", "-created_at"). \
-    #     aggregate(lt=Sum('litre'))
-
     usr = request.user.username
-    # Report on book
+
+    # Report on book Balance
     books = CouponBatch.objects.all().annotate(quan=Count(Subquery(
         fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
         fmin=Min(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
     ).filter(bdel=0, hide=0)
 
+    # This is the monthly fuel consumption by vehicle report for PDF generator.
     vamount = activityReport.objects. \
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
         values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'))
 
+    # This is querset that creates the dictionary
     bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
         quan=Count(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
@@ -2190,10 +2184,6 @@ def reportpdf(request):
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
     ).filter(bdel=0, hide=0)
 
-    # diesel = 0
-    # for i in bamount:
-    #     if i['quan'] == 1 and i['ftype']=='Diesel':
-    #         diesel += i['quan']
 
     # This is for the coupon book total calculations for leaves and cost. Should be improve in the future.
     diesel = 0
@@ -2212,18 +2202,6 @@ def reportpdf(request):
             petrol += p+1
             petrolam += pa
 
-
-
-
-
-    # bamunt = CouponBatch.objects. \
-    #     values('ftype').order_by('ftype').annotate(
-    #     total=Sum(Cast('serial_end', FloatField())) - Sum(Cast('serial_start', FloatField())),
-    #     asum=Sum('totalAmount')).filter(bdel=0, hide=0, used=1)
-
-    # issuers = activityReport.objects.values('issueid').aggregate(issuer= Q('issueid'),requester = Count('issueid'))
-    # if books.quan == 1:
-    #     book=books
     return render_to_pdf(
         template_name,
         {
@@ -2245,7 +2223,7 @@ def reportpdf(request):
 
 
 
-# This is for top messages.
+# This is for top messages. This is not in use.
 def msgtop(request):
     uname = request.user.username
     current_user_id = request.user.id
