@@ -2183,7 +2183,7 @@ def reportpdf(request):
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
         values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'))
 
-    bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end').annotate(
+    bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
         quan=Count(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
         minlnum=Min(Subquery(
@@ -2194,15 +2194,23 @@ def reportpdf(request):
     # for i in bamount:
     #     if i['quan'] == 1 and i['ftype']=='Diesel':
     #         diesel += i['quan']
+
+    # This is for the coupon book total calculations for leaves and cost. Should be improve in the future.
     diesel = 0
+    dieselam = 0
+    petrolam = 0
     petrol = 0
     for i in bamount:
         if i['quan'] == 1 and i['ftype'] == 'Diesel':
             d = int(i['serial_end']) - i['minlnum']
+            da = i['dim'] * (d + 1)
             diesel += d+1
+            dieselam += da
         elif i['quan'] == 1 and i['ftype'] == 'Petrol':
-            d = int(i['serial_end']) - i['minlnum']
-            petrol += d+1
+            p = int(i['serial_end']) - i['minlnum']
+            pa = i['dim'] * (p + 1)
+            petrol += p+1
+            petrolam += pa
 
 
 
@@ -2226,6 +2234,8 @@ def reportpdf(request):
             # "dlt": dlitre,
             "diesel": diesel,
             "petrol": petrol,
+            "dieselam": dieselam,
+            "petrolam": petrolam,
             "vamount": vamount,
             "damount": damount,
             # "pamount": pamount,
