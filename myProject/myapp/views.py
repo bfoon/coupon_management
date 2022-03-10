@@ -1532,8 +1532,18 @@ def transac(request, pk):
                         for i in sorted(c):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
 
-                        # This is handling the Report logs for the monthly and annual fuel usage report
+                        # last_month = datetime.today() - datetime.timedelta(days=30)
+                        # items = Item.objects.filter(my_date__gte=last_month).order_by(...)
+
+                       # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
+                        cmill = rq.values_list('mread', flat=True)[0]
+                        clitre = rq.values_list('amount', flat=True)[0] #rq['litre']
+                        lmill = activityReport.objects.filter(vnum=rq.values_list('vnum', flat=True)[0]).values_list(
+                            'mread', flat=True).last()
+                        fconsumption = (cmill-lmill)/clitre
+
+                        # This is handling the Report logs for the monthly and annual fuel usage report
                         fd_s = fueldump.objects.filter(lnum = min(c))
                         fd_e = fueldump.objects.filter(lnum = max(c))
                         if len(comment.objects.filter(rid=tid))>0:
@@ -1550,7 +1560,7 @@ def transac(request, pk):
                                                                serial_end = max(c), ftype=ftype,
                                                                 bookref_s =fd_s.values_list('book_id',flat=True) ,
                                                                 bookref = fd_e.values_list('book_id',flat=True),
-                                                                note=note, comm = comm ,cdimension=cdimension)
+                                                                note=note, comm = comm ,cdimension=cdimension, fconsumption=fconsumption)
                         acreort.save();
 
 
@@ -2020,6 +2030,7 @@ def coupondetail(request, pk):
             msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
             msg_co = msg.filter(status=1).count()
         elif role[0] == "Issuer":
+
             msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
             msg_co = msg.filter(status=2).count()
         else:
@@ -2208,16 +2219,12 @@ def reportpdf(request):
             "logs": logs,
             "usr": usr,
             "books": books,
-            # "plt": plitre,
-            # "dlt": dlitre,
             "diesel": diesel,
             "petrol": petrol,
             "dieselam": dieselam,
             "petrolam": petrolam,
             "vamount": vamount,
             "damount": damount,
-            # "pamount": pamount,
-            # "issuers": issuers,
         },
     )
 

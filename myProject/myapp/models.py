@@ -206,6 +206,7 @@ class activityReport(models.Model):
     bookref = models.CharField(max_length=1000)  # This is the id for reference on fuel dump for the Last serial end
     bookref_s = models.CharField(max_length=1000)  # This is the id for reference on fuel dump for the Start serial end
     cdimension = models.FloatField(blank=True)  # coupon dimension
+    fconsumption = models.FloatField(blank=True)  # This is a fuel consumption per transaction.
     sign = models.CharField(max_length=100)  # This is if the user signed the receipt or not 1 or 0
     created_at = models.DateTimeField(auto_now_add=True)  # This is the date it was created
     datemodified = models.DateField(auto_now=True)

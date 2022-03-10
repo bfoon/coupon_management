@@ -35,6 +35,7 @@ table.center {
       <th>Issued To</th>
       <th>Signed</th>
       <th>Fuel Type</th>
+      <th>Consumption</th>
     </tr>
   </thead>
   <tbody>
@@ -55,6 +56,7 @@ table.center {
       <td style="text-align:center">N</td>
           {% endif %}
       <td>{{ log.ftype }}</td>
+      <td>{{ log.fconsumption |floatformat }}</td>
           {% endif %}
          {% if log.ftype == "Petrol" %}
       <td style="text-align:center" bgcolor="#ccffff">{{log.vnum}}</td>
@@ -70,6 +72,7 @@ table.center {
       <td style="text-align:center" bgcolor="#ccffff">N</td>
           {% endif %}
       <td bgcolor="#ccffff">{{ log.ftype }}</td>
+      <td bgcolor="#ccffff">{{ log.fconsumption }}</td>
           {% endif %}
 <!--      <td style="text-align:center">{{ log.created_at |date:'Y-m-d' }}</td>-->
     </tr>
