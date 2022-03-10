@@ -17,7 +17,14 @@
   bottom: -1px;
   right: 80px;
 }
-
+.bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background-color: #8ef;
+    z-index: -1;
+}
 </style>
     <div class="container">
         <div class="row">
@@ -58,6 +65,7 @@
       <th class="th-sm">Dimension
       </th>
       <th class="th-sm">Quantity
+      <th class="th-sm">Remaining
       </th>
       <th class="th-sm">Total Amount
       </th>
@@ -75,6 +83,8 @@
       <td>{{book.ftype}}</td>
       <td>{{book.dim}}</td>
       <td>{% widthratio book.totalAmount book.dim 1 %}{{notused.count}}</td>
+      <td><div class="progress"><div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="{% widthratio book.totalAmount book.dim 1 %}" aria-valuemin="0" aria-valuemax="{% widthratio book.totalAmount book.dim 1 %}">{% widthratio book.totalAmount book.dim 1 %}</div>
+      </div></td>
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
       {% else %}
@@ -83,7 +93,9 @@
       <td>{{book.unit}}</td>
       <td>{{book.ftype}}</td>
       <td>{{book.dim}}</td>
-      <td>{% widthratio book.totalAmount book.dim 1 %}</td>
+      <td>{% widthratio book.totalAmount book.dim 1 %} </td>
+      <td><div class="progress"><div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25</div>
+      </div> </td>
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
       {% endif %}
@@ -103,6 +115,7 @@
       <th>Dimension
       </th>
       <th>Quantity
+      <th>Remaining
       </th>
       <th>Total Amount
       </th>
