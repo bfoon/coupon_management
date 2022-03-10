@@ -56,7 +56,7 @@ table.center {
       <td style="text-align:center">N</td>
           {% endif %}
       <td>{{ log.ftype }}</td>
-      <td>{{ log.fconsumption |floatformat }}</td>
+      <td>{{ log.fconsumption |floatformat:2 }}</td>
           {% endif %}
          {% if log.ftype == "Petrol" %}
       <td style="text-align:center" bgcolor="#ccffff">{{log.vnum}}</td>

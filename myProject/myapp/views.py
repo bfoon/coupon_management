@@ -1541,7 +1541,7 @@ def transac(request, pk):
                         clitre = rq.values_list('amount', flat=True)[0] #rq['litre']
                         lmill = activityReport.objects.filter(vnum=rq.values_list('vnum', flat=True)[0]).values_list(
                             'mread', flat=True).last()
-                        fconsumption = round((cmill-lmill)/clitre)
+                        fconsumption = round((cmill-lmill)/clitre, 2)
 
                         # This is handling the Report logs for the monthly and annual fuel usage report
                         fd_s = fueldump.objects.filter(lnum = min(c))
