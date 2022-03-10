@@ -1537,10 +1537,10 @@ def transac(request, pk):
 
                        # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
-                        cmill = rq.values_list('mread', flat=True)[0]
-                        clitre = rq.values_list('amount', flat=True)[0] #rq['litre']
+                        cmill = rq.values_list('mread', flat=True)[0] #Current Milleage
+                        clitre = rq.values_list('amount', flat=True)[0] #Current Litre
                         lmill = activityReport.objects.filter(vnum=rq.values_list('vnum', flat=True)[0]).values_list(
-                            'mread', flat=True).last()
+                            'mread', flat=True).last() #last
                         fconsumption = round((cmill-lmill)/clitre, 2)
 
                         # This is handling the Report logs for the monthly and annual fuel usage report

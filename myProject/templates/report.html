@@ -106,11 +106,11 @@ table.center {
 {% if b.quan == 1 %}
 <!--book.book_id, book.fmin, book.serial_end,int(book.serial_end)+1-book.fmin, book.ftype, book.unit-->
       <tr>
-      <td style="text-align:center">{{b.book_id}}</td>
-      <td style="text-align:center">{{b.fmin }}</td>
-      <td style="text-align:center">{{b.serial_end}}</td>
+      <td style="text-align:center">{{ b.book_id }}</td>
+      <td style="text-align:center">{{ b.fmin }}</td>
+      <td style="text-align:center">{{ b.serial_end }}</td>
       <td style="text-align:center">{{ b.serial_end|add:1 |sub:b.fmin }}</td>
-      <td style="text-align:center">{{b.ftype}}</td>
+      <td style="text-align:center">{{ b.ftype }}</td>
       <td style="text-align:center">{{ b.unit }}</td>
 
 <!--      <td style="text-align:center">{{ log.created_at |date:'Y-m-d' }}</td>-->
