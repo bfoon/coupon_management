@@ -124,7 +124,7 @@ bottom: .5em;
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="m-b-md">
-                                    <a href="/couponBatch" class="btn btn-dark btn-xs pull-right">Back</a>
+                                    <a href="/couponBatch" class="btn btn-dark btn-sm pull-right">Back</a>
                                      {% if book.used == 0 and book.hide == "0" %}
                                     <a class="btn btn-danger float-right btn-sm" href="/deletebook/{{ book.id }}" onclick="return confirm('Are you sure to delete this book?');">Delete</a>
                                     <a class="float-right btn-sm">&nbsp;</a>
@@ -237,7 +237,7 @@ bottom: .5em;
             </tr>
             {% else %}
             <tr>
-              <td class="count"></td>
+              <td>{{ forloop.counter }}</td>
               <td>{{l.lnum}} <bar> {{ l.lnum }}</bar></td>
               <td>{{l.datemodified}}</td>
                 <td><small><a href="/approvalflow/{{l.transac}}"><i class="fa fa-check text-success"></i></a></small></td>

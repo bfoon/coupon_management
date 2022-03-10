@@ -69,7 +69,7 @@
   {% for book in books reversed %}
     <tr>
       {% if book.used == 0 %}
-      <td><a style="text-decoration:none; color: inherit;" href="coupondetail/{{book.id}}" >Book {{book.book_id}}</a></td>
+      <td><a href="coupondetail/{{book.id}}" class="btn btn-info btn-sm" >Book {{book.book_id}}</a></td>
       <td>{{book.serial_start}}-{{book.serial_end}}</td>
       <td>{{book.unit}}</td>
       <td>{{book.ftype}}</td>
@@ -78,7 +78,7 @@
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
       {% else %}
-      <td><a style="text-decoration:none; color: inherit;" href="coupondetail/{{book.id}}" > Book {{book.book_id}} <sup class="badge badge-danger badge-counter"> Used</sup> </a></td>
+      <td><a href="coupondetail/{{book.id}}" class="btn btn-info btn-sm"> Book {{book.book_id}} <sup class="badge badge-danger badge-counter"> Used</sup> </a></td>
       <td>{{book.serial_start}}-{{book.serial_end}}</td>
       <td>{{book.unit}}</td>
       <td>{{book.ftype}}</td>
