@@ -33,7 +33,7 @@ from django.db import IntegrityError, transaction
 from .models import Vehicle, Profile, Unit, Coupons, Requests, Transaction, comment, CouponBatch, fueldump, UserGroup
 from .models import activityReport
 from .utils import render_to_pdf
-from django.db.models import Count, F, Value, Sum, Q, Count, Max, CASCADE, Min, FloatField
+from django.db.models import Count, F, Value, Sum, Q, Count, Max, CASCADE, Min, FloatField, Avg
 from django.db.models.base import ObjectDoesNotExist
 from django.core.mail import send_mail
 from django.conf import settings
@@ -2215,7 +2215,7 @@ def reportpdf(request):
     # This is the monthly fuel consumption by vehicle report for PDF generator.
     vamount = activityReport.objects. \
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
-        values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Sum('fconsumption'))
+        values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Avg('fconsumption'))
 
     # This is the querset that creates the dictionary
     bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
