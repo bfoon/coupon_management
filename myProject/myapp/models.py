@@ -160,6 +160,7 @@ class CouponBatch(models.Model):
     bookref = models.CharField(max_length=1000) # This is the id for reference on fuel dump
     bdel = models.CharField(max_length=1000) # This is for soft deleting the book
     hide = models.CharField(max_length=1000) # This is for hiding or showing the book from the stock
+    rbal = models.PositiveIntegerField() # This is for the remaining balance
     created_at = models.DateTimeField(auto_now_add=True) # This is the date it was created
     datemodified = models.DateField(auto_now=True)
     def __str__(self):

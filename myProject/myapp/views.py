@@ -1508,9 +1508,11 @@ def transac(request, pk):
 
                 else:
                     bupdate = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
-                                                      trans_id=1).values_list('lnum', flat=True).order_by('lnum')
+                                                      trans_id=1).all().order_by('lnum')
                     e = int(cnumber)
-                    c = bupdate[:e]
+                    bc = bupdate[:e]
+                    c =bc.values_list('lnum', flat=True)
+                    ubk = bc.values('book_id', 'lnum')
 
                     if len(Transaction.objects.filter(tid=tid))==0:
 
@@ -1986,7 +1988,9 @@ def couponBatch(request):
                 return redirect("couponBatch")
 
         elif role[0] == "Owner" or role[0] == "Admin":
-            books = CouponBatch.objects.filter(bdel=0)
+            books = CouponBatch.objects.annotate(quan=Subquery(
+        fueldump.objects.filter(book_id=OuterRef('bookref')).annotate(cnt=Count("id")).values('cnt').filter(used=0)[:1])).filter(bdel=0). all()
+
             ulist = Unit.objects.all()
             context = {
                     'role': role[0],
