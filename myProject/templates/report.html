@@ -135,6 +135,7 @@ table.center {
       <th>Vehicle</th>
       <th>Amount(D)</th>
       <th>Total Litre</th>
+      <th>Consumption</th>
     </tr>
   </thead>
 <br>
@@ -145,6 +146,7 @@ table.center {
       <td style="text-align:center">{{v.vnum}}</td>
       <td style="text-align:center">{{v.asum |intcomma}}</td>
       <td style="text-align:center">{{v.lt |floatformat}}</td>
+      <td style="text-align:center">{{v.consum |floatformat}}</td>
 
 <!--      <td style="text-align:center">{{ log.created_at |date:'Y-m-d' }}</td>-->
     </tr>

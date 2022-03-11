@@ -2215,9 +2215,9 @@ def reportpdf(request):
     # This is the monthly fuel consumption by vehicle report for PDF generator.
     vamount = activityReport.objects. \
         filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
-        values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'))
+        values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Sum('fconsumption'))
 
-    # This is querset that creates the dictionary
+    # This is the querset that creates the dictionary
     bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
         quan=Count(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
