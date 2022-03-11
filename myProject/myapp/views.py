@@ -2408,32 +2408,31 @@ def activityreport(request):
     return render(request, 'activityreport.html', context)
 
 
-# @login_required(login_url='login')
-# def couponBatchuse(request):
-#     current_user_id = request.user.id
-#     current_user = request.user.username
-#     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-#     user_p = Profile.objects.get(user=current_user_id)
-#     if role[0] == "Driver":
-#         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-#         msg_co = msg.filter().count()
-#     elif role[0] == "Approver":
-#         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-#         msg_co = msg.filter(status=1).count()
-#     elif role[0] == "Issuer":
-#         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-#         msg_co = msg.filter(status=2).count()
-#     else:
-#         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-#         msg_co = msg.count()
-#
-#         usedlist = couponBatch.objects.filter(used=1
-#
-#         context = {
-#             'role': role[0],
-#             'user_p': user_p,
-#             'msg': msg,
-#             'msg_co': msg_co
-#
-#         }
-#         return render(request, 'couponbatch.html', context)
+@login_required(login_url='login')
+def vehicle_detail(request, pk):
+    current_user_id = request.user.id
+    current_user = request.user.username
+    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
+    user_p = Profile.objects.get(user=current_user_id)
+    if role[0] == "Driver":
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
+        msg_co = msg.filter().count()
+    elif role[0] == "Approver":
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
+        msg_co = msg.filter(status=1).count()
+    elif role[0] == "Issuer":
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
+        msg_co = msg.filter(status=2).count()
+    else:
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
+        msg_co = msg.count()
+
+
+    context = {
+            'role': role[0],
+            'user_p': user_p,
+            'msg': msg,
+            'msg_co': msg_co
+
+        }
+    return render(request, 'vehicle_detail.html', context)

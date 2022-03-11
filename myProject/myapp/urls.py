@@ -61,6 +61,7 @@ urlpatterns = [
     path('activityreport', views.activityreport, name='activityreport'),
     path('signed', views.signed, name='signed'),
     path('msgtop', views.msgtop, name='msgtop'),
+    path('vehicle_detail/<str:pk>', views.vehicle_detail, name='vehicle_detail'),
     path('requestEdit/<str:pk>', views.requestEdit, name='requestEdit'),
     path('fuelconsreport', views.fuelconsreport, name='fuelconsreport'),
     path('logout', views.logout, name='logout')
