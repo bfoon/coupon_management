@@ -1537,6 +1537,30 @@ def transac(request, pk):
                         # last_month = datetime.today() - datetime.timedelta(days=30)
                         # items = Item.objects.filter(my_date__gte=last_month).order_by(...)
 
+                        # This is to add used on the rbal to help display balance on the books.
+                        # Possible solution in the future but not in use now
+                        # from collections import defaultdict  # available in Python 2.5 and newer
+                        #
+                        # urls_d = defaultdict(int)
+                        # for url in list_of_urls:
+                        #     urls_d[url] += 1
+                        # Solution in use
+                        # book_l = {}
+                        # for bl in ubk.values_list('book_id', flat=True):
+                        #     if not bl in book_l:
+                        #         book_l[bl] = 1
+                        #     else:
+                        #         book_l[bl] += 1
+
+
+                        # This is handling the rbal column which is for remaining balance
+                        for i in ubk.values_list('book_id', flat=True):
+                            rb = CouponBatch.objects.values_list('rbal', flat=True).get(bookref=i)
+                            rx = rb + 1
+                            CouponBatch.objects.filter(bookref =i).update(rbal=rx)
+
+
+
                        # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
                         cmill = rq.values_list('mread', flat=True)[0] #Current Milleage
@@ -1988,8 +2012,10 @@ def couponBatch(request):
                 return redirect("couponBatch")
 
         elif role[0] == "Owner" or role[0] == "Admin":
-            books = CouponBatch.objects.annotate(quan=Subquery(
-        fueldump.objects.filter(book_id=OuterRef('bookref')).annotate(cnt=Count("id")).values('cnt').filter(used=0)[:1])).filter(bdel=0). all()
+            # This is what is handling the book render.
+            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - F('rbal'),
+                                                 percent =  100 - (F('rbal')*100)/(F('totalAmount')/F('dim'))).filter(bdel=0).\
+                all()
 
             ulist = Unit.objects.all()
             context = {

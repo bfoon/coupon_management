@@ -93,8 +93,8 @@
       <td>{{book.unit}}</td>
       <td>{{book.ftype}}</td>
       <td>{{book.dim}}</td>
-      <td>{% widthratio book.totalAmount book.dim 1 %} </td>
-      <td><div class="progress"><div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25</div>
+      <td>{% widthratio book.totalAmount book.dim 1 %}</td>
+      <td><div class="progress"><div class="progress-bar bg-success" role="progressbar" style="width: {{ book.percent }}%" aria-valuenow="{{ book.quan }}" aria-valuemin="0" aria-valuemax="{% widthratio book.totalAmount book.dim 1 %}">{{ book.quan }}</div>
       </div> </td>
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
@@ -125,6 +125,7 @@
     </tr>
   </tfoot>
 </table>
+
 </div>
 
 {% if role == "Owner" or role == "Admin" %}
