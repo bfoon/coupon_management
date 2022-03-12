@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 # Create your models here.
-
+from datetime import datetime
 # User table
 from django.forms import UUIDField
 
@@ -213,5 +213,13 @@ class activityReport(models.Model):
     datemodified = models.DateField(auto_now=True)
     def __str__(self):
         return f"{self.vnum}"
+
+    def save(self, *args, **kwargs):
+        if self.sign and self.datemodified is None:
+            self.datemodified = datetime.now()
+        elif not self.sign and self.datemodified is not None:
+            self.datemodified = None
+        super(activityReport, self).save(*args, **kwargs)
+
 
 
