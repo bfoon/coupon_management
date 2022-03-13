@@ -2029,7 +2029,10 @@ def couponBatch(request):
             return render(request, 'couponbatch.html', context)
 
         elif role[0] == "Issuer":
-            books = CouponBatch.objects.filter(used=1, bdel=0)
+            books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - F('rbal'),
+                                                 percent=100 - (F('rbal') * 100) / (
+                                                             F('totalAmount') / F('dim'))).filter(used=1, bdel=0). \
+                all()
             ulist = Unit.objects.all()
             context = {
                 'role': role[0],
