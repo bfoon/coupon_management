@@ -1516,7 +1516,6 @@ def transac(request, pk):
                     e = int(cnumber)
                     bc = bupdate[:e]
                     c =bc.values_list('lnum', flat=True)
-                    ubk = bc.values('book_id', 'lnum')
 
                     if len(Transaction.objects.filter(tid=tid))==0:
 
@@ -1544,24 +1543,13 @@ def transac(request, pk):
                         # This is to add used on the rbal to help display balance on the books.
                         # Possible solution in the future but not in use now
                         # from collections import defaultdict  # available in Python 2.5 and newer
-                        #
-                        # urls_d = defaultdict(int)
-                        # for url in list_of_urls:
-                        #     urls_d[url] += 1
-                        # Solution in use
-                        # book_l = {}
-                        # for bl in ubk.values_list('book_id', flat=True):
-                        #     if not bl in book_l:
-                        #         book_l[bl] = 1
-                        #     else:
-                        #         book_l[bl] += 1
-
 
                         # This is handling the rbal column which is for remaining balance
-                        for i in ubk.values_list('book_id', flat=True):
+                        urb = bc.values_list('book_id', flat=True)
+                        for i in urb:
                             rb = CouponBatch.objects.values_list('rbal', flat=True).get(bookref=i)
-                            rx = rb + 1
-                            CouponBatch.objects.filter(bookref =i).update(rbal=rx)
+                            ta = rb + 1
+                            CouponBatch.objects.filter(bookref =i).update(rbal=ta)
 
 
 
@@ -2028,7 +2016,7 @@ def couponBatch(request):
         elif role[0] == "Owner" or role[0] == "Admin":
             # This is what is handling the book render.
             #quan=(F('totalAmount')/F('dim')) - F('rbal')
-            books = CouponBatch.objects.annotate(quan=F('rbal'),
+            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - F('rbal'),
                                                  percent =  100 - (F('rbal')*100)/(F('totalAmount')/F('dim'))).filter(bdel=0).\
                 all()
 
