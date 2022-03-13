@@ -1498,9 +1498,13 @@ def transac(request, pk):
                     comp = total - trancheck + 1
 
                 else:
-                    total = Coupons.objects.values_list('total', flat=True).filter(unit=unit, cdimension=cdimension,
-                                                                                   ftype=ftype)[0]
-                    comp = total - int(cnumber)+1
+                    try:
+                        total = Coupons.objects.values_list('total', flat=True).filter(unit=unit, cdimension=cdimension,
+                                                                                       ftype=ftype)[0]
+                        comp = total - int(cnumber)+1
+                    except IndexError:
+                        messages.warning(request, "There is no stock for this unit to issue this amount of Coupon/s")
+                        return redirect('transac', str(tid))
 
                 if comp <= 0:
                     messages.warning(request, "The stock is not enough to issue this amount of Coupon/s")
@@ -1566,8 +1570,13 @@ def transac(request, pk):
                         cmill = rq.values_list('mread', flat=True)[0] #Current Milleage
                         clitre = rq.values_list('amount', flat=True)[0] #Current Litre
                         lmill = activityReport.objects.filter(vnum=rq.values_list('vnum', flat=True)[0]).values_list(
-                            'mread', flat=True).last() #last
-                        fconsumption = round((cmill-lmill)/clitre, 2)
+                            'mread', flat=True).last() # The last millage of this vehicle
+
+                        if lmill:
+                            fconsumption = round((cmill-lmill)/clitre, 2)
+                        else:
+                            lastmill = Vehicle.objects.values_list('imile', flat=True)[0]
+                            fconsumption = round((cmill - lastmill) / clitre, 2)
 
                         # This is handling the Report logs for the monthly and annual fuel usage report
                         fd_s = fueldump.objects.filter(lnum = min(c))
@@ -1996,24 +2005,30 @@ def couponBatch(request):
                 messages.info(request,f"This book is not unique (Hash collision!) {bookref} ")
                 return redirect('couponBatch')
             else:
-                tx = int(serial_start) -1
-                tm = int(serial_end) - tx
-                totalamount = tm * int(dim)
+                tx = int(serial_start) -1 # This is to create the exact number of coupon leaves
+                tm = int(serial_end) - tx # This creates the number of leaves to be created.
+                totalamount = tm * int(dim) # This is the amount in cash
                 b = []
                 d = int(serial_start)
                 for i in range(tm):
                     b.append(i+d)
-                fueldump.objects.bulk_create([fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype, dim=dim, used=0, trans_id=0, transac=0) for e in b])
+
+                # This is what creates the book
                 book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
-                                           dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0, hide=1,creator=current_user, bookref=bookref)
+                                           dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0,
+                                                  hide=1, rbal=0, creator=current_user, bookref=bookref)
 
                 book.save();
 
+                # This is what create the leaves on the fuel dump table
+                fueldump.objects.bulk_create([fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
+                                                       dim=dim, used=0, trans_id=0, transac=0) for e in b])
                 return redirect("couponBatch")
 
         elif role[0] == "Owner" or role[0] == "Admin":
             # This is what is handling the book render.
-            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - F('rbal'),
+            #quan=(F('totalAmount')/F('dim')) - F('rbal')
+            books = CouponBatch.objects.annotate(quan=F('rbal'),
                                                  percent =  100 - (F('rbal')*100)/(F('totalAmount')/F('dim'))).filter(bdel=0).\
                 all()
 
