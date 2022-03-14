@@ -6,6 +6,7 @@ from django.contrib.auth.models import User, auth, Group
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models.functions import TruncMonth
+from django.db import transaction
 from django.template.loader import render_to_string
 # from weasyprint import HTML
 import tempfile
@@ -1506,6 +1507,7 @@ def transac(request, pk):
                         messages.warning(request, "There is no stock for this unit to issue this amount of Coupon/s")
                         return redirect('transac', str(tid))
 
+                # This needs to be resolve later because if there is no record in the data base shows zero even if there is stock.
                 if comp <= 0:
                     messages.warning(request, "The stock is not enough to issue this amount of Coupon/s")
                     return redirect('transac', str(tid))
@@ -1537,19 +1539,37 @@ def transac(request, pk):
                         for i in sorted(c):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
 
-                        # last_month = datetime.today() - datetime.timedelta(days=30)
-                        # items = Item.objects.filter(my_date__gte=last_month).order_by(...)
+                        # with transaction.atomic():
+                            # last_month = datetime.today() - datetime.timedelta(days=30)
+                            # items = Item.objects.filter(my_date__gte=last_month).order_by(...)
 
-                        # This is to add used on the rbal to help display balance on the books.
-                        # Possible solution in the future but not in use now
-                        # from collections import defaultdict  # available in Python 2.5 and newer
+                            # This is to add used on the rbal to help display balance on the books.
+                            # Possible solution in the future but not in use now
+                            # from collections import defaultdict  # available in Python 2.5 and newer
 
-                        # This is handling the rbal column which is for remaining balance
-                        urb = bc.values_list('book_id', flat=True)
-                        for i in urb:
-                            rb = CouponBatch.objects.values_list('rbal', flat=True).get(bookref=i)
-                            ta = rb + 1
-                            CouponBatch.objects.filter(bookref =i).update(rbal=ta)
+                            # This is handling the rbal column which is for remaining balance
+                            # bup = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
+                            #                                   trans_id=1).all().order_by('lnum')
+                            cbup = bc.values_list('book_id', flat=True)
+                            for ic in sorted(cbup):
+                                cbu = CouponBatch.objects.get(bookref=ic)
+                                cbu.rbal += 1
+                                cbu.save()
+                            # CouponBatch.objects.filter(bookref = cbup).update(rbal=F('rbal') + 1)
+
+
+
+                        # urb = CouponBatch.objects.filter(bookref =bc.values('book_id')).\
+                        #     annotate(cb = Count('bookref')).values('bookref', 'cb').order_by('bookref')
+                        # crb={}
+                        # for ub in cbup:
+                        #     crb[ub.keys()] +=1
+                        #     # crb = CouponBatch.objects.filter(bookref =ub['book_id']).aggregate(ccb = Sum(ub['cb']))
+                        #     # crb
+                        #     for cb in crb:
+                        #         CouponBatch.objects.filter(bookref=ub[cb]).update(rbal=cb.values())
+                        #     #     pass
+
 
 
 
@@ -2111,7 +2131,7 @@ def deletebook(request, pk):
         fueldump.objects.filter(lnum = i, used=0).delete()
     CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
     return redirect('couponBatch')
-
+2
 @login_required(login_url='login')
 def hidebook(request, pk):
     if CouponBatch.objects.filter(id=pk, used=0, hide=0):
