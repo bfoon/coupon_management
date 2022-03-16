@@ -1550,14 +1550,25 @@ def transac(request, pk):
                             # This is handling the rbal column which is for remaining balance
                             # bup = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
                             #                                   trans_id=1).all().order_by('lnum')
-                            cbup = bc.values_list('book_id', flat=True)
-                            for ic in sorted(cbup):
-                                cbu = CouponBatch.objects.get(bookref=ic)
-                                cbu.rbal += 1
-                                cbu.save()
-                            # CouponBatch.objects.filter(bookref = cbup).update(rbal=F('rbal') + 1)
+
+                            # This is the function that increments rbal which is somehow increment by x2
+                            cbup = list(bc.values_list('book_id', flat=True))
+                            # for item in range(e):
+                            #     for ic in sorted(cbup[item:e]):
+                            #         CouponBatch.objects.filter(bookref=ic).update(rbal=F('rbal')+1)
+                            #     break
+                            #     # cbu.rbal +=1
+                            #     # cbu.save()
+                            # cbu = []
+                            for item in range(0,e):
+                                for ic in sorted(cbup):
+                                    cbu = CouponBatch.objects.get(bookref=ic)
+                                    if ic in cbu.bookref:
+                                        cbu.rbal +=1
+                                        cbu.save()
 
 
+                        # CouponBatch.objects.filter(bookref = cbup).update(rbal=F('rbal') + 1)
 
                         # urb = CouponBatch.objects.filter(bookref =bc.values('book_id')).\
                         #     annotate(cb = Count('bookref')).values('bookref', 'cb').order_by('bookref')
@@ -2036,8 +2047,9 @@ def couponBatch(request):
         elif role[0] == "Owner" or role[0] == "Admin":
             # This is what is handling the book render.
             #quan=(F('totalAmount')/F('dim')) - F('rbal')
-            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - F('rbal'),
-                                                 percent =  100 - (F('rbal')*100)/(F('totalAmount')/F('dim'))).filter(bdel=0).\
+            # The function that increment rbal increment it x2 always so to see the correct output you need to divide it by 2
+            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
+                                                 percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
                 all()
 
             ulist = Unit.objects.all()
