@@ -1541,7 +1541,7 @@ def transac(request, pk):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
 
 
-                        # Up rbal for the remaining leaves on the book.
+                        # Update rbal for the remaining leaves on the book.
                         for bu in p:
                             cbu = CouponBatch.objects.get(bookref=bu)
                             cbu.rbal += 1
