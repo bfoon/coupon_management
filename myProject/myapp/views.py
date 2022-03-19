@@ -1541,98 +1541,11 @@ def transac(request, pk):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
 
 
-
+                        # Up rbal for the remaining leaves on the book.
                         for bu in p:
-                            cbu = CouponBatch.objects.filter(bookref=bu)
+                            cbu = CouponBatch.objects.get(bookref=bu)
                             cbu.rbal += 1
                             cbu.save()
-                        # for li in range(0, len(bc)):
-                        # cic = 0
-                        # while cic < len(cbup):
-                        #     b = cbup[cic]
-                        #     cic += 1
-                        #     CouponBatch.objects.filter(bookref=b).update(rbal=F('rbal') + 1)
-                            # cbu.rbal += 1
-                            # cbu.save()
-
-                            # list = []
-                            # number = int(input("how many names do you want in a list: "))
-                            # for i in range(0, number):
-                            #     string_list = (input("enter desired names:"))
-                            #     list.append(string_list)
-                            #
-                            # all_freq = {}
-                            # for name in list:
-                            #     for c in name:
-                            #         if c in all_freq:
-                            #             all_freq[c] += 1
-                            #         else:
-                            #             all_freq[c] = 1
-                            #
-                            # print("Count of all characters in names is :\n "
-                            #       + str(all_freq))
-                            #
-                            # for bu in cbu:
-                            #     bu.rbal += 1
-                            #         bu.save()
-                                # bu.update(rbal=F('rbal') + 1)
-                            # cbu = CouponBatch.objects.get(bookref=ic)
-                            # cbu.rbal += 1
-                            # cbu.save()
-
-                        # with transaction.atomic():
-                            # last_month = datetime.today() - datetime.timedelta(days=30)
-                            # items = Item.objects.filter(my_date__gte=last_month).order_by(...)
-
-                            # This is to add used on the rbal to help display balance on the books.
-                            # Possible solution in the future but not in use now
-                            # from collections import defaultdict  # available in Python 2.5 and newer
-
-                            # This is handling the rbal column which is for remaining balance
-                            # bup = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
-                            #                                   trans_id=1).all().order_by('lnum')
-
-                            # This is the function that increments rbal which is somehow increment by x2
-                        # cbup = bc.values_list('book_id', flat=True)
-                            # d = {x: cbup.count(x) for x in cbup}
-                            # d = list(dc)
-                            # for itm in range(e):
-
-                        #
-                        # for li in range(0,len(bc)):
-                        #     CouponBatch.objects.filter(bookref=cbup[li]).update(rbal=F('rbal') + 1)
-
-                            # for ic in sorted(d):
-
-                            # for item in range(e):
-                            #     for ic in sorted(cbup[item:e]):
-                            #         CouponBatch.objects.filter(bookref=ic).update(rbal=F('rbal')+1)
-                            #     break
-                            #     # cbu.rbal +=1
-                            #     # cbu.save()
-                            # cbu = []
-                            # for item in range(e):
-                            #     for ic in sorted(cbup[0:item]):
-                            #         cbu = CouponBatch.objects.get(bookref=ic)
-                            #         if ic in cbu.bookref:
-                            #             cbu.rbal +=1
-                            #         cbu.save()
-                            #         break
-
-
-                        # CouponBatch.objects.filter(bookref = cbup).update(rbal=F('rbal') + 1)
-
-                        # urb = CouponBatch.objects.filter(bookref =bc.values('book_id')).\
-                        #     annotate(cb = Count('bookref')).values('bookref', 'cb').order_by('bookref')
-                        # crb={}
-                        # for ub in cbup:
-                        #     crb[ub.keys()] +=1
-                        #     # crb = CouponBatch.objects.filter(bookref =ub['book_id']).aggregate(ccb = Sum(ub['cb']))
-                        #     # crb
-                        #     for cb in crb:
-                        #         CouponBatch.objects.filter(bookref=ub[cb]).update(rbal=cb.values())
-                        #     #     pass
-
 
 
 
