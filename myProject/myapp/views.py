@@ -54,6 +54,7 @@ from django.template import RequestContext
 from django.http import HttpResponseRedirect
 import sys
 from django.contrib.auth.decorators import login_required
+import threading
 # import gi
 # gi.require_version("Gtk", "3.0")
 # from gi.repository import Gtk
@@ -231,6 +232,13 @@ def login(request):
         return render(request, 'login.html')
 
 
+class EmailThreading(threading.Thread):
+    def __init__(self, email):
+        self.email = email
+        threading.Thread.__init__(self)
+
+    def run(self):
+        self.msg.send(fail_silently=True)
 
 @login_required(login_url='login')
 def logout(request):
@@ -519,14 +527,7 @@ def requester(request):
                                                                                  '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
                         msg.attach_alternative(html_content, "text/html")
-                        msg.send(fail_silently=True)
-
-                        # send_mail('New Request for Coupon add by ' + current_user,
-                        #           'Coupon request for ' + vnum + ' go to http://127.0.0.1:8000/inbox',
-                        #           settings.EMAIL_HOST_USER, recipients, fail_silently=False)
-                        # send_mail('New Request for Coupon add by ' + current_user,
-                        #           'Coupon request for ' + vnum + ' go to http://127.0.0.1:8000/inbox', settings.EMAIL_HOST_USER,
-                        #           [email], fail_silently=False)
+                        EmailThreading(msg).start()
 
                         subject, from_email, to = 'New Request for Coupon add by ' + current_user, 'service.gm@undp.org', email
                         text_content = 'This is an important message.'
@@ -537,7 +538,8 @@ def requester(request):
                                                                                  '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                         msg.attach_alternative(html_content, "text/html")
-                        msg.send(fail_silently=True)
+
+                        EmailThreading(msg).start()
                         messages.success(request, 'Request Successfully Submitted!')
                         return redirect('inbox')
                     except TimeoutError:
@@ -609,7 +611,7 @@ def approve(request, pk):
                        '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
 
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', email
@@ -622,7 +624,7 @@ def approve(request, pk):
                            '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
             return redirect('inbox')
         except TimeoutError:
             messages.warning(request, "Unable to send email but request Approved!!")
@@ -639,7 +641,7 @@ def approve(request, pk):
                                                                           '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
 
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', email
@@ -652,7 +654,7 @@ def approve(request, pk):
                        '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
 
             return redirect('inbox')
         except TimeoutError:
@@ -686,7 +688,7 @@ def ret(request, pk):
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=True)
+        EmailThreading(msg).start()
 
         return redirect('inbox')
     elif role[0] == "Issuer":
@@ -703,7 +705,7 @@ def ret(request, pk):
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=True)
+        EmailThreading(msg).start()
 
         return redirect('inbox')
     elif role[0] == "Admin":
@@ -720,7 +722,7 @@ def ret(request, pk):
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=True)
+        EmailThreading(msg).start()
 
         return redirect('inbox')
     else:
@@ -806,7 +808,7 @@ def approvalflow(request, pk):
                                                                                     '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
 
             return redirect('approvalflow', str(pk))
 
@@ -830,7 +832,7 @@ def approvalflow(request, pk):
                                                                                                                            '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
-            msg.send(fail_silently=True)
+            EmailThreading(msg).start()
 
             return redirect('approvalflow', str(pk))
 
@@ -1109,7 +1111,7 @@ def comments(request):
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
-        msg.send(fail_silently=True)
+        EmailThreading(msg).start()
 
         return redirect('comments')
     elif role[0] == "Driver":
@@ -1605,7 +1607,7 @@ def transac(request, pk):
                                        '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                         msg.attach_alternative(html_content, "text/html")
-                        msg.send(fail_silently=True)
+                        EmailThreading(msg).start()
 
                         subject, from_email, to = 'Coupon requested Issued by ' + current_user, 'service.gm@undp.org', recipients
                         text_content = 'This is an important message.'
@@ -1617,7 +1619,7 @@ def transac(request, pk):
                                        '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
                         msg.attach_alternative(html_content, "text/html")
-                        msg.send(fail_silently=True)
+                        EmailThreading(msg).start()
 
                         return redirect('approvalflow', str(tid))
 
