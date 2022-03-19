@@ -1533,9 +1533,11 @@ def transac(request, pk):
 
                         t = Coupons.objects.filter(unit=unit, cdimension=cdimension, ftype=ftype).annotate(id = Max('cid'))\
                             .values_list('cid', flat=True)  # Get only the last id of this category.
+
                         # This is the stock update
                         Coupons.objects.filter(
                             cid__in=t).update(transamount=F('transamount') + int(cnumber))
+
                         # This is handling the book update.
                         for i in sorted(c):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
