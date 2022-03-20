@@ -1511,7 +1511,7 @@ def transac(request, pk):
 
                         # This is handling the book update.
                         for i in sorted(c):
-                            fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user))
+                            fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user), datemodified = datetime.datetime.now())
 
 
                         # Update rbal for the remaining leaves on the book.
