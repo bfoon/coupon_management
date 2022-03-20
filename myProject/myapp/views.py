@@ -60,11 +60,14 @@ import threading
 # from gi.repository import Gtk
 
 # Create your views here.
+
+# This def handles the data on the nav bar or the main template
 @login_required(login_url='login')
-def dashboard(request):
-    current_user = request.user
+def preloaddata(request):
     current_user_id = request.user.id
+    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
+    user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
         msg_co = msg.filter().count()
@@ -77,6 +80,18 @@ def dashboard(request):
     else:
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
         msg_co = msg.count()
+    context = {
+        'role': role[0],
+        'user_p': user_p,
+        'msg': msg,
+        'msg_co': msg_co
+
+    }
+    return context
+
+# This is the dashboard display data.
+@login_required(login_url='login')
+def dashboard(request):
     def scatter():
         try:
             reqlist = pd.DataFrame(list(Requests.objects.all().values().filter(Q(ret=0) | Q(ret=1))))
@@ -147,18 +162,19 @@ def dashboard(request):
             req = Requests.objects.filter(Q(status=1, ret=0) | Q(status=2, ret=0) | Q(status=1, ret=1)).aggregate(
                 pen=Count('rid'))
             rreq = Requests.objects.filter(ret=0,  created_at__year=today.year).order_by('-created_at')[:10]
+            maintemp = preloaddata(request)
             context = {
                 'diesel': diesel,
                 'petrol': petrol,
                 'req': req,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'rreq': rreq,
                 'plot1': scatter(),
                 'user_p': user_p,
                 'vehnum': vehnum,
                 'month_req': month_req,
-                'role': role[0]
+                'role': maintemp['role']
 
             }
             return render(request, 'dashboard.html', context)
@@ -173,12 +189,12 @@ def dashboard(request):
             'req1': req1,
             'nav1': nav1[0],
             'nav2': nav2[0],
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'diesel': diesel,
             'petrol': petrol,
             'user_p': user_p,
-            'role': role[0]
+            'role': maintemp['role']
 
         }
         return render(request, 'dashboard.html', context)
@@ -244,22 +260,10 @@ def logout(request):
 
 @login_required(login_url='login')
 def stock(request):
-    current_user = request.user
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] == "Driver":
         messages.info(request, "You don't have permission on this page")
         return redirect('404')
@@ -321,10 +325,10 @@ def stock(request):
                 'stocks': stocks,
                 'books': books,
                 'js': js,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'user_p': user_p,
-                'role': role[0]
+                'role': maintemp['role']
             }
             return render(request, 'stock.html', context)
 
@@ -341,6 +345,7 @@ def inbox(request):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
     if role[0] == "":
         messages.info(request, "You don't have permission on this page")
         return redirect('404')
@@ -362,26 +367,15 @@ def inbox(request):
         paginator_iss = Paginator(issu, 10)  # Show 10 contacts per page.
         page_number_iss = request.GET.get('page')
         page_obj_iss = paginator_iss.get_page(page_number_iss)
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
+
         context = {
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'page_obj_unap': page_obj_unap,
             'page_obj_app': page_obj_app,
             'page_obj_iss': page_obj_iss,
             'user_p': user_p,
-            'role': role[0]
+            'role': maintemp['role']
         }
         return render(request, 'inbox.html', context)
 
@@ -405,26 +399,15 @@ def inbox(request):
         paginator_iss = Paginator(issu, 10)  # Show 10 contacts per page.
         page_number_iss = request.GET.get('page')
         page_obj_iss = paginator_iss.get_page(page_number_iss)
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
+
         context = {
             'page_obj_unap': page_obj_unap,
             'page_obj_app': page_obj_app,
             'page_obj_iss': page_obj_iss,
             'user_p': user_p,
-            'msg': msg,
-            'msg_co': msg_co,
-            'role': role[0]
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
+            'role': maintemp['role']
         }
         return render(request, 'inbox.html', context)
 
@@ -434,18 +417,7 @@ def requester(request):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
 
     vlist = Vehicle.objects.values('vnum', 'ftype')
     if role[0] == "Driver" or role[0] == "Admin":
@@ -538,10 +510,10 @@ def requester(request):
                      messages.warning(request, "The Mileage indicated is less than the last mileage!")
                      context = {
                          'vlist': vlist,
-                         'msg': msg,
-                         'msg_co': msg_co,
+                         'msg': maintemp['msg'],
+                         'msg_co': maintemp['msg_co'],
                          'user_p': user_p,
-                         'role': role[0]
+                         'role': maintemp['role']
                      }
                      return render(request, 'requester.html', context)
             else:
@@ -549,18 +521,18 @@ def requester(request):
                 context = {
                     'vlist': vlist,
                     'user_p': user_p,
-                    'msg': msg,
-                    'msg_co': msg_co,
-                    'role': role[0]
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
+                    'role': maintemp['role']
                 }
                 return render(request, 'requester.html', context)
         else:
             context = {
                 'vlist': vlist,
                 'user_p': user_p,
-                'msg': msg,
-                'msg_co': msg_co,
-                'role': role[0]
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
+                'role': maintemp['role']
             }
             return render(request, 'requester.html', context)
     else:
@@ -738,18 +710,7 @@ def approvalflow(request, pk):
         current_user = request.user.username
         role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
         user_p = Profile.objects.get(user=current_user_id)
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
+        maintemp = preloaddata(request)
         t = Requests.objects.values_list('status', flat=True).filter(rid=pk)
         psign = Requests.objects.values_list('requesterid', flat=True).filter(rid=pk)
         sig = Transaction.objects.values_list('sign', flat=True).filter(tid=pk)
@@ -816,22 +777,17 @@ def approvalflow(request, pk):
             return redirect('approvalflow', str(pk))
 
 
-        #     fss.save(upload.name, upload)
-        #     # Saving the information in the database
-        #     # Transaction.objects.filter(tid=pk).update(uploadedFile=uploadedFile)
-
-
         elif Requests.objects.filter(Q(status=1) | Q(status=2), rid=pk):
             aflow = Requests.objects.get(rid=pk)
             comm = comment.objects.values_list('rid', flat=True).filter(rid=pk)[0]
             context = {
                     'aflow': aflow,
                     'comm': comm,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'user_p': user_p,
                     'psign': psign,
-                    'role': role[0]
+                    'role': maintemp['role']
                        }
             return render(request, 'approvalflow.html', context)
         elif Requests.objects.filter(status=3, rid=pk):
@@ -845,11 +801,11 @@ def approvalflow(request, pk):
                     'aflow': aflow,
                     'rflow': rflow,
                     'lit': lit,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'comm': comm,
                     'user_p': user_p,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'approvalflow.html', context)
             else:
@@ -859,10 +815,10 @@ def approvalflow(request, pk):
                     'rflow': rflow,
                     'lit': lit,
                     'comm': comm,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'user_p': user_p,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'approvalflow.html', context)
 
@@ -873,9 +829,6 @@ def approvalflow(request, pk):
     except MultipleObjectsReturned:
         messages.warning(request, ' This is a duplicate record! Please contact your system Administrator')
         return redirect('inbox')
-    # except ValueError:
-    #     messages.warning(request, ' This is record contain an input error! Please contact your system Administrator')
-    #     return redirect('inbox')
 
     except IntegrityError:
         messages.warning(request, ' Please sign or enter the current fuel market rate, Contact the Issuer')
@@ -883,25 +836,13 @@ def approvalflow(request, pk):
     except IndexError:
         try:
             current_user_id = request.user.id
-            current_user = request.user.username
             role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
             user_p = Profile.objects.get(user=current_user_id)
             t = Requests.objects.values_list('status', flat=True).filter(rid=pk)
             psign = Requests.objects.values_list('requesterid', flat=True).filter(rid=pk)
             sig = Transaction.objects.values_list('sign', flat=True).filter(tid=pk)
             markt = Transaction.objects.values_list('marketrate', flat=True).filter(tid=pk)
-            if role[0] == "Driver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-                msg_co = msg.filter().count()
-            elif role[0] == "Approver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=1).count()
-            elif role[0] == "Issuer":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=2).count()
-            else:
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.count()
+            maintemp = preloaddata(request)
 
             if request.method == 'POST' and t[0] == 3 and sig[0] == "0" and markt[0] == 0 and role[0] != 'Driver':
                 Transaction.objects.filter(tid=pk).update(marketrate=request.POST.get('marketrate'))
@@ -917,11 +858,11 @@ def approvalflow(request, pk):
                 context = {
                     'aflow': aflow,
                     # 'comm': comm,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'user_p': user_p,
                     'psign': psign,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'approvalflow.html', context)
 
@@ -934,11 +875,11 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
-                        'msg': msg,
-                        'msg_co': msg_co,
+                        'msg': maintemp['msg'],
+                        'msg_co': maintemp['msg_co'],
                         'lit': lit,
                         'user_p': user_p,
-                        'role': role[0]
+                        'role': maintemp['role']
                     }
                     return render(request, 'approvalflow.html', context)
 
@@ -947,11 +888,11 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
-                        'msg': msg,
-                        'msg_co': msg_co,
+                        'msg': maintemp['msg'],
+                        'msg_co': maintemp['msg_co'],
                         'lit': lit,
                         'user_p': user_p,
-                        'role': role[0]
+                        'role': maintemp['role']
                     }
                     return render(request, 'approvalflow.html', context)
         except ObjectDoesNotExist:
@@ -968,82 +909,42 @@ def requests(request):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-
+    maintemp = preloaddata(request)
     if role[0] == "Driver":
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
 
         r = Requests.objects.filter(Q(status=1, ret=0) |
                                     Q(status=1, ret=1) | Q(status=2, ret=0) |
                                     Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-created_at')
         context = {
             'requests': r,
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p,
-            'role': role[0]
+            'role': maintemp['role']
         }
         return render(request, 'requests.html', context)
     else:
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
         r = Requests.objects.filter(
             Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0) | Q(status=3, ret=0)).order_by('-created_at')
         context = {
             'requests': r,
             'user_p': user_p,
-            'msg': msg,
-            'msg_co': msg_co,
-            'role': role[0]
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
+            'role': maintemp['role']
         }
         return render(request, 'requests.html', context)
 
 @login_required(login_url='login')
 def perm(request):
-    current_user = request.user.username
+    maintemp = preloaddata(request)
     current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
     context = {
         'user_p': user_p,
-        'msg': msg,
-        'msg_co': msg_co,
-        'role': role[0]
+        'msg': maintemp['msg'],
+        'msg_co': maintemp['msg_co'],
+        'role': maintemp['role']
     }
     return render(request, '404.html', context)
 
@@ -1064,6 +965,7 @@ def comments(request):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
     if request.method == 'POST':
         rid = request.POST.get('rid')
         message = request.POST.get('message')
@@ -1091,19 +993,6 @@ def comments(request):
         return redirect('comments')
     elif role[0] == "Driver":
 
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
-
         req = Requests.objects.values('rid').filter(Q(ret=0) | Q(ret=1),
                                                     Q(status=1) | Q(status=2),
                                                     requesterid=current_user)
@@ -1121,26 +1010,14 @@ def comments(request):
                                            requesterid=current_user)
         context = {
             'comm': comm,
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p,
-            'role': role[0],
+            'role': maintemp['role'],
             'requests': requests
         }
         return render(request, 'comment.html', context)
     else:
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
         req = Requests.objects.values('rid').filter(Q(ret=0) | Q(ret=1),
                                                     Q(status=1) | Q(status=2))
 
@@ -1161,10 +1038,10 @@ def comments(request):
 
         context = {
             'comm': comm,
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p,
-            'role': role[0],
+            'role': maintemp['role'],
             'requests': requests
         }
         return render(request, 'comment.html', context)
@@ -1172,9 +1049,9 @@ def comments(request):
 @login_required(login_url='login')
 def itemcomment(request, pk):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
     imgid = []
     ir = comment.objects.values_list('username', flat=True).filter(rid=pk)
     for i in ir:
@@ -1185,33 +1062,21 @@ def itemcomment(request, pk):
                                                                                         'created_at')[0]
         imgid.append(img)
     comm = imgid
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
     context = {
         'comm': comm,
-        'msg': msg,
-        'msg_co': msg_co,
+        'msg': maintemp['msg'],
+        'msg_co': maintemp['msg_co'],
         'user_p': user_p,
-        'role': role[0]
+        'role': maintemp['role']
     }
     return render(request, 'itemcomment.html', context)
 
 @login_required(login_url='login')
 def vehicles(request):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
     if role[0] == 'Admin' or role[0] == 'Issuer':
         if request.method == 'POST':
             vnum = request.POST.get('vnum')
@@ -1231,26 +1096,15 @@ def vehicles(request):
             vlist = Vehicle.objects.all()
             ulist = Unit.objects.all()
             plist = Profile.objects.filter(role='Driver')
-            if role[0] == "Driver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-                msg_co = msg.filter().count()
-            elif role[0] == "Approver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=1).count()
-            elif role[0] == "Issuer":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=2).count()
-            else:
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.count()
+
             context = {
                 'vlist': vlist,
                 'ulist': ulist,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'plist': plist,
                 'user_p': user_p,
-                'role': role[0]
+                'role': maintemp['role']
             }
             return render(request, 'vehicles.html', context)
     else:
@@ -1270,29 +1124,17 @@ def vehdel(request, pk):
 @login_required(login_url='login')
 def delstock(request):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] == 'Admin' or role[0] == 'Issuer' or role[0] == 'Issuer':
         dellist = Coupons.objects.all()
         context = {
             'dellist': dellist,
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p,
-            'role': role[0]
+            'role': maintemp['role']
         }
         return render(request, 'delstock.html', context)
     else:
@@ -1311,9 +1153,9 @@ def delst(request, pk):
 @login_required(login_url='login')
 def unit(request):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
     if role[0] == 'Admin':
         if request.method == 'POST':
             uname = request.POST.get('uname')
@@ -1323,25 +1165,13 @@ def unit(request):
             un.save();
             return redirect('unit')
         else:
-            if role[0] == "Driver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-                msg_co = msg.filter().count()
-            elif role[0] == "Approver":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=1).count()
-            elif role[0] == "Issuer":
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.filter(status=2).count()
-            else:
-                msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                msg_co = msg.count()
             units = Unit.objects.all()
             context = {
                 'units': units,
                 'user_p': user_p,
-                'msg': msg,
-                'msg_co': msg_co,
-                'role': role[0]
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
+                'role': maintemp['role']
             }
 
             return render(request, 'unit.html', context)
@@ -1362,29 +1192,17 @@ def unitdel(request, pk):
 @login_required(login_url='login')
 def profile(request):
     current_user_id = request.user.id
-    current_user = request.user
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] == 'Admin':
         prof = Profile.objects.all()
         context = {
             'prof': prof,
-            'msg': msg,
-            'msg_co': msg_co,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p,
-            'role': role[0]
+            'role': maintemp['role']
         }
         return render(request, 'profile.html', context)
     else:
@@ -1392,22 +1210,10 @@ def profile(request):
 
 @login_required(login_url='login')
 def userGroup(request):
-    current_user = request.user.username
     current_user_id = request.user.id
     user_p = Profile.objects.get(user=current_user_id)
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
 
     if role[0]=="Admin":
         if request.method == "POST":
@@ -1420,10 +1226,10 @@ def userGroup(request):
             ug = UserGroup.objects.all()
             context ={
                 'ug': ug,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'user_p': user_p,
-                'role': role[0]
+                'role': maintemp['role']
             }
 
             return render(request, 'usergroup.html', context)
@@ -1447,6 +1253,7 @@ def transac(request, pk):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
+    maintemp = preloaddata(request)
 
     try:
         if role[0] == "Issuer" or role[0] == "Admin":
@@ -1599,25 +1406,13 @@ def transac(request, pk):
             else:
                 issue = Requests.objects.get(rid=pk)
                 ulist = Unit.objects.all()
-                if role[0] == "Driver":
-                    msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-                    msg_co = msg.filter().count()
-                elif role[0] == "Approver":
-                    msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                    msg_co = msg.filter(status=1).count()
-                elif role[0] == "Issuer":
-                    msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                    msg_co = msg.filter(status=2).count()
-                else:
-                    msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-                    msg_co = msg.count()
                 context = {
                     'issue': issue,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'ulist': ulist,
                     'user_p': user_p,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'issued.html', context)
 
@@ -1639,18 +1434,7 @@ def user_profile(request, pk):
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] == "Admin":
         try:
             if request.method == 'POST' and len(request.FILES)>0:
@@ -1692,11 +1476,11 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'pic': pic,
                     'user_p': user_p,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'user_profile.html', context)
         except IntegrityError:
@@ -1744,11 +1528,11 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'pic': pic,
                     'user_p': user_p,
-                    'role': role[0]
+                    'role': maintemp['role']
                 }
                 return render(request, 'user_profile.html', context)
         except IntegrityError:
@@ -1763,7 +1547,6 @@ def user_profile(request, pk):
 def user_pic(request, pk):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    # user_p = Profile.objects.get(user=current_user_id)
     if role[0] != "Driver":
         if request.method == 'POST':
             pic = request.FILES('pic')
@@ -1781,21 +1564,9 @@ def login404(request):
 def passwordreset(request, pk):
     current_user = request.user.username
     current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
     u = User.objects.get(username__exact=current_user)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if request.method == 'POST':
         password = request.POST.get('password')
         password_confirm = request.POST.get('password_confirm')
@@ -1808,13 +1579,16 @@ def passwordreset(request, pk):
                 return redirect('passwordreset', str(pk))
             else:
                 messages.info(request, "Password mismatch. Please try again!")
-                return render(request, 'passwordreset.html',{'role': role[0], 'user_p':user_p, 'msg': msg, 'msg_co': msg_co })
+                return render(request, 'passwordreset.html',{'role': maintemp['role'], 'user_p':user_p, 'msg': maintemp['msg'],
+                                                             'msg_co': maintemp['msg_co'] })
         else:
             messages.info(request, "Incorrect current password. Please try again!")
-            return render(request, 'passwordreset.html', {'role': role[0], 'user_p':user_p, 'msg': msg, 'msg_co': msg_co})
+            return render(request, 'passwordreset.html', {'role': maintemp['role'], 'user_p':user_p, 'msg': maintemp['msg'],
+                                                          'msg_co': maintemp['msg_co']})
 
     else:
-        return render(request, 'passwordreset.html', {'role':role[0], 'user_p': user_p, 'msg':msg, 'msg_co': msg_co})
+        return render(request, 'passwordreset.html', {'role':maintemp['role'], 'user_p': user_p, 'msg':maintemp['msg'],
+                                                      'msg_co': maintemp['msg_co']})
 
 @login_required(login_url='login')
 def getfile(request):
@@ -1890,29 +1664,17 @@ def fuelconsreport(request):
 @login_required(login_url='login')
 def translog(request):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] =="Driver":
         return redirect('404')
     else:
 
         context = {
-            'role': role[0],
-            'msg': msg,
-            'msg_co': msg_co,
+            'role': maintemp['role'],
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
             'user_p': user_p
         }
         return render(request, 'translog.html', context)
@@ -1925,18 +1687,7 @@ def couponBatch(request):
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] =="Driver" or role[0] =="Approver":
         return redirect('404')
     else:
@@ -1987,10 +1738,10 @@ def couponBatch(request):
 
             ulist = Unit.objects.all()
             context = {
-                    'role': role[0],
+                    'role': maintemp['role'],
                     'books': books,
-                    'msg': msg,
-                    'msg_co': msg_co,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
                     'ulist': ulist,
                     'user_p': user_p
                 }
@@ -2003,10 +1754,10 @@ def couponBatch(request):
                 all()
             ulist = Unit.objects.all()
             context = {
-                'role': role[0],
+                'role': maintemp['role'],
                 'books': books,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'ulist': ulist,
                 'user_p': user_p
             }
@@ -2022,19 +1773,7 @@ def coupondetail(request, pk):
         current_user = request.user.username
         role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
         user_p = Profile.objects.get(user=current_user_id)
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
+        maintemp = preloaddata(request)
         if role[0] =="Driver" or role[0] =="Issuer" or role[0] =="Approver":
             return redirect('404')
         else:
@@ -2049,11 +1788,11 @@ def coupondetail(request, pk):
             Transaction.objects.filter(tid=OuterRef('transac')).values('created_at')[:1])).order_by('lastmod').last()
 
             context = {
-                'role': role[0],
+                'role': maintemp['role'],
                 'book': book,
                 'used': used,
-                'msg': msg,
-                'msg_co': msg_co,
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
                 'lastu': lastu,
                 'notused': notused,
                 'leaves': leaves,
@@ -2070,7 +1809,6 @@ def deletebook(request, pk):
     b = CouponBatch.objects.filter(id=pk, used=0).values_list('bookref', flat=True)[0]
     lid = fueldump.objects.filter(book_id=b).values_list('lnum', flat=True)
     for i in lid:
-        # fueldump.objects.filter(lnum = i, used=0, ldel=0).update(ldel= 1)
         fueldump.objects.filter(lnum = i, used=0).delete()
     CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
     return redirect('couponBatch')
@@ -2089,21 +1827,9 @@ def hidebook(request, pk):
 @login_required(login_url='login')
 def search(request):
     current_user_id = request.user.id
-    current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if role[0] == "Driver":
         if request.method=='POST':
             sear = request.POST.get('sear')
@@ -2111,36 +1837,24 @@ def search(request):
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
                                       Q(created_at__icontains=sear), requesterid = request.user.username).order_by('-created_at')[:23]
         context = {
-            'role':role,
+            'role':maintemp['role'],
             'lst':lst,
-            'msg':msg,
-            'msg_co':msg_co,
+            'msg':maintemp['msg'],
+            'msg_co':maintemp['msg_co'],
             'user_p':user_p
 
         }
         return render(request, 'search.html', context)
     else:
-        if role[0] == "Driver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-            msg_co = msg.filter().count()
-        elif role[0] == "Approver":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=1).count()
-        elif role[0] == "Issuer":
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.filter(status=2).count()
-        else:
-            msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-            msg_co = msg.count()
         if request.method=='POST':
             sear = request.POST.get('sear')
 
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
                                       Q(created_at__icontains=sear)).order_by('-created_at')[:23]
         context = {
-            'role':role,
-            'msg':msg,
-            'msg_co':msg_co,
+            'role':maintemp['role'],
+            'msg':maintemp['msg'],
+            'msg_co':maintemp['msg_co'],
             'lst':lst,
             'user_p':user_p
 
@@ -2251,18 +1965,7 @@ def requestEdit(request, pk):
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     if request.method == 'POST':
         rid = request.POST.get('rid')
         mread = request.POST.get('mread')
@@ -2336,42 +2039,27 @@ def requestEdit(request, pk):
         rq = Requests.objects.get(rid=pk)
         context = {
             'rq':rq,
-            'role': role[0],
+            'role': maintemp['role'],
             'user_p': user_p,
-            'msg': msg,
-            'msg_co': msg_co
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co']
 
         }
         return render(request, 'requester_edit.html', context)
 
 @login_required(login_url='login')
 def activityreport(request):
-    current_user_id = request.user.id
-    current_user = request.user.username
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
+    maintemp = preloaddata(request)
     logs = activityReport.objects.all().order_by("-created_at")
     casham = activityReport.objects.aggregate(Sum('totalamount'))
 
     context = {
-        'role': role[0],
+        'role': maintemp['role'],
         'logs': logs,
         'casham': casham,
-        'user_p': user_p,
-        'msg': msg,
-        'msg_co': msg_co
+        'user_p': maintemp['user_p'],
+        'msg': maintemp['msg'],
+        'msg_co': maintemp['msg_co']
 
     }
     return render(request, 'activityreport.html', context)
@@ -2379,28 +2067,14 @@ def activityreport(request):
 @login_required(login_url='login')
 def vehicle_detail(request, pk):
     current_user_id = request.user.id
-    current_user = request.user.username
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
-    if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
-        msg_co = msg.filter().count()
-    elif role[0] == "Approver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=1).count()
-    elif role[0] == "Issuer":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.filter(status=2).count()
-    else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
-        msg_co = msg.count()
-
+    maintemp = preloaddata(request)
 
     context = {
-            'role': role[0],
+            'role': maintemp['role'],
             'user_p': user_p,
-            'msg': msg,
-            'msg_co': msg_co
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co']
 
         }
     return render(request, 'vehicle_detail.html', context)
