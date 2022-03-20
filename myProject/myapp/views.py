@@ -55,9 +55,6 @@ from django.http import HttpResponseRedirect
 import sys
 from django.contrib.auth.decorators import login_required
 import threading
-# import gi
-# gi.require_version("Gtk", "3.0")
-# from gi.repository import Gtk
 
 # Create your views here.
 
@@ -639,7 +636,8 @@ def ret(request, pk):
                        '<br>' \
                        f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])# Am having error on this line saying
+                                                                            # 'EmailMultiAlternatives' object has no attribute 'user'
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
 
@@ -1765,7 +1763,6 @@ def couponBatch(request):
         else:
             redirect(perm)
 
-
 @login_required(login_url='login')
 def coupondetail(request, pk):
     try:
@@ -1812,7 +1809,6 @@ def deletebook(request, pk):
         fueldump.objects.filter(lnum = i, used=0).delete()
     CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
     return redirect('couponBatch')
-
 
 @login_required(login_url='login')
 def hidebook(request, pk):
@@ -1963,7 +1959,6 @@ def msgtop(request):
 def requestEdit(request, pk):
     current_user_id = request.user.id
     current_user = request.user.username
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     user_p = Profile.objects.get(user=current_user_id)
     maintemp = preloaddata(request)
     if request.method == 'POST':
@@ -2028,9 +2023,9 @@ def requestEdit(request, pk):
                                                                                          f'<a href="http://127.0.0.1:8000/approvalflow/{rid}">Request Item</a></p>' \
                                                                                          '<br> ' \
                                                                                          '<p> Thank you 😊 </p>'
-                msgs = EmailMultiAlternatives(subject, text_content, from_email, to)
-                msgs.attach_alternative(html_content, "text/html")
-                msgs.send(fail_silently=True)
+                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                msg.attach_alternative(html_content, "text/html")
+                EmailThreading(msg).start()
 
         return redirect('approvalflow', rid)
 
