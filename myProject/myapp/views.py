@@ -231,7 +231,7 @@ def login(request):
     else:
         return render(request, 'login.html')
 
-
+# This is to send email at the background to improve performance of the app
 class EmailThreading(threading.Thread):
     def __init__(self, email):
         self.email = email
@@ -244,11 +244,6 @@ class EmailThreading(threading.Thread):
 def logout(request):
     auth.logout(request)
     return redirect('/')
-
-#
-# @login_required(login_url='login')
-# def tables(request):
-#     return render(request, 'tables.html')
 
 
 @login_required(login_url='login')
@@ -336,7 +331,6 @@ def stock(request):
                 'role': role[0]
             }
             return render(request, 'stock.html', context)
-
 
 
 @login_required(login_url='login')
@@ -578,10 +572,6 @@ def requester(request):
             return render(request, 'requester.html', context)
     else:
         return redirect('404')
-
-# @login_required(login_url='login')
-# def charts(request):
-#     return render(request, 'charts.html')
 
 
 @login_required(login_url='login')
@@ -1867,6 +1857,7 @@ def getfile(request):
         writer.writerow([stock.cid, stock.cdimension, stock.ftype, stock.camount,
                          stock.total, stock.stockopen, stock.transamount, stock.unit, stock.created_at])
     return response
+
 @login_required(login_url='login')
 def bookreport(request, pk):
     response = HttpResponse(content_type='text/csv')
@@ -1894,6 +1885,7 @@ def bookreport(request, pk):
         writer.writerow([leave.book, leave.lnum, leave.ftype, leave.used,
                          leave.book_id, leave.trans_id, leave.dim, leave.requester, leave.approver, leave.issuer,  leave.vnum,  leave.unit, leave.datemodified])
     return response
+
 @login_required(login_url='login')
 def couponbooksreport(request):
     response = HttpResponse(content_type='text/csv')
@@ -2052,8 +2044,6 @@ def couponBatch(request):
             redirect(perm)
 
 
-
-
 @login_required(login_url='login')
 def coupondetail(request, pk):
     try:
@@ -2113,7 +2103,8 @@ def deletebook(request, pk):
         fueldump.objects.filter(lnum = i, used=0).delete()
     CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
     return redirect('couponBatch')
-2
+
+
 @login_required(login_url='login')
 def hidebook(request, pk):
     if CouponBatch.objects.filter(id=pk, used=0, hide=0):
@@ -2267,8 +2258,8 @@ def reportpdf(request):
     )
 
 
-
 # This is for top messages. This is not in use.
+@login_required(login_url='login')
 def msgtop(request):
     uname = request.user.username
     current_user_id = request.user.id
@@ -2414,7 +2405,6 @@ def activityreport(request):
 
     }
     return render(request, 'activityreport.html', context)
-
 
 @login_required(login_url='login')
 def vehicle_detail(request, pk):
