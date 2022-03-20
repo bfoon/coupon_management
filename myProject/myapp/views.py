@@ -59,7 +59,6 @@ import threading
 # gi.require_version("Gtk", "3.0")
 # from gi.repository import Gtk
 
-
 # Create your views here.
 @login_required(login_url='login')
 def dashboard(request):
@@ -184,7 +183,6 @@ def dashboard(request):
         }
         return render(request, 'dashboard.html', context)
 
-
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -208,7 +206,6 @@ def register(request):
 
     else:
         return render(request, 'register.html')
-
 
 def login(request):
     if request.method == 'POST':
@@ -244,7 +241,6 @@ class EmailThreading(threading.Thread):
 def logout(request):
     auth.logout(request)
     return redirect('/')
-
 
 @login_required(login_url='login')
 def stock(request):
@@ -332,13 +328,11 @@ def stock(request):
             }
             return render(request, 'stock.html', context)
 
-
 @login_required(login_url='login')
 def requestlist(request):
     current_user_id = request.user.id
     user_p = Profile.objects.get(user=current_user_id)
     return render(request, 'requestlist.html', {'user_p': user_p})
-
 
 @login_required(login_url='login')
 def inbox(request):
@@ -433,7 +427,6 @@ def inbox(request):
             'role': role[0]
         }
         return render(request, 'inbox.html', context)
-
 
 @login_required(login_url='login')
 def requester(request):
@@ -573,7 +566,6 @@ def requester(request):
     else:
         return redirect('404')
 
-
 @login_required(login_url='login')
 def approve(request, pk):
     current_user = request.user.username
@@ -654,7 +646,6 @@ def approve(request, pk):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
-
 @login_required(login_url='login')
 def ret(request, pk):
     current_user = request.user.username
@@ -719,7 +710,6 @@ def ret(request, pk):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
-
 @login_required(login_url='login')
 def delete(request, pk):
     try:
@@ -740,7 +730,6 @@ def delete(request, pk):
     except IndexError:
         messages.warning(request, "You can't delete items created by other users")
         return redirect('inbox')
-
 
 @login_required(login_url='login')
 def approvalflow(request, pk):
@@ -973,7 +962,6 @@ def approvalflow(request, pk):
         except ValueError:
             return redirect('inbox')
 
-
 @login_required(login_url='login')
 def requests(request):
     current_user = request.user.username
@@ -1030,7 +1018,6 @@ def requests(request):
         }
         return render(request, 'requests.html', context)
 
-
 @login_required(login_url='login')
 def perm(request):
     current_user = request.user.username
@@ -1060,7 +1047,6 @@ def perm(request):
     }
     return render(request, '404.html', context)
 
-
 @login_required(login_url='login')
 def nav(request):
     current_user_id = request.user.id
@@ -1071,7 +1057,6 @@ def nav(request):
         'nav': nav2
     }
     return render(request, 'nav.html', context)
-
 
 @login_required(login_url='login')
 def comments(request):
@@ -1184,7 +1169,6 @@ def comments(request):
         }
         return render(request, 'comment.html', context)
 
-
 @login_required(login_url='login')
 def itemcomment(request, pk):
     current_user_id = request.user.id
@@ -1221,7 +1205,6 @@ def itemcomment(request, pk):
         'role': role[0]
     }
     return render(request, 'itemcomment.html', context)
-
 
 @login_required(login_url='login')
 def vehicles(request):
@@ -1284,7 +1267,6 @@ def vehdel(request, pk):
     else:
         return redirect('404')
 
-
 @login_required(login_url='login')
 def delstock(request):
     current_user_id = request.user.id
@@ -1316,7 +1298,6 @@ def delstock(request):
     else:
         return redirect('404')
 
-
 @login_required(login_url='login')
 def delst(request, pk):
     current_user_id = request.user.id
@@ -1326,7 +1307,6 @@ def delst(request, pk):
         return redirect('delstock')
     else:
         return redirect('404')
-
 
 @login_required(login_url='login')
 def unit(request):
@@ -1409,7 +1389,6 @@ def profile(request):
         return render(request, 'profile.html', context)
     else:
         return redirect('404')
-
 
 @login_required(login_url='login')
 def userGroup(request):
@@ -1650,11 +1629,9 @@ def transac(request, pk):
         messages.warning(request, "The stock  does not exit for this coupon dimension")
         return redirect('stock')
 
-
 @login_required(login_url='login')
 def invoice(request, pk):
     return render(request, 'invoice.html')
-
 
 @login_required(login_url='login')
 def user_profile(request, pk):
@@ -1782,7 +1759,6 @@ def user_profile(request, pk):
     else:
          return redirect('404')
 
-
 @login_required(login_url='login')
 def user_pic(request, pk):
     current_user_id = request.user.id
@@ -1797,13 +1773,9 @@ def user_pic(request, pk):
     else:
         return redirect('404')
 
-
-
-
 @login_required(login_url='login')
 def login404(request):
     return render(request, '404login.html')
-
 
 @login_required(login_url='login')
 def passwordreset(request, pk):
@@ -1944,7 +1916,6 @@ def translog(request):
             'user_p': user_p
         }
         return render(request, 'translog.html', context)
-
 
 #------ This is to genrate a unique ID ------
 import uuid
@@ -2256,7 +2227,6 @@ def reportpdf(request):
             "damount": damount,
         },
     )
-
 
 # This is for top messages. This is not in use.
 @login_required(login_url='login')
