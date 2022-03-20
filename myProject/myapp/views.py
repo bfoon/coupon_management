@@ -196,6 +196,7 @@ def dashboard(request):
         }
         return render(request, 'dashboard.html', context)
 
+# This is what will handle the registration
 def register(request):
     if request.method == 'POST':
         username = request.POST.get('username')
