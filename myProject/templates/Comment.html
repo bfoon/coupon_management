@@ -50,7 +50,7 @@
                          {% for i in comm reversed%}
                         <li class="media">
                             <a href="/approvalflow/{{ i.rid }}" class="pull-left">
-                                <img src="media/{{ i.pic}}" alt="" class="img-circle">
+                                <img src="media/{{ i.pic}}" alt="" class="img-circle zoom">
                             </a>
                             <div class="media-body">
                                 <span class="text-muted float-right">
@@ -79,6 +79,14 @@
 </div>
 </div>
 </div>
+
+<style>
+
+.zoom:hover {
+  transform: scale(1.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+</style>
+
 <style type="text/css">
 
 .comment-wrapper .panel-body {
