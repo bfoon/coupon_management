@@ -158,9 +158,10 @@ class CouponBatch(models.Model):
     totalAmount = models.PositiveIntegerField() # This is the amount in cash
     creator = models.CharField(max_length=1000) # This is the user who created the book
     bookref = models.CharField(max_length=1000) # This is the id for reference on fuel dump
-    bdel = models.CharField(max_length=1000) # This is for soft deleting the book
+    bdel = models.CharField(max_length=1000) # This is for soft deleting the book 1 is delete 0 is not delete
     hide = models.CharField(max_length=1000) # This is for hiding or showing the book from the stock
     rbal = models.PositiveIntegerField() # This is for the remaining balance
+    status = models.PositiveIntegerField() # This is if the book is empty 1 not empty 0
     created_at = models.DateTimeField(auto_now_add=True) # This is the date it was created
     datemodified = models.DateField(auto_now=True)
     def __str__(self):

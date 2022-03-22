@@ -1296,7 +1296,12 @@ def transac(request, pk):
                             cbu.rbal += 1
                             cbu.save()
 
+                        bookstat = couponBatch.objects.filter(status=0, hide=0, bdel=0)
 
+                       # This will update the book status
+                        for i in bookstat:
+                            if (fueldump.objects.filter(used=0,book_id=i.values_list('bookref', flat=True))) <= 0:
+                                CouponBatch.objects.get(bookref=i.values_list('bookref', flat=True)).update(status=1)
 
                        # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
