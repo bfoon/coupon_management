@@ -88,13 +88,13 @@
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
       {% else %}
-      <td><a href="coupondetail/{{book.id}}" class="btn btn-info btn-sm"> Book {{book.book_id}} <sup class="badge badge-danger badge-counter"> Used</sup> </a></td>
+      <td><a href="coupondetail/{{book.id}}" class="btn btn-info btn-sm zoom"> Book {{book.book_id}} <sup class="badge badge-danger badge-counter"> Used</sup> </a></td>
       <td>{{book.serial_start}}-{{book.serial_end}}</td>
       <td>{{book.unit}}</td>
       <td>{{book.ftype}}</td>
       <td>{{book.dim}}</td>
       <td>{% widthratio book.totalAmount book.dim 1 %}</td>
-      <td><div class="progress"><div class="progress-bar bg-success" role="progressbar" style="width: {{ book.percent }}%" aria-valuenow="{{ book.quan }}" aria-valuemin="0" aria-valuemax="{% widthratio book.totalAmount book.dim 1 %}">{{ book.quan }}</div>
+      <td><div class="progress zoom"><div class="progress-bar bg-success" role="progressbar" style="width: {{ book.percent }}%" aria-valuenow="{{ book.quan }}" aria-valuemin="0" aria-valuemax="{% widthratio book.totalAmount book.dim 1 %}">{{ book.quan }}</div>
       </div> </td>
       <td>D{{book.totalAmount | intcomma}}</td>
       <td>{{book.created_at | date:'Y-m-d'}}</td>
@@ -209,6 +209,14 @@
 {% include 'footer.html' %}
 
 {% endblock %}
+
+<style>
+
+.zoom:hover {
+  transform: scale(1.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
+}
+</style>
+
 <script>
     // Material Design example
 $(document).ready(function () {

@@ -1036,7 +1036,6 @@ def comments(request):
 
 @login_required(login_url='login')
 def itemcomment(request, pk):
-    current_user_id = request.user.id
     maintemp = preloaddata(request)
     imgid = []
     ir = comment.objects.values_list('username', flat=True).filter(rid=pk)
@@ -1285,23 +1284,28 @@ def transac(request, pk):
                         Coupons.objects.filter(
                             cid__in=t).update(transamount=F('transamount') + int(cnumber))
 
+                        # Update book status rbal
+                        for bu in bc:
+                            for bu2 in CouponBatch.objects.filter(bookref=bu.book_id):
+                                bu2.rbal += 1
+                                bu2.save()
+
                         # This is handling the book update.
                         for i in sorted(c):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user), datemodified = datetime.datetime.now())
 
 
                         # Update rbal for the remaining leaves on the book.
-                        for bu in p:
-                            cbu = CouponBatch.objects.get(bookref=bu)
-                            cbu.rbal += 1
-                            cbu.save()
+                        #inc = []
 
-                        bookstat = couponBatch.objects.filter(status=0, hide=0, bdel=0)
+
+
+                        bookstat = CouponBatch.objects.filter(status=0, hide=0, bdel=0)
 
                        # This will update the book status
                         for i in bookstat:
-                            if (fueldump.objects.filter(used=0,book_id=i.values_list('bookref', flat=True))) <= 0:
-                                CouponBatch.objects.get(bookref=i.values_list('bookref', flat=True)).update(status=1)
+                            if len(fueldump.objects.filter(used=0,book_id=i.bookref))<= 0:
+                                CouponBatch.objects.filter(bookref=i.bookref).update(status=1, rbal=(i.totalAmount) / (i.dim))
 
                        # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
@@ -1682,7 +1686,7 @@ def couponBatch(request):
                 # This is what creates the book
                 book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
                                            dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0,
-                                                  hide=1, rbal=0, creator=current_user, bookref=bookref)
+                                                  hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
 
                 book.save();
 

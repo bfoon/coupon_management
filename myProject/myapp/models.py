@@ -164,6 +164,14 @@ class CouponBatch(models.Model):
     status = models.PositiveIntegerField() # This is if the book is empty 1 not empty 0
     created_at = models.DateTimeField(auto_now_add=True) # This is the date it was created
     datemodified = models.DateField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.status and self.datemodified is None:
+            self.datemodified = datetime.now()
+        elif not self.status and self.datemodified is not None:
+            self.datemodified = None
+        super(CouponBatch, self).save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.serial_start} - {self.serial_end}"
 

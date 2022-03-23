@@ -140,9 +140,20 @@
                                             <td>{{ i.current_balance | intcomma }}</td>
                                             {% endif %}
                                             <td>
+                                                <a href="#" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
                                                 <a href="/delstock" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
                                             </td>
                                         </tr>
+                                        <div class="modal fade" id="emailforstock" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLong">Stock Request</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+<!--                                        Put my email form here-->
+                                    </div>
                                         {% endfor %}
 
                                     </tbody>
