@@ -1253,10 +1253,12 @@ def transac(request, pk):
                         messages.warning(request, "There is no stock for this unit to issue this amount of Coupon/s")
                         return redirect('transac', str(tid))
 
-                # This needs to be resolve later because if there is no record in the data base shows zero even if there is stock.
+                # This needs to be resolve later because if there is no record in the database shows zero even if there is stock.(resolved)
                 if comp <= 0:
                     messages.warning(request, "The stock is not enough to issue this amount of Coupon/s")
                     return redirect('transac', str(tid))
+                #
+
 
                 else:
                     bupdate = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
@@ -1264,10 +1266,10 @@ def transac(request, pk):
                     e = int(cnumber)
                     bc = bupdate[:e]
                     c =bc.values_list('lnum', flat=True)
-                    p = bc.values_list('book_id', flat=True)
+                    cp = Coupons.objects.annotate(am = F('total')-F('transamount')).values_list('am', flat=True).last()
+                    lbu = len(bupdate)
 
-                    if len(Transaction.objects.filter(tid=tid))==0:
-
+                    if len(Transaction.objects.filter(tid=tid))==0 and cp == lbu:
                         tran = Transaction.objects.create(tid_id=tid, cdimension=cdimension, totalamount=totalamount,
                                                           ftype=ftype,
                                                           cnumber=cnumber, quantity=quantity, rate=rate, marketrate=0, sign=0,
@@ -1340,7 +1342,9 @@ def transac(request, pk):
                                                                 note=note, comm = comm ,cdimension=cdimension, fconsumption=fconsumption)
                         acreort.save();
 
-
+                    else:
+                        messages.warning(request, "The stock and the books are not tally Please contact the Administrator!!!")
+                        return redirect('approvalflow', str(tid))
 
                     emial_group = Profile.objects.values_list('email', flat=True).filter(
                         Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
