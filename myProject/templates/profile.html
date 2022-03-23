@@ -14,7 +14,7 @@
             <div class="main-box no-header clearfix">
                 <div class="main-box-body clearfix">
                     <div class="table-responsive">
-                        <table class="table user-list">
+                        <table class="table user-list" id="paginationTable">
                             <thead>
                                 <tr>
                                 <th><span>User</span></th>
@@ -81,12 +81,18 @@
 </div>
 
 <style>
-
 .zoom:hover {
   transform: scale(1.5); /* (150% zoom - Note: if the zoom is too large, it will go outside of the viewport) */
 }
 </style>
 
+<style>
+        $(document).ready(function () {
+  $('#paginationTable').DataTable();
+  $('.dataTables_length').addClass('bs-select');
+});
+
+</style>
 
 <style type="text/css">
 body{
