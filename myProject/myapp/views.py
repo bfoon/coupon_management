@@ -77,7 +77,14 @@ def preloaddata(request):
     else:
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
         msg_co = msg.count()
+
+    # Diesel market current rate
+    dcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Diesel').last()
+    # Petrol market current rate
+    pcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
     context = {
+        'dcurmark':dcurmark,
+        'pcurmark':pcurmark,
         'role': role[0],
         'user_p': user_p,
         'msg': msg,
@@ -165,6 +172,8 @@ def dashboard(request):
                 'petrol': petrol,
                 'req': req,
                 'msg': maintemp['msg'],
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'msg_co': maintemp['msg_co'],
                 'rreq': rreq,
                 'plot1': scatter(),
@@ -188,6 +197,8 @@ def dashboard(request):
             'nav2': nav2[0],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'diesel': diesel,
             'petrol': petrol,
             'user_p': user_p,
@@ -322,6 +333,8 @@ def stock(request):
                 'stocks': stocks,
                 'books': books,
                 'js': js,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
                 'user_p': maintemp['user_p'],
@@ -367,6 +380,8 @@ def inbox(request):
         context = {
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'page_obj_unap': page_obj_unap,
             'page_obj_app': page_obj_app,
             'page_obj_iss': page_obj_iss,
@@ -400,6 +415,8 @@ def inbox(request):
             'page_obj_unap': page_obj_unap,
             'page_obj_app': page_obj_app,
             'page_obj_iss': page_obj_iss,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
@@ -506,6 +523,8 @@ def requester(request):
                      context = {
                          'vlist': vlist,
                          'msg': maintemp['msg'],
+                         'dcurmark': maintemp['dcurmark'],
+                         'pcurmark': maintemp['pcurmark'],
                          'msg_co': maintemp['msg_co'],
                          'user_p': maintemp['user_p'],
                          'role': maintemp['role']
@@ -515,6 +534,8 @@ def requester(request):
                 messages.info(request, f"The Vehicle {vnum} already has a request in progress!")
                 context = {
                     'vlist': vlist,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'user_p': maintemp['user_p'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
@@ -524,6 +545,8 @@ def requester(request):
         else:
             context = {
                 'vlist': vlist,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'user_p': maintemp['user_p'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
@@ -778,6 +801,8 @@ def approvalflow(request, pk):
             context = {
                     'aflow': aflow,
                     'comm': comm,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'user_p': maintemp['user_p'],
@@ -796,6 +821,8 @@ def approvalflow(request, pk):
                     'aflow': aflow,
                     'rflow': rflow,
                     'lit': lit,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'comm': comm,
@@ -810,6 +837,8 @@ def approvalflow(request, pk):
                     'rflow': rflow,
                     'lit': lit,
                     'comm': comm,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'user_p': maintemp['user_p'],
@@ -850,6 +879,8 @@ def approvalflow(request, pk):
                 aflow = Requests.objects.get(rid=pk)
                 context = {
                     'aflow': aflow,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'user_p': maintemp['user_p'],
@@ -867,6 +898,8 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
+                        'dcurmark': maintemp['dcurmark'],
+                        'pcurmark': maintemp['pcurmark'],
                         'msg': maintemp['msg'],
                         'msg_co': maintemp['msg_co'],
                         'lit': lit,
@@ -880,6 +913,8 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
+                        'dcurmark': maintemp['dcurmark'],
+                        'pcurmark': maintemp['pcurmark'],
                         'msg': maintemp['msg'],
                         'msg_co': maintemp['msg_co'],
                         'lit': lit,
@@ -908,6 +943,8 @@ def requests(request):
                                     Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-created_at')
         context = {
             'requests': r,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
             'user_p': maintemp['user_p'],
@@ -919,6 +956,8 @@ def requests(request):
             Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0) | Q(status=3, ret=0)).order_by('-created_at')
         context = {
             'requests': r,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
@@ -933,6 +972,8 @@ def perm(request):
     user_p = Profile.objects.get(user=current_user_id)
     context = {
         'user_p': user_p,
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
         'msg': maintemp['msg'],
         'msg_co': maintemp['msg_co'],
         'role': maintemp['role']
@@ -999,6 +1040,8 @@ def comments(request):
                                            requesterid=current_user)
         context = {
             'comm': comm,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
             'user_p': maintemp['user_p'],
@@ -1026,6 +1069,8 @@ def comments(request):
 
         context = {
             'comm': comm,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
             'user_p': maintemp['user_p'],
@@ -1049,6 +1094,8 @@ def itemcomment(request, pk):
     comm = imgid
     context = {
         'comm': comm,
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
         'msg': maintemp['msg'],
         'msg_co': maintemp['msg_co'],
         'user_p': maintemp['user_p'],
@@ -1084,6 +1131,8 @@ def vehicles(request):
             context = {
                 'vlist': vlist,
                 'ulist': ulist,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
                 'plist': plist,
@@ -1112,6 +1161,8 @@ def delstock(request):
         dellist = Coupons.objects.all()
         context = {
             'dellist': dellist,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
             'user_p': maintemp['user_p'],
@@ -1145,6 +1196,8 @@ def unit(request):
             units = Unit.objects.all()
             context = {
                 'units': units,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'user_p': maintemp['user_p'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
@@ -1172,6 +1225,8 @@ def profile(request):
         prof = Profile.objects.all()
         context = {
             'prof': prof,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
             'user_p': maintemp['user_p'],
@@ -1196,6 +1251,8 @@ def userGroup(request):
             ug = UserGroup.objects.all()
             context ={
                 'ug': ug,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
                 'user_p': maintemp['user_p'],
@@ -1268,7 +1325,7 @@ def transac(request, pk):
                     c =bc.values_list('lnum', flat=True)
                     cp = Coupons.objects.annotate(am = F('total')-F('transamount')).values_list('am', flat=True).last()
                     lbu = len(bupdate)
-
+                    # This will check if the transaction doesn't exist and if the book issued is equal to the stock
                     if len(Transaction.objects.filter(tid=tid))==0 and cp == lbu:
                         tran = Transaction.objects.create(tid_id=tid, cdimension=cdimension, totalamount=totalamount,
                                                           ftype=ftype,
@@ -1297,14 +1354,9 @@ def transac(request, pk):
                             fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user), datemodified = datetime.datetime.now())
 
 
-                        # Update rbal for the remaining leaves on the book.
-                        #inc = []
-
-
-
+                        # This will update the book status
                         bookstat = CouponBatch.objects.filter(status=0, hide=0, bdel=0)
 
-                       # This will update the book status
                         for i in bookstat:
                             if len(fueldump.objects.filter(used=0,book_id=i.bookref))<= 0:
                                 CouponBatch.objects.filter(bookref=i.bookref).update(status=1, rbal=(i.totalAmount) / (i.dim))
@@ -1390,6 +1442,8 @@ def transac(request, pk):
                 ulist = Unit.objects.all()
                 context = {
                     'issue': issue,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'ulist': ulist,
@@ -1457,6 +1511,8 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'pic': pic,
@@ -1509,6 +1565,8 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
                     'pic': pic,
@@ -1557,15 +1615,18 @@ def passwordreset(request, pk):
                 return redirect('passwordreset', str(pk))
             else:
                 messages.info(request, "Password mismatch. Please try again!")
-                return render(request, 'passwordreset.html',{'role': maintemp['role'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
+                return render(request, 'passwordreset.html',{'role': maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
                                                              'msg_co': maintemp['msg_co'] })
         else:
             messages.info(request, "Incorrect current password. Please try again!")
-            return render(request, 'passwordreset.html', {'role': maintemp['role'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
+            return render(request, 'passwordreset.html', {'role': maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
                                                           'msg_co': maintemp['msg_co']})
 
     else:
-        return render(request, 'passwordreset.html', {'role':maintemp['role'], 'user_p': maintemp['user_p'], 'msg':maintemp['msg'],
+        return render(request, 'passwordreset.html', {'role':maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'], 'user_p': maintemp['user_p'], 'msg':maintemp['msg'],
                                                       'msg_co': maintemp['msg_co']})
 
 @login_required(login_url='login')
@@ -1644,6 +1705,8 @@ def translog(request):
     else:
 
         context = {
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'role': maintemp['role'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
@@ -1708,6 +1771,8 @@ def couponBatch(request):
             ulist = Unit.objects.all()
             context = {
                     'role': maintemp['role'],
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
                     'books': books,
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
@@ -1724,6 +1789,8 @@ def couponBatch(request):
             ulist = Unit.objects.all()
             context = {
                 'role': maintemp['role'],
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'books': books,
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
@@ -1756,6 +1823,8 @@ def coupondetail(request, pk):
                 'role': maintemp['role'],
                 'book': book,
                 'used': used,
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
                 'lastu': lastu,
@@ -1802,6 +1871,8 @@ def search(request):
         context = {
             'role':maintemp['role'],
             'lst':lst,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'msg':maintemp['msg'],
             'msg_co':maintemp['msg_co'],
             'user_p':maintemp['user_p']
@@ -1839,6 +1910,7 @@ def signed(request):
 
 @login_required(login_url='login')
 def reportpdf(request):
+    maintemp = preloaddata(request)
     today = datetime.datetime.now() # This is to generate the date today.
     template_name = "report.html" # This is the template to generate pdf
 
@@ -1895,6 +1967,8 @@ def reportpdf(request):
         {
             "logs": logs,
             "usr": usr,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             "books": books,
             "diesel": diesel,
             "petrol": petrol,
@@ -1998,6 +2072,8 @@ def requestEdit(request, pk):
         rq = Requests.objects.get(rid=pk)
         context = {
             'rq':rq,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'role': maintemp['role'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
@@ -2016,6 +2092,8 @@ def activityreport(request):
         'role': maintemp['role'],
         'logs': logs,
         'casham': casham,
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
         'user_p': maintemp['user_p'],
         'msg': maintemp['msg'],
         'msg_co': maintemp['msg_co']
@@ -2029,6 +2107,8 @@ def vehicle_detail(request, pk):
 
     context = {
             'role': maintemp['role'],
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co']

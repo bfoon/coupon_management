@@ -28,13 +28,13 @@
                         {% endif %}
                         <nav>
                             <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
-                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Unapprove</a>
+                                <a class="nav-item nav-link " id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="">Unapprove</a>
                                 <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="">Approved</a>
-                                <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="">Issued</a>
+                                <a class="nav-item nav-link active" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="">Issued</a>
                             </div>
                         </nav>
                         <div class="tab-content" id="nav-tabContent">
-                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                            <div class="tab-pane fade show fade" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
                                 <div class="table-responsive">
                                 <table class="table table-bordred table-striped" cellspacing="0" >
                                     <thead>
@@ -48,6 +48,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+<!--                                    This is for the unapproved requests-->
                                     {% for i in page_obj_unap reversed %}
                                         <tr>
                                             <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;" >{{i.vnum}}</a></td>
@@ -150,8 +151,8 @@
                                 </nav>
                         </div>
                         </div>
-                              <!-- Approval table begins-->
-                            <div class="tab-pane fade show fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
+                              <!-- Issued table begins-->
+                            <div class="tab-pane fade show active" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">
                                 <div class="table-responsive">
                                 <table class="table table-bordred table-striped" cellspacing="0" >
                                     <thead>
