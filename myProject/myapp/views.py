@@ -266,6 +266,7 @@ class EmailThreading(threading.Thread):
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
 # This is what handles the stock.
 @login_required(login_url='login')
 def stock(request):
@@ -2116,6 +2117,7 @@ def vehicle_detail(request, pk):
         }
     return render(request, 'vehicle_detail.html', context)
 
+# This is what is handling the stock requesting email.
 @login_required(login_url='login')
 def email_stock(request, pk):
     current_user = request.user.username
