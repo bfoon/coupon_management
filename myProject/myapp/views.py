@@ -2118,26 +2118,39 @@ def vehicle_detail(request, pk):
 
 @login_required(login_url='login')
 def email_stock(request):
+    current_user = request.user.username
     if request.method == 'POST':
-        unit = request.POST.get('')
-        dim = request.POST.get('')
-        fytpe = request.POST.get('')
-        subject = request.POST.get('')
-        message = request.POST.get('')
+        unit = request.POST.get('unit')
+        dim = request.POST.get('dim')
+        fytpe = request.POST.get('fytpe')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
         emial_group = Profile.objects.values_list('email', flat=True).filter(
             Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
         recipients = list(i for i in emial_group if bool(i))
-        subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
+        subject, from_email, to = subject + ' ' + current_user, 'service.gm@undp.org', recipients
         text_content = 'This is an important message.'
-        html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
-                                                                 '<br>' \
-                                                                 f'<a href="http://127.0.0.1:8000/approvalflow/{rid}">Request Item</a></p>' \
-                                                                 '<br> ' \
-                                                                 '<p> Thank you 😊 </p>'
+        html_content = '<p>Stock request:' \
+                                        '<br>' \
+                                        f'Unit: <strong>{unit}</strong>'\
+                                        '<br> ' \
+                                        f'Dimension: <strong>{dim}</strong>'\
+                                        '<br> ' \
+                                        f'Fuel Type: <strong>{fytpe}</strong>'\
+                                        '<br> ' \
+                                        f'{message}'\
+                                        '<br>'\
+                                        '<p> Thank you 😊 </p>'
+
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
 
         return redirect('stock')
 
-        pass
+    else:
+
+        context = {
+
+        }
+    return render(request, 'stock', context)
