@@ -266,7 +266,7 @@ class EmailThreading(threading.Thread):
 def logout(request):
     auth.logout(request)
     return redirect('/')
-
+# This is what handles the stock.
 @login_required(login_url='login')
 def stock(request):
     current_user_id = request.user.id
@@ -321,7 +321,7 @@ def stock(request):
             # tra = Transaction.objects.values('unit','cdimension','ftype').annotate(camount = Sum('cnumber'))
             t = Coupons.objects.values('unit', 'cdimension', 'ftype').annotate(cid=Max('cid')).values_list('cid',
                                                                                                            flat=True)  # Get only the ids
-            stocks = (Coupons.objects.values('unit', 'cdimension', 'ftype', 'total', 'camount', 'stockopen').filter(
+            stocks = (Coupons.objects.values('cid', 'unit', 'cdimension', 'ftype', 'total', 'camount', 'stockopen').filter(
                 cid__in=t)).annotate(current_balance=F('total') - F('transamount'))
 
             js = CouponBatch.objects.values('id', 'unit','dim','ftype','totalAmount').filter(bdel=0)
@@ -2117,18 +2117,18 @@ def vehicle_detail(request, pk):
     return render(request, 'vehicle_detail.html', context)
 
 @login_required(login_url='login')
-def email_stock(request):
+def email_stock(request, pk):
     current_user = request.user.username
     if request.method == 'POST':
         unit = request.POST.get('unit')
         dim = request.POST.get('dim')
-        fytpe = request.POST.get('fytpe')
+        ftype = request.POST.get('ftype')
         subject = request.POST.get('subject')
         message = request.POST.get('message')
         emial_group = Profile.objects.values_list('email', flat=True).filter(
             Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
         recipients = list(i for i in emial_group if bool(i))
-        subject, from_email, to = subject + ' ' + current_user, 'service.gm@undp.org', recipients
+        subject, from_email, to = subject + ' from ' + current_user, 'service.gm@undp.org', recipients
         text_content = 'This is an important message.'
         html_content = '<p>Stock request:' \
                                         '<br>' \
@@ -2136,7 +2136,7 @@ def email_stock(request):
                                         '<br> ' \
                                         f'Dimension: <strong>{dim}</strong>'\
                                         '<br> ' \
-                                        f'Fuel Type: <strong>{fytpe}</strong>'\
+                                        f'Fuel Type: <strong>{ftype}</strong>'\
                                         '<br> ' \
                                         f'{message}'\
                                         '<br>'\
@@ -2149,8 +2149,8 @@ def email_stock(request):
         return redirect('stock')
 
     else:
-
+        disp = Coupons.objects.all().filter(cid=pk)
         context = {
-
+            'disp':disp
         }
     return render(request, 'stock', context)

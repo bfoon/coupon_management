@@ -28,9 +28,11 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
+                            {% if role == "issuer" or role == "Admin" %}
                              <button type="button" class="btn btn-success btn-circle btn-md float-right" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">
                           <i class="fas fa-plus"></i>
                       </button>
+                            {% endif %}
                         <a class="breadcrumb-item active" aria-current="page">Stock List</a>
                          &nbsp;&nbsp; &nbsp; <a href="/getfile"><i class="fa fa-download" aria-hidden="true"></i></a>
 
@@ -79,10 +81,15 @@
                                 </form>
                               </div>
                               </div>
+
                             </div>
+
                           </div>
+
                         </div>
+
                         </div>
+
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -140,10 +147,13 @@
                                             <td>{{ i.current_balance | intcomma }}</td>
                                             {% endif %}
                                             <td>
-                                                <a href="#" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
+                                                {% if role == "issuer" or role == "Admin" %}
+                                                <a href="email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
                                                 <a href="/delstock" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
+                                                {% endif %}
                                             </td>
                                         </tr>
+                                        {% if role == "issuer" or role == "Admin" %}
                                         <div class="modal fade" id="emailforstock" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                     <div class="modal-header">
@@ -161,14 +171,18 @@
 
         <!--Grid column-->
         <div class="col-md-10 mb-md-0 mb-5">
-            <form id="contact-form" name="contact-form" action="" method="POST">
+            <form id="contact-form" name="contact-form" action={% url 'email_stock' i.cid %} method="POST">
+                {% csrf_token %}
                 <!--Grid row-->
 
                 <!--Grid row-->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="md-form mb-0">
-                            <input type="text" id="subject" name="subject" class="form-control">
+                            <input type="text" id="unit1" name="unit" class="form-control" value="{{i.unit}}" hidden>
+                            <input type="text" id="dim1" name="dim" class="form-control" value="{{i.cdimension}}" hidden>
+                            <input type="text" id="ftype1" name="ftype" class="form-control" value="{{i.ftype}}" hidden>
+                            <input type="text" id="subject" name="subject" class="form-control" required>
                             <label for="subject" class="">Subject</label>
                         </div>
                     </div>
@@ -196,9 +210,7 @@
                 <a class="btn btn-primary" onclick="document.getElementById('contact-form').submit();">Send</a>
             </div>
             <br>
-        <!--Grid column-->
-
-        <!--Grid column-->
+       {% endif %}
 
 
 </section>
