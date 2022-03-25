@@ -82,7 +82,10 @@ def preloaddata(request):
     dcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Diesel').last()
     # Petrol market current rate
     pcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
+    # Stock for nav
+    stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))
     context = {
+        'stocks':stocks,
         'dcurmark':dcurmark,
         'pcurmark':pcurmark,
         'role': role[0],
@@ -173,6 +176,7 @@ def dashboard(request):
                 'req': req,
                 'msg': maintemp['msg'],
                 'dcurmark': maintemp['dcurmark'],
+                'stocks': maintemp['stocks'],
                 'pcurmark': maintemp['pcurmark'],
                 'msg_co': maintemp['msg_co'],
                 'rreq': rreq,
@@ -1326,7 +1330,8 @@ def transac(request, pk):
                     e = int(cnumber)
                     bc = bupdate[:e]
                     c =bc.values_list('lnum', flat=True)
-                    cp = Coupons.objects.annotate(am = F('total')-F('transamount')).values_list('am', flat=True).last()
+                    cp = Coupons.objects.annotate(am = F('total')-F('transamount')).values_list('am', flat=True).\
+                        filter(unit=unit, ftype=ftype, cdimension=cdimension).last()
                     lbu = len(bupdate)
                     # This will check if the transaction doesn't exist and if the book issued is equal to the stock
                     if len(Transaction.objects.filter(tid=tid))==0 and cp == lbu:

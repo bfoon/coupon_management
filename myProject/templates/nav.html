@@ -231,17 +231,21 @@
                                         The current market price for Petrol is D{{pcurmark.marketrate}} per litre!!
                                     </div>
                                 </a>
-                                <a class="dropdown-item d-flex align-items-center" href="#">
+                                {% if stocks.current_balance <= 1 %}
+                                <a class="dropdown-item d-flex align-items-center" href="/stock">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-warning">
                                             <i class="fas fa-exclamation-triangle text-white"></i>
                                         </div>
                                     </div>
                                     <div>
-                                        <div class="small text-gray-500">December 2, 2019</div>
+
+                                        <div class="small text-gray-500">{{ stocks.created_at }}</div>
                                         Stock Alert: We've noticed unusually low stock balance on you stock list.
                                     </div>
+
                                 </a>
+                                {% endif %}
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
                             </div>
                         </li>
