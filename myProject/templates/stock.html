@@ -148,9 +148,9 @@
                                             {% endif %}
                                             <td>
                                                 {% if role == "issuer" or role == "Admin" %}
-                                                <a href="/email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
+                                                <a href="/email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock{{i.cid}}"><i class="fa fa-fw fa-envelope"></i></a>
                                                 <a href="/delstock" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
-                                        <div class="modal fade" id="emailforstock" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal fade" id="emailforstock{{i.cid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle{{i.cid}}" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                     <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -175,9 +175,6 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="md-form mb-0">
-                            <input type="text" id="unit1" name="unit" class="form-control" value="{{i.unit}}" hidden>
-                            <input type="text" id="dim1" name="dim" class="form-control" value="{{i.cdimension}}" hidden>
-                            <input type="text" id="ftype1" name="ftype" class="form-control" value="{{i.ftype}}" hidden>
                             <input type="text" id="current_balance" name="current_balance" class="form-control" value="{{i.current_balance}}" hidden>
                             <input type="text" id="subject" name="subject" class="form-control" required>
                             <label for="subject" class="">Subject</label>

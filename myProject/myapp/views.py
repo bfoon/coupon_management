@@ -2123,10 +2123,11 @@ def vehicle_detail(request, pk):
 @login_required(login_url='login')
 def email_stock(request, pk):
     current_user = request.user.username
+    rstock = Coupons.objects.filter(cid=pk)
     if request.method == 'POST':
-        unit = request.POST.get('unit')
-        dim = request.POST.get('dim')
-        ftype = request.POST.get('ftype')
+        unit = rstock.values_list('unit', flat=True)[0]
+        dim = rstock.values_list('cdimension', flat=True)[0]
+        ftype = rstock.values_list('ftype', flat=True)[0]
         current_balance = request.POST.get('current_balance')
         subject = request.POST.get('subject')
         message = request.POST.get('message')
@@ -2155,9 +2156,9 @@ def email_stock(request, pk):
 
         return redirect('stock')
 
-    else:
-        disp = Coupons.objects.get(cid=pk)
-        context = {
-            'disp':disp
-        }
-    return render(request, 'stock', context)
+    # else:
+    #     disp = Coupons.objects.get(cid=pk)
+    #     context = {
+    #         'disp':disp
+    #     }
+    # return render(request, 'stock.html', context)
