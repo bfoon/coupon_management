@@ -2155,10 +2155,3 @@ def email_stock(request, pk):
         EmailThreading(msg).start()
 
         return redirect('stock')
-
-    # else:
-    #     disp = Coupons.objects.get(cid=pk)
-    #     context = {
-    #         'disp':disp
-    #     }
-    # return render(request, 'stock.html', context)
