@@ -329,8 +329,10 @@ def stock(request):
             books = CouponBatch.objects.filter(used=0, bdel=0, hide=0).values()
 
             # books = serializers.serialize('json', qs)
+            # srq = email_stock(request, id)
 
             context = {
+                # 'disp':srq['disp'],
                 'stocks': stocks,
                 'books': books,
                 'js': js,
@@ -2125,6 +2127,7 @@ def email_stock(request, pk):
         unit = request.POST.get('unit')
         dim = request.POST.get('dim')
         ftype = request.POST.get('ftype')
+        current_balance = request.POST.get('current_balance')
         subject = request.POST.get('subject')
         message = request.POST.get('message')
         emial_group = Profile.objects.values_list('email', flat=True).filter(
@@ -2134,14 +2137,16 @@ def email_stock(request, pk):
         text_content = 'This is an important message.'
         html_content = '<p>Stock request:' \
                                         '<br>' \
-                                        f'Unit: <strong>{unit}</strong>'\
+                                        f'Unit: <strong>{unit}</strong>' \
                                         '<br> ' \
-                                        f'Dimension: <strong>{dim}</strong>'\
+                                        f'Dimension: <strong>{dim}</strong>' \
                                         '<br> ' \
-                                        f'Fuel Type: <strong>{ftype}</strong>'\
+                                        f'Fuel Type: <strong>{ftype}</strong>' \
                                         '<br> ' \
-                                        f'{message}'\
-                                        '<br>'\
+                                        f'Balance: <strong>{current_balance}</strong>' \
+                                        '<br> ' \
+                                        f'{message}' \
+                                        '<br> ' \
                                         '<p> Thank you 😊 </p>'
 
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -2151,7 +2156,7 @@ def email_stock(request, pk):
         return redirect('stock')
 
     else:
-        disp = Coupons.objects.all().filter(cid=pk)
+        disp = Coupons.objects.get(cid=pk)
         context = {
             'disp':disp
         }

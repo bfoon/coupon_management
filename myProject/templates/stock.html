@@ -148,12 +148,8 @@
                                             {% endif %}
                                             <td>
                                                 {% if role == "issuer" or role == "Admin" %}
-                                                <a href="email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
+                                                <a href="/email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock"><i class="fa fa-fw fa-envelope"></i></a>
                                                 <a href="/delstock" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
-                                                {% endif %}
-                                            </td>
-                                        </tr>
-                                        {% if role == "issuer" or role == "Admin" %}
                                         <div class="modal fade" id="emailforstock" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
                                     <div class="modal-header">
@@ -171,7 +167,7 @@
 
         <!--Grid column-->
         <div class="col-md-10 mb-md-0 mb-5">
-            <form id="contact-form" name="contact-form" action={% url 'email_stock' i.cid %} method="POST">
+            <form method="POST" action={% url 'email_stock' i.cid %}>
                 {% csrf_token %}
                 <!--Grid row-->
 
@@ -182,6 +178,7 @@
                             <input type="text" id="unit1" name="unit" class="form-control" value="{{i.unit}}" hidden>
                             <input type="text" id="dim1" name="dim" class="form-control" value="{{i.cdimension}}" hidden>
                             <input type="text" id="ftype1" name="ftype" class="form-control" value="{{i.ftype}}" hidden>
+                            <input type="text" id="current_balance" name="current_balance" class="form-control" value="{{i.current_balance}}" hidden>
                             <input type="text" id="subject" name="subject" class="form-control" required>
                             <label for="subject" class="">Subject</label>
                         </div>
@@ -203,14 +200,18 @@
                     </div>
                 </div>
                 <!--Grid row-->
+             <div class="text-center text-md-left">
+                <input type="submit" class="btn btn-primary" value="Send"/>
+            </div>
+            <br>
 
             </form>
 
-            <div class="text-center text-md-left">
-                <a class="btn btn-primary" onclick="document.getElementById('contact-form').submit();">Send</a>
-            </div>
-            <br>
+
        {% endif %}
+
+                                            </td>
+                                        </tr>
 
 
 </section>
