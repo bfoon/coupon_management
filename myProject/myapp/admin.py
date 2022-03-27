@@ -11,6 +11,7 @@ from .models import CouponBatch
 from .models import fueldump
 from .models import UserGroup
 from .models import activityReport
+from .models import settings
 # Register your models here.
 admin.site.register(Profile)
 admin.site.register(Vehicle)
@@ -24,4 +25,5 @@ admin.site.register(CouponBatch)
 admin.site.register(fueldump)
 admin.site.register(UserGroup)
 admin.site.register(activityReport)
+admin.site.register(settings)
 
