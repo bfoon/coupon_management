@@ -293,7 +293,7 @@
                                         <h4><strong>Total:</strong></h4>
                                     </td>
                                     <td class="text-left">
-                                        <h4><strong><i area-hidden="true"></i>D{{rflow.totalamount | floatformat:2 | intcomma}} </strong></h4>
+                                        <h4><strong><i area-hidden="true"></i>{{settings.currency}}{{rflow.totalamount | floatformat:2 | intcomma}} </strong></h4>
                                     </td>
                                 </tr>
                             </tbody>
@@ -330,7 +330,7 @@
 
       </div>
         {% if rflow.marketrate != 0 and aflow.status == 3 %}
-        <h8 class="text-info">The market rate on {{rflow.datemodified}} is {{rflow.marketrate}} and coupon rate is {{rflow.rate}}</h8>
+        <h8 class="text-info">The market rate on {{rflow.datemodified}} is {{settings.currency}}{{rflow.marketrate}} and coupon rate is {{settings.currency}}{{rflow.rate}}</h8>
         {% endif %}
       <div class="modal-footer ">
         <button type="button" class="btn btn-secondary d-print-none" data-dismiss="modal">Close</button>

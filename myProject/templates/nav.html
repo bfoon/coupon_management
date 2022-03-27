@@ -13,7 +13,7 @@
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa fa-credit-card"></i>
                 </div>
-                <div class="sidebar-brand-text mx-3">UNDP COUPON <sup>system</sup></div>
+                <div class="sidebar-brand-text mx-3">{{settings.company}} COUPON <sup>system</sup></div>
             </a>
 {% if role != 'Driver' %}
             <!-- Divider -->
@@ -217,7 +217,7 @@
                                     </div>
                                     <div>
                                         <div class="small text-gray-500">{{dcurmark.datemodified}}</div>
-                                        <span class="font-weight-bold">The current market price for Diesel is D{{dcurmark.marketrate}} per litre!</span>
+                                        <span class="font-weight-bold">The current market price for Diesel is {{settings.currency}}{{dcurmark.marketrate}} per litre!</span>
                                     </div>
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
@@ -228,7 +228,7 @@
                                     </div>
                                     <div>
                                         <div class="small text-gray-500">{{pcurmark.datemodified}}</div>
-                                        The current market price for Petrol is D{{pcurmark.marketrate}} per litre!!
+                                        The current market price for Petrol is {{settings.currency}}{{pcurmark.marketrate}} per litre!!
                                     </div>
                                 </a>
                                 {% if stocks.current_balance == 1 %}

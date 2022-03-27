@@ -31,7 +31,7 @@ import os
 from django.utils.timezone import now
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import IntegrityError, transaction
-from .models import Vehicle, Profile, Unit, Coupons, Requests, Transaction, comment, CouponBatch, fueldump, UserGroup
+from .models import Vehicle, Profile, Unit, Coupons, Requests, Transaction, comment, CouponBatch, fueldump, UserGroup, settings
 from .models import activityReport
 from .utils import render_to_pdf
 from django.db.models import Count, F, Value, Sum, Q, Count, Max, CASCADE, Min, FloatField, Avg
@@ -64,6 +64,7 @@ def preloaddata(request):
     current_user_id = request.user.id
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
+    setting = settings.objects.all()[0]
     user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
@@ -86,6 +87,7 @@ def preloaddata(request):
     stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))[0]
     context = {
         'stocks':stocks,
+        'setting':setting,
         'dcurmark':dcurmark,
         'pcurmark':pcurmark,
         'role': role[0],
@@ -175,6 +177,7 @@ def dashboard(request):
                 'petrol': petrol,
                 'req': req,
                 'msg': maintemp['msg'],
+                'settings' : maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'stocks': maintemp['stocks'],
                 'pcurmark': maintemp['pcurmark'],
@@ -201,6 +204,7 @@ def dashboard(request):
             'nav2': nav2[0],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'diesel': diesel,
@@ -341,6 +345,7 @@ def stock(request):
                 'books': books,
                 'js': js,
                 'dcurmark': maintemp['dcurmark'],
+                'settings': maintemp['setting'],
                 'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
                 'msg_co': maintemp['msg_co'],
@@ -387,6 +392,7 @@ def inbox(request):
         context = {
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co'],
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'page_obj_unap': page_obj_unap,
@@ -423,6 +429,7 @@ def inbox(request):
             'page_obj_app': page_obj_app,
             'page_obj_iss': page_obj_iss,
             'dcurmark': maintemp['dcurmark'],
+            'settings': maintemp['setting'],
             'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
@@ -530,6 +537,7 @@ def requester(request):
                      context = {
                          'vlist': vlist,
                          'msg': maintemp['msg'],
+                         'settings': maintemp['setting'],
                          'dcurmark': maintemp['dcurmark'],
                          'pcurmark': maintemp['pcurmark'],
                          'msg_co': maintemp['msg_co'],
@@ -543,6 +551,7 @@ def requester(request):
                     'vlist': vlist,
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
+                    'settings': maintemp['setting'],
                     'user_p': maintemp['user_p'],
                     'msg': maintemp['msg'],
                     'msg_co': maintemp['msg_co'],
@@ -552,6 +561,7 @@ def requester(request):
         else:
             context = {
                 'vlist': vlist,
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
                 'user_p': maintemp['user_p'],
@@ -808,6 +818,7 @@ def approvalflow(request, pk):
             context = {
                     'aflow': aflow,
                     'comm': comm,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -828,6 +839,7 @@ def approvalflow(request, pk):
                     'aflow': aflow,
                     'rflow': rflow,
                     'lit': lit,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -844,6 +856,7 @@ def approvalflow(request, pk):
                     'rflow': rflow,
                     'lit': lit,
                     'comm': comm,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -886,6 +899,7 @@ def approvalflow(request, pk):
                 aflow = Requests.objects.get(rid=pk)
                 context = {
                     'aflow': aflow,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -905,6 +919,7 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
+                        'settings': maintemp['setting'],
                         'dcurmark': maintemp['dcurmark'],
                         'pcurmark': maintemp['pcurmark'],
                         'msg': maintemp['msg'],
@@ -920,6 +935,7 @@ def approvalflow(request, pk):
                     context = {
                         'aflow': aflow,
                         'rflow': rflow,
+                        'settings': maintemp['setting'],
                         'dcurmark': maintemp['dcurmark'],
                         'pcurmark': maintemp['pcurmark'],
                         'msg': maintemp['msg'],
@@ -950,6 +966,7 @@ def requests(request):
                                     Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-created_at')
         context = {
             'requests': r,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
@@ -963,6 +980,7 @@ def requests(request):
             Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0) | Q(status=3, ret=0)).order_by('-created_at')
         context = {
             'requests': r,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
@@ -979,6 +997,7 @@ def perm(request):
     user_p = Profile.objects.get(user=current_user_id)
     context = {
         'user_p': user_p,
+        'settings': maintemp['setting'],
         'dcurmark': maintemp['dcurmark'],
         'pcurmark': maintemp['pcurmark'],
         'msg': maintemp['msg'],
@@ -1047,6 +1066,7 @@ def comments(request):
                                            requesterid=current_user)
         context = {
             'comm': comm,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
@@ -1076,6 +1096,7 @@ def comments(request):
 
         context = {
             'comm': comm,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
@@ -1101,6 +1122,7 @@ def itemcomment(request, pk):
     comm = imgid
     context = {
         'comm': comm,
+        'settings': maintemp['setting'],
         'dcurmark': maintemp['dcurmark'],
         'pcurmark': maintemp['pcurmark'],
         'msg': maintemp['msg'],
@@ -1138,6 +1160,7 @@ def vehicles(request):
             context = {
                 'vlist': vlist,
                 'ulist': ulist,
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
@@ -1168,6 +1191,7 @@ def delstock(request):
         dellist = Coupons.objects.all()
         context = {
             'dellist': dellist,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
@@ -1203,6 +1227,7 @@ def unit(request):
             units = Unit.objects.all()
             context = {
                 'units': units,
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
                 'user_p': maintemp['user_p'],
@@ -1232,6 +1257,7 @@ def profile(request):
         prof = Profile.objects.all()
         context = {
             'prof': prof,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'msg': maintemp['msg'],
@@ -1258,6 +1284,7 @@ def userGroup(request):
             ug = UserGroup.objects.all()
             context ={
                 'ug': ug,
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
@@ -1450,6 +1477,7 @@ def transac(request, pk):
                 ulist = Unit.objects.all()
                 context = {
                     'issue': issue,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -1519,6 +1547,7 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -1573,6 +1602,7 @@ def user_profile(request, pk):
                     'tranam': tranam,
                     'tranlast': tranlast,
                     'tranpen': tranpen,
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'msg': maintemp['msg'],
@@ -1623,17 +1653,17 @@ def passwordreset(request, pk):
                 return redirect('passwordreset', str(pk))
             else:
                 messages.info(request, "Password mismatch. Please try again!")
-                return render(request, 'passwordreset.html',{'role': maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+                return render(request, 'passwordreset.html',{'role': maintemp['role'],  'settings' : maintemp['setting'], 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
                                                              'msg_co': maintemp['msg_co'] })
         else:
             messages.info(request, "Incorrect current password. Please try again!")
-            return render(request, 'passwordreset.html', {'role': maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+            return render(request, 'passwordreset.html', {'role': maintemp['role'],  'settings' : maintemp['setting'],'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
                                                           'msg_co': maintemp['msg_co']})
 
     else:
-        return render(request, 'passwordreset.html', {'role':maintemp['role'],  'dcurmark': maintemp['dcurmark'],
+        return render(request, 'passwordreset.html', {'role':maintemp['role'],  'settings' : maintemp['setting'],'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'], 'user_p': maintemp['user_p'], 'msg':maintemp['msg'],
                                                       'msg_co': maintemp['msg_co']})
 
@@ -1713,6 +1743,7 @@ def translog(request):
     else:
 
         context = {
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'role': maintemp['role'],
@@ -1779,6 +1810,7 @@ def couponBatch(request):
             ulist = Unit.objects.all()
             context = {
                     'role': maintemp['role'],
+                    'settings': maintemp['setting'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'books': books,
@@ -1796,6 +1828,7 @@ def couponBatch(request):
                 all()
             ulist = Unit.objects.all()
             context = {
+                'settings': maintemp['setting'],
                 'role': maintemp['role'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
@@ -1831,6 +1864,7 @@ def coupondetail(request, pk):
                 'role': maintemp['role'],
                 'book': book,
                 'used': used,
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
                 'msg': maintemp['msg'],
@@ -1877,6 +1911,7 @@ def search(request):
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
                                       Q(created_at__icontains=sear), requesterid = request.user.username).order_by('-created_at')[:23]
         context = {
+            'settings': maintemp['setting'],
             'role':maintemp['role'],
             'lst':lst,
             'dcurmark': maintemp['dcurmark'],
@@ -1894,6 +1929,7 @@ def search(request):
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
                                       Q(created_at__icontains=sear)).order_by('-created_at')[:23]
         context = {
+            'settings': maintemp['setting'],
             'role':maintemp['role'],
             'msg':maintemp['msg'],
             'msg_co':maintemp['msg_co'],
@@ -1975,6 +2011,7 @@ def reportpdf(request):
         {
             "logs": logs,
             "usr": usr,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             "books": books,
@@ -2080,6 +2117,7 @@ def requestEdit(request, pk):
         rq = Requests.objects.get(rid=pk)
         context = {
             'rq':rq,
+            'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
             'role': maintemp['role'],
@@ -2097,6 +2135,7 @@ def activityreport(request):
     casham = activityReport.objects.aggregate(Sum('totalamount'))
 
     context = {
+        'settings': maintemp['setting'],
         'role': maintemp['role'],
         'logs': logs,
         'casham': casham,
@@ -2114,9 +2153,10 @@ def vehicle_detail(request, pk):
     maintemp = preloaddata(request)
 
     context = {
+            'settings': maintemp['setting'],
             'role': maintemp['role'],
-        'dcurmark': maintemp['dcurmark'],
-        'pcurmark': maintemp['pcurmark'],
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
             'user_p': maintemp['user_p'],
             'msg': maintemp['msg'],
             'msg_co': maintemp['msg_co']
