@@ -27,7 +27,7 @@ table.center {
   <thead>
     <tr bgcolor="yellow" >
       <th>Vehicle</th>
-      <th>Amount(D)</th>
+      <th>Amount({{settings.currency}})</th>
       <th>Millage</th>
       <th>Coupon Start</th>
       <th>Coupon End</th>
@@ -81,7 +81,7 @@ table.center {
 </table>
 <br>
 {% for d in damount %}
-<h6 class="text-dark">{{ d.ftype }} Total: D{{ d.asum |intcomma}}   |   Litre: {{ d.lt |floatformat }}</h6>
+<h6 class="text-dark">{{ d.ftype }} Total: {{settings.currency}}{{ d.asum |intcomma}}   |   Litre: {{ d.lt |floatformat }}</h6>
 {% endfor %}
 <!--<h6 class="text-dark">Petrol Total: D{{ pamount.asum |intcomma}}   |   Litre: {{ plt.lt |floatformat }}</h6>-->
 <!--<h6 class="text-dark" align="right">Diesel Total Litre: {{ dlt.lt |floatformat }}</h6>-->
@@ -104,7 +104,6 @@ table.center {
     <h5 align="center">  Coupon Book Report <strong>{% now "F-Y" %} </strong></h5>
 {% for b in books %}
 {% if b.quan == 1 %}
-<!--book.book_id, book.fmin, book.serial_end,int(book.serial_end)+1-book.fmin, book.ftype, book.unit-->
       <tr>
       <td style="text-align:center">{{ b.book_id }}</td>
       <td style="text-align:center">{{ b.fmin }}</td>
@@ -113,7 +112,6 @@ table.center {
       <td style="text-align:center">{{ b.ftype }}</td>
       <td style="text-align:center">{{ b.unit }}</td>
 
-<!--      <td style="text-align:center">{{ log.created_at |date:'Y-m-d' }}</td>-->
     </tr>
     {% endif %}
       {% endfor %}
@@ -122,8 +120,8 @@ table.center {
 </table>
 {{bamunt}}
 
-<h6 class="text-dark">Diesel Total: D{{ dieselam | intcomma }}   |   Remaining coupons: {{ diesel }} </h6>
-<h6 class="text-dark">Petrol Total: D{{ petrolam |intcomma}}   |   Remaining coupons: {{ petrol }}</h6>
+<h6 class="text-dark">Diesel Total: {{settings.currency}}{{ dieselam | intcomma }}   |   Remaining coupons: {{ diesel }} </h6>
+<h6 class="text-dark">Petrol Total: {{settings.currency}}{{ petrolam |intcomma}}   |   Remaining coupons: {{ petrol }}</h6>
 <br>
 <h6 align="right"> Book Keeper:_______________________________ Sign:_________________</h6>
 <br>
@@ -133,7 +131,7 @@ table.center {
  <thead>
     <tr bgcolor="yellow" >
       <th>Vehicle</th>
-      <th>Amount(D)</th>
+      <th>Amount({{settings.currency}})</th>
       <th>Total Litre</th>
       <th>Consumption</th>
     </tr>

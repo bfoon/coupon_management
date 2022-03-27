@@ -1972,7 +1972,7 @@ def reportpdf(request):
     books = CouponBatch.objects.all().annotate(quan=Count(Subquery(
         fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
         fmin=Min(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[:1])),
     ).filter(bdel=0, hide=0)
 
     # This is the monthly fuel consumption by vehicle report for PDF generator.
