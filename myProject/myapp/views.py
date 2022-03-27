@@ -83,7 +83,7 @@ def preloaddata(request):
     # Petrol market current rate
     pcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
     # Stock for nav
-    stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))
+    stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))[0]
     context = {
         'stocks':stocks,
         'dcurmark':dcurmark,
