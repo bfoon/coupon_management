@@ -2229,9 +2229,10 @@ def setupconfig(request):
             address = request.POST.get('address')
             company = request.POST.get('company')
             phone = request.POST.get('phone')
+            description = request.POST.get('description')
             # logo = request.FILES['logo']
             stup = settings.objects.create(country=country, city=city, currency=currency,
-                                           address=address, phone=phone, company=company)
+                                           address=address, phone=phone, description=description, company=company)
             stup.save()
             return redirect('setupconfig')
         elif request.method == 'POST' and len(maintemp['setting'].country) > 0:
@@ -2241,9 +2242,10 @@ def setupconfig(request):
             address = request.POST.get('address')
             company = request.POST.get('company')
             phone = request.POST.get('phone')
+            description = request.POST.get('description')
             # logo = request.FILES['logo']
             settings.objects.update(country=country, city=city, currency=currency,
-                                                            address=address, phone=phone, company=company)
+                                                            address=address, phone=phone, description=description, company=company)
             return redirect('setupconfig')
         else:
             context = {

@@ -240,3 +240,6 @@ class settings(models.Model):
     address = models.CharField(max_length=100)
     phone = models.CharField(max_length=100)
     logo = models.ImageField(blank=True, null=True)
+    description = models.CharField(max_length=100) # This is for the software description
+    created_at = models.DateTimeField(auto_now_add=True)  # This is the date it was created
+    datemodified = models.DateField(auto_now=True)
