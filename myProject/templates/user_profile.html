@@ -325,7 +325,11 @@
                                         <label>Total:</label>
                                     </div>
                                     <div class="col-md-6">
+                                        {% if trantotal.total == None %}
+                                        <p>{{ trantotal.total | intcomma}}</p>
+                                        {% else %}
                                         <p>{{settings.currency}}{{ trantotal.total | intcomma}}</p>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>

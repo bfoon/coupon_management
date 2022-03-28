@@ -80,11 +80,24 @@ def preloaddata(request):
         msg_co = msg.count()
 
     # Diesel market current rate
-    dcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Diesel').last()
+    dcm =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Diesel').last()
+    if dcm == None:
+        dcurmark = None
+    else:
+        dcurmark = dcm
     # Petrol market current rate
-    pcurmark =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
-    # Stock for nav
-    stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))[0]
+    pcm =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
+    if pcm == None:
+        pcurmark = None
+    else:
+        pcurmark = pcm
+    # Stock for nav alerts center
+    stck = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))
+    if stck == None:
+        stocks = None
+    else:
+        stocks = stck
+
     context = {
         'stocks':stocks,
         'setting':setting[0],
@@ -214,6 +227,7 @@ def dashboard(request):
 
         }
         return render(request, 'dashboard.html', context)
+
 
 # This is what will handle the registration
 def register(request):
@@ -1758,59 +1772,79 @@ import uuid
 @login_required(login_url='login')
 def couponBatch(request):
     current_user = request.user.username
-    maintemp = preloaddata(request)
-    role = maintemp['role']
+    try:
+        maintemp = preloaddata(request)
+        role = maintemp['role']
 
-    if role =="Driver" or role =="Approver":
-        return redirect('404')
-    else:
-        if request.method == "POST":
-            book_id = request.POST.get('book_id')
-            serial_start = request.POST.get('serial_start')
-            serial_end = request.POST.get('serial_end')
-            dim = request.POST.get('dim')
-            ftype = request.POST.get('ftype')
-            unit = request.POST.get('unit')
-            bookref = uuid.uuid4().hex[:6].upper()
-            ex = CouponBatch.objects.filter(serial_start = serial_start, serial_end = serial_end, bdel=0)
-            ux = CouponBatch.objects.filter(bookref=bookref)
-            if ex:
-                messages.info(request,f"This book exit! book - {serial_start}")
-                return redirect('couponBatch')
-            elif ux:
-                messages.info(request,f"This book is not unique (Hash collision!) {bookref} ")
-                return redirect('couponBatch')
-            else:
-                tx = int(serial_start) -1 # This is to create the exact number of coupon leaves
-                tm = int(serial_end) - tx # This creates the number of leaves to be created.
-                totalamount = tm * int(dim) # This is the amount in cash
-                b = []
-                d = int(serial_start)
-                for i in range(tm):
-                    b.append(i+d)
+        if role =="Driver" or role =="Approver":
+            return redirect('404')
+        else:
+            if request.method == "POST":
+                book_id = request.POST.get('book_id')
+                serial_start = request.POST.get('serial_start')
+                serial_end = request.POST.get('serial_end')
+                dim = request.POST.get('dim')
+                ftype = request.POST.get('ftype')
+                unit = request.POST.get('unit')
+                bookref = uuid.uuid4().hex[:6].upper()
+                ex = CouponBatch.objects.filter(serial_start = serial_start, serial_end = serial_end, bdel=0)
+                ux = CouponBatch.objects.filter(bookref=bookref)
+                if ex:
+                    messages.info(request,f"This book exit! book - {serial_start}")
+                    return redirect('couponBatch')
+                elif ux:
+                    messages.info(request,f"This book is not unique (Hash collision!) {bookref} ")
+                    return redirect('couponBatch')
+                else:
+                    tx = int(serial_start) -1 # This is to create the exact number of coupon leaves
+                    tm = int(serial_end) - tx # This creates the number of leaves to be created.
+                    totalamount = tm * int(dim) # This is the amount in cash
+                    b = []
+                    d = int(serial_start)
+                    for i in range(tm):
+                        b.append(i+d)
 
-                # This is what creates the book
-                book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
-                                           dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0,
-                                                  hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
+                    # This is what creates the book
+                    book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
+                                               dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0,
+                                                      hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
 
-                book.save();
+                    book.save();
 
-                # This is what create the leaves on the fuel dump table
-                fueldump.objects.bulk_create([fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
-                                                       dim=dim, used=0, trans_id=0, transac=0) for e in b])
-                return redirect("couponBatch")
+                    # This is what create the leaves on the fuel dump table
+                    fueldump.objects.bulk_create([fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
+                                                           dim=dim, used=0, trans_id=0, transac=0) for e in b])
+                    return redirect("couponBatch")
 
-        elif role == "Owner" or role == "Admin":
-            # This is what is handling the book render.
-            books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
-                                                 percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
-                all()
+            elif role == "Owner" or role == "Admin":
+                # This is what is handling the book render.
+                books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
+                                                     percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
+                    all()
 
-            ulist = Unit.objects.all()
-            context = {
-                    'role': maintemp['role'],
+                ulist = Unit.objects.all()
+                context = {
+                        'role': maintemp['role'],
+                        'settings': maintemp['setting'],
+                        'dcurmark': maintemp['dcurmark'],
+                        'pcurmark': maintemp['pcurmark'],
+                        'books': books,
+                        'msg': maintemp['msg'],
+                        'msg_co': maintemp['msg_co'],
+                        'ulist': ulist,
+                        'user_p': maintemp['user_p']
+                    }
+                return render(request, 'couponbatch.html', context)
+
+            elif role == "Issuer":
+                books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - F('rbal'),
+                                                     percent=100 - (F('rbal') * 100) / (
+                                                                 F('totalAmount') / F('dim'))).filter(used=1, bdel=0). \
+                    all()
+                ulist = Unit.objects.all()
+                context = {
                     'settings': maintemp['setting'],
+                    'role': maintemp['role'],
                     'dcurmark': maintemp['dcurmark'],
                     'pcurmark': maintemp['pcurmark'],
                     'books': books,
@@ -1819,28 +1853,11 @@ def couponBatch(request):
                     'ulist': ulist,
                     'user_p': maintemp['user_p']
                 }
-            return render(request, 'couponbatch.html', context)
-
-        elif role == "Issuer":
-            books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - F('rbal'),
-                                                 percent=100 - (F('rbal') * 100) / (
-                                                             F('totalAmount') / F('dim'))).filter(used=1, bdel=0). \
-                all()
-            ulist = Unit.objects.all()
-            context = {
-                'settings': maintemp['setting'],
-                'role': maintemp['role'],
-                'dcurmark': maintemp['dcurmark'],
-                'pcurmark': maintemp['pcurmark'],
-                'books': books,
-                'msg': maintemp['msg'],
-                'msg_co': maintemp['msg_co'],
-                'ulist': ulist,
-                'user_p': maintemp['user_p']
-            }
-            return render(request, 'couponbatch.html', context)
-        else:
-            redirect(perm)
+                return render(request, 'couponbatch.html', context)
+            else:
+                return redirect(perm)
+    except IndexError:
+        return redirect('couponBatch')
 
 @login_required(login_url='login')
 def coupondetail(request, pk):
