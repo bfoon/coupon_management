@@ -2205,26 +2205,28 @@ def email_stock(request, pk):
 def setupconfig(request):
     maintemp = preloaddata(request)
     if maintemp['role'] == 'Admin':
-        if request.method == 'POST' and len(maintemp['setting']) == 0:
+        if request.method == 'POST' and len(maintemp['setting'].country) == 0:
             country = request.POST.get('country')
-            city = request.POST.get('country')
-            currency = request.POST.get('country')
-            address = request.POST.get('country')
-            phone = request.POST.get('country')
-            logo = request.FILES['logo']
-            stup = settings.objects.create(country=country, city=city, currency=currency, address=address, phone=phone)
+            city = request.POST.get('city')
+            currency = request.POST.get('currency')
+            address = request.POST.get('address')
+            company = request.POST.get('company')
+            phone = request.POST.get('phone')
+            # logo = request.FILES['logo']
+            stup = settings.objects.create(country=country, city=city, currency=currency,
+                                           address=address, phone=phone, company=company)
             stup.save()
             return redirect('setupconfig')
-        elif request.method == 'POST' and len(maintemp['setting']) > 0:
-            id = settings.pk
+        elif request.method == 'POST' and len(maintemp['setting'].country) > 0:
             country = request.POST.get('country')
-            city = request.POST.get('country')
-            currency = request.POST.get('country')
-            address = request.POST.get('country')
-            phone = request.POST.get('country')
-            logo = request.FILES['logo']
-            settings.objects.filter(id=id).update(country=country, city=city, currency=currency,
-                                                            address=address, phone=phone)
+            city = request.POST.get('city')
+            currency = request.POST.get('currency')
+            address = request.POST.get('address')
+            company = request.POST.get('company')
+            phone = request.POST.get('phone')
+            # logo = request.FILES['logo']
+            settings.objects.update(country=country, city=city, currency=currency,
+                                                            address=address, phone=phone, company=company)
             return redirect('setupconfig')
         else:
             context = {

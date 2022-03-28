@@ -182,7 +182,7 @@
                                 </div>
                                 <div class="card-body">
                                     <ul style="list-style-type:none;">
-                                        {% for r in rreq|slice:":10"  %}
+                                        {% for r in rreq|slice:":10" %}
                                         {% if r.status == 1 %}
                                         <li><small><a class="text-success" href="/approvalflow/{{r.rid}}">{{ r.vnum }} | {{ r.amount }}L</a></small> &rarr; <small>{{ r.requesterid }}</small> </li>
                                         {% elif r.status == 2 %}
