@@ -233,7 +233,7 @@ class activityReport(models.Model):
 
 
 class settings(models.Model):
-    Country = models.CharField(max_length=100)
+    country = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
     company = models.CharField(max_length=100)
     currency = models.CharField(max_length=100)

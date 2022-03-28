@@ -64,7 +64,7 @@ def preloaddata(request):
     current_user_id = request.user.id
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    setting = settings.objects.all()[0]
+    setting = settings.objects.all()
     user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
@@ -87,7 +87,7 @@ def preloaddata(request):
     stocks = Coupons.objects.annotate(current_balance=F('total') - F('transamount'))[0]
     context = {
         'stocks':stocks,
-        'setting':setting,
+        'setting':setting[0],
         'dcurmark':dcurmark,
         'pcurmark':pcurmark,
         'role': role[0],
@@ -170,7 +170,7 @@ def dashboard(request):
 
             req = Requests.objects.filter(Q(status=1, ret=0) | Q(status=2, ret=0) | Q(status=1, ret=1)).aggregate(
                 pen=Count('rid'))
-            rreq = Requests.objects.filter(ret=0,  created_at__year=today.year).order_by('-created_at')[:10]
+            rreq = Requests.objects.filter(ret=0,  created_at__year=today.year).order_by('-created_at')
             maintemp = preloaddata(request)
             context = {
                 'diesel': diesel,
@@ -2200,3 +2200,42 @@ def email_stock(request, pk):
         EmailThreading(msg).start()
 
         return redirect('stock')
+
+@login_required(login_url='login')
+def setupconfig(request):
+    maintemp = preloaddata(request)
+    if maintemp['role'] == 'Admin':
+        if request.method == 'POST' and len(maintemp['setting']) == 0:
+            country = request.POST.get('country')
+            city = request.POST.get('country')
+            currency = request.POST.get('country')
+            address = request.POST.get('country')
+            phone = request.POST.get('country')
+            logo = request.FILES['logo']
+            stup = settings.objects.create(country=country, city=city, currency=currency, address=address, phone=phone)
+            stup.save()
+            return redirect('setupconfig')
+        elif request.method == 'POST' and len(maintemp['setting']) > 0:
+            id = settings.pk
+            country = request.POST.get('country')
+            city = request.POST.get('country')
+            currency = request.POST.get('country')
+            address = request.POST.get('country')
+            phone = request.POST.get('country')
+            logo = request.FILES['logo']
+            settings.objects.filter(id=id).update(country=country, city=city, currency=currency,
+                                                            address=address, phone=phone)
+            return redirect('setupconfig')
+        else:
+            context = {
+                'settings': maintemp['setting'],
+                'role': maintemp['role'],
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
+                'user_p': maintemp['user_p'],
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co']
+
+            }
+            return render(request, 'settings.html', context)
+

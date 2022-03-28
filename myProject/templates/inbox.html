@@ -51,15 +51,15 @@
 <!--                                    This is for the unapproved requests-->
                                     {% for i in page_obj_unap reversed %}
                                         <tr>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;" >{{i.vnum}}</a></td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary btn-block" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;" >{{i.vnum}}</a></td>
                                             <td>{{ i.ftype }}</td>
                                             <td>{{ i.amount  }}</td>
                                             <td>{{ i.created_at }}</td>
                                             {% if i.ret == 1 %}
 <!--                                            <td><a href="#" style="color:#FF0000;" >Returned request</a></td>-->
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-danger" data-container="body" title="{{i.retid}}" data-content="....">Returned request</a></td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-danger btn-block" data-container="body" title="{{i.retid}}" data-content="....">Returned request</a></td>
                                             {% else %}
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning" data-container="body" title="{{i.requesterid}}" data-content="..?">Pending approval</a></td></td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning btn-block" data-container="body" title="{{i.requesterid}}" data-content="..?">Pending approval</a></td></td>
                                             {% endif %}
                                             <td> <a href="requestEdit/{{ i.rid }}" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
                                                 |
@@ -114,11 +114,11 @@
                                     <tbody>
                                     {% for i in page_obj_app reversed %}
                                         <tr>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;">{{i.vnum}}</a></td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary btn-block" data-container="body" title="{{i.requesterid}}"  style="text-transform:uppercase;">{{i.vnum}}</a></td>
                                             <td>{{ i.ftype }}</td>
                                             <td>{{ i.amount }}</td>
                                             <td>{{ i.created_at }}</td>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning" data-container="body" title="{{i.requesterid}}" data-content="....">Pending issuance</a></td>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-warning btn-block" data-container="body" title="{{i.requesterid}}" data-content="....">Pending issuance</a></td>
 <!--                                            <td>{{ i.status }}</td>-->
                                             <td class="text-capitalize">{{ i.approverid }}</td>
                                         </tr>
@@ -169,7 +169,7 @@
                                     {% for i in page_obj_iss %}
                                     {% if i.marketrate == 0.0 and i.status == 3 %}
                                         <tr>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-success " data-container="body" title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-success btn-block" data-container="body" title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
                                             </td>
                                             <td>{{ i.ftype }}</td>
                                             <td>{{ i.amount }}</td>
@@ -179,7 +179,7 @@
                                         </tr>
                                     {% else %}
                                     <tr>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary " data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary btn-block" data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
                                             {% if i.sign == "1" %}
                                                 <sup class="badge badge-danger badge-counter"> Signed</sup>
                                              {% endif %}

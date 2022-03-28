@@ -31,8 +31,8 @@
                                     <div class="row no-gutters align-items-center">
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                                Coupons (In Stock)</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ petrol.tpetrol | add:diesel.tdiesel }}</div>
+                                                Total Requests</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ rreq.count}}</div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-credit-card fa-2x text-gray-300"></i>
@@ -98,18 +98,6 @@
 
                     </div>
 
-                    <!-- Content Row -->
-<!--              <div class="{% plotly_class name='dashboard' %} card" style="height: 100%; width: 100%">-->
-<!--&lt;!&ndash;                                {%plotly_app name="dashboard"%}&ndash;&gt;-->
-<!--                                         {% plotly_app name="dashboard" ratio=0.65 %}-->
-<!--   </div>-->
-<!--                    <br>-->
-<!--                    <div class="card " id="plot1" style="width: 40rem;">-->
-<!--                    {{ plot1 | safe }}-->
-<!--                    </div>-->
-   <!-- Area Chart -->
-<!-- Content Row -->
-<!--{{month_req.month | date:"M"}}-->
                     <div class="row">
                         <div class="col-xl-8 col-lg-6">
                             <div class="card shadow mb-4">
@@ -194,7 +182,7 @@
                                 </div>
                                 <div class="card-body">
                                     <ul style="list-style-type:none;">
-                                        {% for r in rreq %}
+                                        {% for r in rreq|slice:":10"  %}
                                         {% if r.status == 1 %}
                                         <li><small><a class="text-success" href="/approvalflow/{{r.rid}}">{{ r.vnum }} | {{ r.amount }}L</a></small> &rarr; <small>{{ r.requesterid }}</small> </li>
                                         {% elif r.status == 2 %}
@@ -205,7 +193,7 @@
                                         {% endfor %}
 
                                     </ul>
-                                    <a target="_blank" rel="nofollow" href="#">All requests
+                                    <a target="_blank" rel="nofollow" href="/requests">All requests
                                          &rarr;</a>
                                 </div>
                             </div>

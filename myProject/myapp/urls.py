@@ -62,6 +62,7 @@ urlpatterns = [
     path('signed', views.signed, name='signed'),
     path('msgtop', views.msgtop, name='msgtop'),
     path('email_stock/<str:pk>', views.email_stock, name='email_stock'),
+    path('setupconfig', views.setupconfig, name='setupconfig'),
     path('vehicle_detail/<str:pk>', views.vehicle_detail, name='vehicle_detail'),
     path('requestEdit/<str:pk>', views.requestEdit, name='requestEdit'),
     path('fuelconsreport', views.fuelconsreport, name='fuelconsreport'),
