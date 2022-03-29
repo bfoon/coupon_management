@@ -27,8 +27,8 @@
         <form method="POST" action="transac">
             {% csrf_token %}
             <div class="form-group">
-                <label for="tid" class="col-form-label">Transaction ID:</label>
-            <input type="number" class="form-control" id="tid" name ="tid" value="{{issue.rid}}" readonly>
+<!--                <label for="tid" class="col-form-label">Transaction ID:</label>-->
+            <input type="number" class="form-control" id="tid" name ="tid" value="{{issue.rid}}" readonly hidden>
         </div>
           <div class="form-group">
             <label for="requesterid" class="col-form-label">Requerter:</label>
