@@ -50,7 +50,7 @@
                          {% for i in comm reversed%}
                         <li class="media">
                             <a href="/approvalflow/{{ i.rid }}" class="pull-left">
-                                <img src="media/{{ i.pic.urls}}" alt="" class="img-circle zoom">
+                                <img src="media/{{ i.pic}}" alt="" class="img-circle zoom">
                             </a>
                             <div class="media-body">
                                 <span class="text-muted float-right">
@@ -58,7 +58,7 @@
                                 </span>
                                 <strong class="text-success"> @{{i.username}}</strong>
                                 <p>
-                                    {{i.message}} <a href="/approvalflow/{{ i.rid }}">#Request number {{i.rid}} </a>.
+                                    {{i.message}} <a href="/approvalflow/{{ i.rid }}">#{{i.requ}} </a>.
                                 </p>
                             </div>
                         </li>
