@@ -1710,7 +1710,7 @@ def bookreport(request, pk):
     if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
-        response['Content-Disposition'] = f'attachment; filename="report {now }.csv"'
+        response['Content-Disposition'] = f'attachment; filename="bookreport {now }.csv"'
         book = CouponBatch.objects.values_list('bookref').filter(id=pk, bdel=0)[0][0]
         bk = book
         leaves = fueldump.objects.all().annotate(vnum =Subquery(
@@ -1737,7 +1737,7 @@ def couponbooksreport(request):
     if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
-        response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+        response['Content-Disposition'] = f'attachment; filename="couponbooksreport {now}.csv"'
         books = CouponBatch.objects.all().annotate(quan = Count(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used = 0)[:1])),
             fmin = Min(Subquery(
@@ -1756,7 +1756,7 @@ def fuelconsreport(request):
     if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
         responsed = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
-        responsed['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+        responsed['Content-Disposition'] = f'attachment; filename="fuelconsreport {now}.csv"'
         writer = csv.writer(responsed)
         result = Transaction.objects.select_related('tid').annotate(vehicle = F('tid__vnum')).order_by('vehicle')
         writer.writerow(['Vehicle', 'Fuel Type', 'Litres consume', 'Unit', 'Date created'])
