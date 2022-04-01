@@ -1692,7 +1692,7 @@ def passwordreset(request, pk):
 def getfile(request):
     response = HttpResponse(content_type='text/csv')
     now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = 'attachment; filename="report"'+ now +'".csv"'
+    response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
     stocks = Coupons.objects.all()
     writer = csv.writer(response)
     writer.writerow(['ID', 'Dimension', 'Fuel Type', 'Stock Amount',
@@ -1706,7 +1706,7 @@ def getfile(request):
 def bookreport(request, pk):
     response = HttpResponse(content_type='text/csv')
     now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = 'attachment; filename="report"'+ now +'".csv"'
+    response['Content-Disposition'] = f'attachment; filename="report {now }.csv"'
     book = CouponBatch.objects.values_list('bookref').filter(id=pk, bdel=0)[0][0]
     bk = book
     leaves = fueldump.objects.all().annotate(vnum =Subquery(
@@ -1731,7 +1731,7 @@ def bookreport(request, pk):
 def couponbooksreport(request):
     response = HttpResponse(content_type='text/csv')
     now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = 'attachment; filename="report"' + now + '".csv"'
+    response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
     books = CouponBatch.objects.all().annotate(quan = Count(Subquery(
         fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used = 0)[:1])),
         fmin = Min(Subquery(
@@ -1746,15 +1746,15 @@ def couponbooksreport(request):
 
 @login_required(login_url='login')
 def fuelconsreport(request):
-    response = HttpResponse(content_type='text/csv')
+    responsed = HttpResponse(content_type='text/csv')
     now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = 'attachment; filename="report"' + now + '".csv"'
-    writer = csv.writer(response)
+    responsed['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+    writer = csv.writer(responsed)
     result = Transaction.objects.select_related('tid').annotate(vehicle = F('tid__vnum')).order_by('vehicle')
     writer.writerow(['Vehicle', 'Fuel Type', 'Litres consume', 'Unit', 'Date created'])
     for res in result:
         writer.writerow([res.vehicle, res.ftype, res.quantity, res.unit, res.created_at])
-    return response
+    return responsed
 
 @login_required(login_url='login')
 def translog(request):
