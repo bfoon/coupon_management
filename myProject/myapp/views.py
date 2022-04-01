@@ -1690,71 +1690,79 @@ def passwordreset(request, pk):
 
 @login_required(login_url='login')
 def getfile(request):
-    response = HttpResponse(content_type='text/csv')
-    now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
-    stocks = Coupons.objects.all()
-    writer = csv.writer(response)
-    writer.writerow(['ID', 'Dimension', 'Fuel Type', 'Stock Amount',
-                     'Total', 'Opening Stock', 'Amount of Transactions', 'Unit', 'Date created'])
-    for stock in stocks:
-        writer.writerow([stock.cid, stock.cdimension, stock.ftype, stock.camount,
-                         stock.total, stock.stockopen, stock.transamount, stock.unit, stock.created_at])
-    return response
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        response = HttpResponse(content_type='text/csv')
+        now = time.strftime('%d-%m-%Y %H:%M:%S')
+        response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+        stocks = Coupons.objects.all()
+        writer = csv.writer(response)
+        writer.writerow(['ID', 'Dimension', 'Fuel Type', 'Stock Amount',
+                         'Total', 'Opening Stock', 'Amount of Transactions', 'Unit', 'Date created'])
+        for stock in stocks:
+            writer.writerow([stock.cid, stock.cdimension, stock.ftype, stock.camount,
+                             stock.total, stock.stockopen, stock.transamount, stock.unit, stock.created_at])
+        return response
 
 @login_required(login_url='login')
 def bookreport(request, pk):
-    response = HttpResponse(content_type='text/csv')
-    now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = f'attachment; filename="report {now }.csv"'
-    book = CouponBatch.objects.values_list('bookref').filter(id=pk, bdel=0)[0][0]
-    bk = book
-    leaves = fueldump.objects.all().annotate(vnum =Subquery(
-        Requests.objects.filter(rid=OuterRef('transac')).values('vnum').order_by('vnum')[:1]),
-    requester = Subquery(
-        Requests.objects.filter(rid=OuterRef('transac')).values('requesterid')[:1]
-    ),
-        approver = Subquery(
-        Requests.objects.filter(rid=OuterRef('transac')).values('approverid')[:1]
-    )).filter(book_id= bk, used=1).order_by('lnum')
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        response = HttpResponse(content_type='text/csv')
+        now = time.strftime('%d-%m-%Y %H:%M:%S')
+        response['Content-Disposition'] = f'attachment; filename="report {now }.csv"'
+        book = CouponBatch.objects.values_list('bookref').filter(id=pk, bdel=0)[0][0]
+        bk = book
+        leaves = fueldump.objects.all().annotate(vnum =Subquery(
+            Requests.objects.filter(rid=OuterRef('transac')).values('vnum').order_by('vnum')[:1]),
+        requester = Subquery(
+            Requests.objects.filter(rid=OuterRef('transac')).values('requesterid')[:1]
+        ),
+            approver = Subquery(
+            Requests.objects.filter(rid=OuterRef('transac')).values('approverid')[:1]
+        )).filter(book_id= bk, used=1).order_by('lnum')
 
 
-    writer = csv.writer(response)
-    writer.writerow(['Book', 'Leave No', 'Fuel Type', 'Used',
-                     'Book serial', 'Allocated stock', 'Dimension', 'Requester', 'Approver', 'Issuer', 'Vehicle',  'Unit', 'Date modified'])
-    for leave in leaves:
-        writer.writerow([leave.book, leave.lnum, leave.ftype, leave.used,
-                         leave.book_id, leave.trans_id, leave.dim, leave.requester, leave.approver, leave.issuer,  leave.vnum,  leave.unit, leave.datemodified])
-    return response
+        writer = csv.writer(response)
+        writer.writerow(['Book', 'Leave No', 'Fuel Type', 'Used',
+                         'Book serial', 'Allocated stock', 'Dimension', 'Requester', 'Approver', 'Issuer', 'Vehicle',  'Unit', 'Date modified'])
+        for leave in leaves:
+            writer.writerow([leave.book, leave.lnum, leave.ftype, leave.used,
+                             leave.book_id, leave.trans_id, leave.dim, leave.requester, leave.approver, leave.issuer,  leave.vnum,  leave.unit, leave.datemodified])
+        return response
 
 @login_required(login_url='login')
 def couponbooksreport(request):
-    response = HttpResponse(content_type='text/csv')
-    now = time.strftime('%d-%m-%Y %H:%M:%S')
-    response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
-    books = CouponBatch.objects.all().annotate(quan = Count(Subquery(
-        fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used = 0)[:1])),
-        fmin = Min(Subquery(
-        fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used = 0)[:1])),
-    ).filter(bdel=0, hide=0)
-    writer = csv.writer(response)
-    writer.writerow(['Book','Start Serial', 'End Serial', 'Quantity','Fuel Type', 'Unit'])
-    for book in books:
-        if book.quan == 1:
-            writer.writerow([book.book_id, book.fmin, book.serial_end,int(book.serial_end)+1-book.fmin, book.ftype, book.unit])
-    return response
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        response = HttpResponse(content_type='text/csv')
+        now = time.strftime('%d-%m-%Y %H:%M:%S')
+        response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+        books = CouponBatch.objects.all().annotate(quan = Count(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used = 0)[:1])),
+            fmin = Min(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used = 0)[:1])),
+        ).filter(bdel=0, hide=0)
+        writer = csv.writer(response)
+        writer.writerow(['Book','Start Serial', 'End Serial', 'Quantity','Fuel Type', 'Unit'])
+        for book in books:
+            if book.quan == 1:
+                writer.writerow([book.book_id, book.fmin, book.serial_end,int(book.serial_end)+1-book.fmin, book.ftype, book.unit])
+        return response
 
 @login_required(login_url='login')
 def fuelconsreport(request):
-    responsed = HttpResponse(content_type='text/csv')
-    now = time.strftime('%d-%m-%Y %H:%M:%S')
-    responsed['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
-    writer = csv.writer(responsed)
-    result = Transaction.objects.select_related('tid').annotate(vehicle = F('tid__vnum')).order_by('vehicle')
-    writer.writerow(['Vehicle', 'Fuel Type', 'Litres consume', 'Unit', 'Date created'])
-    for res in result:
-        writer.writerow([res.vehicle, res.ftype, res.quantity, res.unit, res.created_at])
-    return responsed
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        responsed = HttpResponse(content_type='text/csv')
+        now = time.strftime('%d-%m-%Y %H:%M:%S')
+        responsed['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
+        writer = csv.writer(responsed)
+        result = Transaction.objects.select_related('tid').annotate(vehicle = F('tid__vnum')).order_by('vehicle')
+        writer.writerow(['Vehicle', 'Fuel Type', 'Litres consume', 'Unit', 'Date created'])
+        for res in result:
+            writer.writerow([res.vehicle, res.ftype, res.quantity, res.unit, res.created_at])
+        return responsed
 
 @login_required(login_url='login')
 def translog(request):
@@ -1906,21 +1914,25 @@ def coupondetail(request, pk):
 # This is to soft delete a book with it's leave
 @login_required(login_url='login')
 def deletebook(request, pk):
-    b = CouponBatch.objects.filter(id=pk, used=0).values_list('bookref', flat=True)[0]
-    lid = fueldump.objects.filter(book_id=b).values_list('lnum', flat=True)
-    for i in lid:
-        fueldump.objects.filter(lnum = i, used=0).delete()
-    CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
-    return redirect('couponBatch')
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Owner":
+        b = CouponBatch.objects.filter(id=pk, used=0).values_list('bookref', flat=True)[0]
+        lid = fueldump.objects.filter(book_id=b).values_list('lnum', flat=True)
+        for i in lid:
+            fueldump.objects.filter(lnum = i, used=0).delete()
+        CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
+        return redirect('couponBatch')
 
 @login_required(login_url='login')
 def hidebook(request, pk):
-    if CouponBatch.objects.filter(id=pk, used=0, hide=0):
-        CouponBatch.objects.filter(id=pk).update(hide=1)
-        return redirect('coupondetail', pk)
-    else:
-        CouponBatch.objects.filter(id=pk, used=0, hide=1).update(hide=0)
-        return redirect('coupondetail', pk)
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Owner":
+        if CouponBatch.objects.filter(id=pk, used=0, hide=0):
+            CouponBatch.objects.filter(id=pk).update(hide=1)
+            return redirect('coupondetail', pk)
+        else:
+            CouponBatch.objects.filter(id=pk, used=0, hide=1).update(hide=0)
+            return redirect('coupondetail', pk)
 
 # This is for the search
 @login_required(login_url='login')
@@ -1979,74 +1991,75 @@ def signed(request):
 @login_required(login_url='login')
 def reportpdf(request):
     maintemp = preloaddata(request)
-    today = datetime.datetime.now() # This is to generate the date today.
-    template_name = "report.html" # This is the template to generate pdf
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        today = datetime.datetime.now() # This is to generate the date today.
+        template_name = "report.html" # This is the template to generate pdf
 
-    # This is for the request
-    logs = activityReport.objects.filter(created_at__year=today.year, created_at__month=today.month).order_by("ftype", "-created_at")
+        # This is for the request
+        logs = activityReport.objects.filter(created_at__year=today.year, created_at__month=today.month).order_by("ftype", "-created_at")
 
-    # Report on transaction per request.
-    damount = activityReport.objects.\
-        filter(created_at__year=today.year, created_at__month=today.month).\
-        values('ftype').annotate(asum = Sum('totalamount'), lt=Sum('litre'))
+        # Report on transaction per request.
+        damount = activityReport.objects.\
+            filter(created_at__year=today.year, created_at__month=today.month).\
+            values('ftype').annotate(asum = Sum('totalamount'), lt=Sum('litre'))
 
-    usr = request.user.username
+        usr = request.user.username
 
-    # Report on book Balance
-    books = CouponBatch.objects.all().annotate(quan=Count(Subquery(
-        fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
-        fmin=Min(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[:1])),
-    ).filter(bdel=0, hide=0)
-
-    # This is the monthly fuel consumption by vehicle report for PDF generator.
-    vamount = activityReport.objects. \
-        filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
-        values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Avg('fconsumption'))
-
-    # This is the querset that creates the dictionary
-    bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
-        quan=Count(Subquery(
+        # Report on book Balance
+        books = CouponBatch.objects.all().annotate(quan=Count(Subquery(
             fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
-        minlnum=Min(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
-    ).filter(bdel=0, hide=0)
+            fmin=Min(Subquery(
+                fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[:1])),
+        ).filter(bdel=0, hide=0)
+
+        # This is the monthly fuel consumption by vehicle report for PDF generator.
+        vamount = activityReport.objects. \
+            filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
+            values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Avg('fconsumption'))
+
+        # This is the querset that creates the dictionary
+        bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
+            quan=Count(Subquery(
+                fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
+            minlnum=Min(Subquery(
+                fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
+        ).filter(bdel=0, hide=0)
 
 
-    # This is for the coupon book total calculations for leaves and cost. Should be improve in the future.
-    diesel = 0
-    dieselam = 0
-    petrolam = 0
-    petrol = 0
-    for i in bamount:
-        if i['quan'] == 1 and i['ftype'] == 'Diesel':
-            d = int(i['serial_end']) - i['minlnum']
-            da = i['dim'] * (d + 1)
-            diesel += d+1
-            dieselam += da
-        elif i['quan'] == 1 and i['ftype'] == 'Petrol':
-            p = int(i['serial_end']) - i['minlnum']
-            pa = i['dim'] * (p + 1)
-            petrol += p+1
-            petrolam += pa
+        # This is for the coupon book total calculations for leaves and cost. Should be improve in the future.
+        diesel = 0
+        dieselam = 0
+        petrolam = 0
+        petrol = 0
+        for i in bamount:
+            if i['quan'] == 1 and i['ftype'] == 'Diesel':
+                d = int(i['serial_end']) - i['minlnum']
+                da = i['dim'] * (d + 1)
+                diesel += d+1
+                dieselam += da
+            elif i['quan'] == 1 and i['ftype'] == 'Petrol':
+                p = int(i['serial_end']) - i['minlnum']
+                pa = i['dim'] * (p + 1)
+                petrol += p+1
+                petrolam += pa
 
-    return render_to_pdf(
-        template_name,
-        {
-            "logs": logs,
-            "usr": usr,
-            'settings': maintemp['setting'],
-            'dcurmark': maintemp['dcurmark'],
-            'pcurmark': maintemp['pcurmark'],
-            "books": books,
-            "diesel": diesel,
-            "petrol": petrol,
-            "dieselam": dieselam,
-            "petrolam": petrolam,
-            "vamount": vamount,
-            "damount": damount,
-        },
-    )
+        return render_to_pdf(
+            template_name,
+            {
+                "logs": logs,
+                "usr": usr,
+                'settings': maintemp['setting'],
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
+                "books": books,
+                "diesel": diesel,
+                "petrol": petrol,
+                "dieselam": dieselam,
+                "petrolam": petrolam,
+                "vamount": vamount,
+                "damount": damount,
+            },
+        )
 
 # This is for top messages. This is not in use.
 @login_required(login_url='login')
