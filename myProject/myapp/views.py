@@ -1130,15 +1130,15 @@ def itemcomment(request, pk):
     current_user = request.user.username
     maintemp = preloaddata(request)
     imgid = []
-    req = Requests.objects.filter(Q(ret=0) | Q(ret=1),
-                                  requesterid=current_user)
+    req = Requests.objects.filter(Q(ret=0) | Q(ret=1))
     ir = comment.objects.values_list('username', flat=True).filter(rid=pk)
     for i in ir:
         uid = User.objects.values_list('id', flat=True).filter(username=i)[0]
         prof = Profile.objects.values('pic').filter(user=uid)
-        img = comment.objects.filter(username=i, rid=pk).annotate(pic=prof, requ=Subquery(req.filter(rid=OuterRef('rid')).values('vnum')[:1])).values('id', 'rid', 'username',
-                                                                                        'message', 'pic', 'requ',
-                                                                                        'created_at')[0]
+        img = comment.objects.filter(username=i, rid=pk).\
+        annotate(pic=prof, requ=req.values_list('vnum', flat=True).filter(rid=pk)).\
+        values('id', 'rid', 'username','message', 'pic', 'requ','created_at')[0]
+
         imgid.append(img)
     comm = imgid
     context = {
