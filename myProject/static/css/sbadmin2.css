@@ -10861,7 +10861,7 @@ a:focus {
 }
 
 .bg-login-image {
-  background: url("https://undp.sharepoint.com/_api/siteiconmanager/getsitelogo?type='1'");
+  background: url("https://upload.wikimedia.org/wikipedia/commons/e/ee/UN_emblem_blue.svg");
   background-position: center;
   background-size: cover;
 }
