@@ -33,7 +33,7 @@
         {% csrf_token %}
         <div class="form-group">
             <label for="rid" class="col-form-label">ID:</label>
-            <input type="text" class="form-control" id="rid" name="rid" value="{{rq.rid}}" readonly>
+            <input type="text" class="form-control" id="rid" name="rid" value="{{rq.rid}}" readonly hidden>
         </div>
           <div class="form-group">
             <label for="requesterid" class="col-form-label">Requerter:</label>

@@ -2076,7 +2076,7 @@ def reportpdf(request):
 
         # This is the monthly fuel consumption by vehicle report for PDF generator.
         vamount = activityReport.objects. \
-            filter(created_at__year=today.year, created_at__month=today.month, ftype="Diesel"). \
+            filter(created_at__year=today.year, created_at__month=today.month). \
             values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Avg('fconsumption'))
 
         # This is the querset that creates the dictionary
