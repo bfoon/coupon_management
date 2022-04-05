@@ -80,13 +80,13 @@ def preloaddata(request):
         msg_co = msg.count()
 
     # Diesel market current rate
-    dcm =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Diesel').last()
+    dcm =  Transaction.objects.filter(marketrate__gt=0.1, ftype='Diesel').last()
     if dcm == None:
         dcurmark = None
     else:
         dcurmark = dcm
     # Petrol market current rate
-    pcm =  Transaction.objects.filter(marketrate__gte=0.1, ftype='Petrol').last()
+    pcm =  Transaction.objects.filter(marketrate__gt=0.1, ftype='Petrol').last()
     if pcm == None:
         pcurmark = None
     else:

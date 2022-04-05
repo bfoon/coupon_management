@@ -25,25 +25,6 @@
           </button>
             </div>
                 {% endfor %}
-                <form method="POST" action="comments">
-                    {% csrf_token %}
-                <div class="panel-body" >
-
-              <div class="form-group">
-                        <label for="rid" class="col-form-label"></label>
-                    <select class="form-control" id="rid" name="rid" required>
-                         <option value="" disabled selected>Select a request...</option>
-                        {% for t in requests %}
-
-                        <option value="{{t.rid}}"{% if t.rid == rid %} selected{% endif %}>{{t.requesterid}} - {{t.vnum}} - {{t.created_at}}</option>
-                    {% endfor %}
-                    </select>
-                    </div>
-
-                    <textarea class="form-control" placeholder="write a comment..." rows="3" name="message" required></textarea>
-                    <br>
-                    <input type="submit" value="Post" class="btn btn-success float-right"/>
-                </form>
                     <div class="clearfix"></div>
                     <hr>
                     <ul class="media-list">
@@ -79,7 +60,7 @@
 </div>
 </div>
 </div>
-</div>
+
 
 <style>
 
