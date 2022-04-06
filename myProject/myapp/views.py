@@ -65,6 +65,7 @@ def preloaddata(request):
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     setting = settings.objects.all()
+    server_url = "127.0.0.1:8000"
     user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
@@ -99,6 +100,7 @@ def preloaddata(request):
         stocks = stck
 
     context = {
+        'server_url': server_url,
         'stocks':stocks,
         'setting':setting[0],
         'dcurmark':dcurmark,
@@ -521,7 +523,7 @@ def requester(request):
                         text_content = 'This is an important message.'
                         html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
                                                                                  '<br>' \
-                                                                                 f'<a href="http://127.0.0.1:8000/inbox">Request Item</a></p>' \
+                                                                                 f'<a href="{maintemp["server_url"]}/inbox">Request Item</a></p>' \
                                                                                  '<br> ' \
                                                                                  '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -532,7 +534,7 @@ def requester(request):
                         text_content = 'This is an important message.'
                         html_content = '<p>Your coupon request for <strong>' + vnum + '</strong> was created, go to the link below.' \
                                                                                  '<br>' \
-                                                                                 f'<a href="http://127.0.0.1:8000/inbox">Request Item</a></p>' \
+                                                                                 f'<a href="{maintemp["server_url"]}/inbox">Request Item</a></p>' \
                                                                                  '<br> ' \
                                                                                  '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -589,6 +591,7 @@ def requester(request):
 
 @login_required(login_url='login')
 def approve(request, pk):
+    maintemp = preloaddata(request)
     current_user = request.user.username
     vnum = Requests.objects.values_list('vnum', flat=True).get(rid=pk)
     req = Requests.objects.values_list('requesterid', flat=True).get(rid=pk)
@@ -609,7 +612,7 @@ def approve(request, pk):
             html_content = '<p>Coupon requested by <strong>' + str(
                 req) + '</strong> was approved, go to the link below.' \
                        '<br>' \
-                       f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<br> ' \
                        '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -622,7 +625,7 @@ def approve(request, pk):
             html_content = '<p>Your coupon requested has been approved by <strong>' + current_user + \
                            '</strong> go to the link below.' \
                            '<br>' \
-                           f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                            '<br> ' \
                            '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -639,7 +642,7 @@ def approve(request, pk):
             text_content = 'This is an important message.'
             html_content = '<p>Coupon requested by <strong>' + str(req) + '</strong> was approved, go to the link below.' \
                                                                           '<br>' \
-                                                                          f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                                                                          f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                                                                           '<br> ' \
                                                                           '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -652,7 +655,7 @@ def approve(request, pk):
             html_content = '<p>Your coupon requested has been approved by <strong>' + current_user +\
                            '</strong> go to the link below.' \
                        '<br>' \
-                       f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<br> ' \
                        '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -669,6 +672,7 @@ def approve(request, pk):
 
 @login_required(login_url='login')
 def ret(request, pk):
+    maintemp = preloaddata(request)
     current_user = request.user.username
     vnum = Requests.objects.values_list('vnum', flat=True).get(rid=pk)
     req = Requests.objects.values_list('requesterid', flat=True).get(rid=pk)
@@ -686,7 +690,7 @@ def ret(request, pk):
                                               '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
-                       f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])# Am having error on this line saying
                                                                             # 'EmailMultiAlternatives' object has no attribute 'user'
@@ -704,7 +708,7 @@ def ret(request, pk):
                        '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
-                       f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
@@ -721,7 +725,7 @@ def ret(request, pk):
                        '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
-                       f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
@@ -792,7 +796,7 @@ def approvalflow(request, pk):
             html_content = '<p> The market price for <strong>' + vnum +  'Coupon'\
                            '</strong> was added by <strong>' + current_user + '</strong> go to the link below.' \
                                                                                     '<br>' \
-                                                                                    f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                                                                                    f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                                                                                     '<br> ' \
                                                                                     '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -816,7 +820,7 @@ def approvalflow(request, pk):
             html_content = '<p> The Coupon for <strong>' + vnum + \
                                                                         '</strong> was signed by <strong>' + current_user + '</strong> go to the link below.' \
                                                                                                                            '<br>' \
-                                                                                                                           f'<a href="http://127.0.0.1:8000/approvalflow/{pk}">Request Item</a></p>' \
+                                                                                                                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                                                                                                                            '<br> ' \
                                                                                                                            '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -966,6 +970,9 @@ def approvalflow(request, pk):
             return redirect('inbox')
         except ValueError:
             return redirect('inbox')
+        except IntegrityError:
+            messages.info(request, ' Please browse and upload a file. Your have not selected a file.')
+            return redirect('approvalflow',pk)
 
 @login_required(login_url='login')
 def requests(request):
@@ -1053,7 +1060,7 @@ def comments(request):
         text_content = 'This is an important message.'
         html_content = message + '<p> go to the link below.' \
                        '<br>' \
-                       '<a href="http://127.0.0.1:8000/comments">Request Item</a></p>' \
+                       f'<a href="{maintemp["server_url"]}/comments">Request Item</a></p>' \
                        '<br> ' \
                        '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -1194,6 +1201,15 @@ def vehicles(request):
     else:
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
+
+@login_required(login_url='login')
+def vehedit(request, pk):
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin":
+        if request.method == "POST":
+            pass
+    else:
+        context ={}
 
 @login_required(login_url='login')
 def vehdel(request, pk):
@@ -1468,7 +1484,7 @@ def transac(request, pk):
                         html_content = '<p>Your coupon request has been issued by <strong>' + current_user + \
                                        '</strong> go to the link below.' \
                                        '<br>' \
-                                       f'<a href="http://127.0.0.1:8000/approvalflow/{tid}">Request Item</a></p>' \
+                                       f'<a href="{maintemp["server_url"]}/approvalflow/{tid}">Request Item</a></p>' \
                                        '<br> ' \
                                        '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
@@ -1480,7 +1496,7 @@ def transac(request, pk):
                         html_content = '<p> Coupon requested by <strong>' + str(req) + \
                                        '</strong> has been issued by <strong>' + current_user + '</strong> go to the link below.' \
                                        '<br>' \
-                                       f'<a href="http://127.0.0.1:8000/approvalflow/{tid}">Request Item</a></p>' \
+                                       f'<a href="{maintemp["server_url"]}/approvalflow/{tid}">Request Item</a></p>' \
                                        '<br> ' \
                                        '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
@@ -2202,7 +2218,7 @@ def requestEdit(request, pk):
                 text_content = 'This is an important message.'
                 html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
                                                                                          '<br>' \
-                                                                                         f'<a href="http://127.0.0.1:8000/approvalflow/{rid}">Request Item</a></p>' \
+                                                                                         f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
                                                                                          '<br> ' \
                                                                                          '<p> Thank you 😊 </p>'
                 msg = EmailMultiAlternatives(subject, text_content, from_email, to)

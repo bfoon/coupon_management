@@ -21,15 +21,15 @@
             <div class="card shadow mb-4">
 
                         <div class="card-header py-3">
-                             <button type="button" class="btn btn-success btn-circle btn-md float-right" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">
+                             <button type="button" class="btn btn-success btn-circle btn-md float-right" data-toggle="modal" data-target="#addModal" data-whatever="@getbootstrap">
                           <i class="fa fa-car" aria-hidden="true"></i>
                       </button>
                             <h5 align="center"><strong>List of Vehicles</strong></h5>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addLabel" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Add Vehicle <i class="fa fa-car" aria-hidden="true"></i></h5>
+                                <h5 class="modal-title" id="addLabel">Add Vehicle <i class="fa fa-car" aria-hidden="true"></i></h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
@@ -81,7 +81,7 @@
 
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <input type="submit" class="btn btn-primary"/>
+                                <input type="submit" class="btn btn-primary" value="Add"/>
                                 </form>
                               </div>
                               </div>
@@ -133,11 +133,78 @@
                                             </span>
                                         </a>
                                         <a href="#" class="table-link text-info">
-                                            <span class="fa-stack">
+                                            <span class="fa-stack" data-toggle="modal" data-target="#editvehicle{{v.vid}}">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-text-width fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
+                        <div class="modal fade" id="editvehicle{{v.vid}}" tabindex="-1" role="dialog" aria-labelledby="editvehicleLabel{{v.vid}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="editvehicleLabel{{v.vid}}">Edit {{v.vnum}} <i class="fa fa-car" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action="vehicles">
+                                    {% csrf_token %}
+                                  <div class="form-group">
+                                    <label for="asunit" class="col-form-label">Unit:</label>
+                                    <select class="form-control" id="v.asunit" name="asunit" required>
+                                    <option value="{{v.asunit}}">{{v.asunit}}</option>
+                                    {% for u in ulist %}
+                                    <option value="{{u.uname}}" style="text-transform:uppercase;">{{u.uname}}</option>
+                                    {% endfor %}
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="vnum" class="col-form-label">Vehicle Number:</label>
+                                    <input type="text" class="form-control" value="{{v.vnum}}" name="vnum" style="text-transform:uppercase;" required>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="driver" class="col-form-label">Driver:</label>
+                                    <select class="form-control text-capitalize" id="v.driver" name="driver" required>
+                                          <option>{{v.driver}}</option>
+                                        {% for p in plist %}
+                                          <option value="{{p.id}}">{{p.user}}</option>
+                                         {% endfor %}
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="imile" class="col-form-label">Initial Miles:</label>
+                                    <input type="number" class="form-control" value="{{v.imile}}" name="imile" required>
+                                  </div>
+                                    <div class="form-group">
+                                    <label for="ftype" class="col-form-label">Fuel Type:</label>
+                                    <select class="form-control" id="v.ftype" name="ftype" required>
+                                          <option value="{{v.ftype}}">{{v.ftype}}</option>
+                                          <option>Petrol</option>
+                                          <option>Diesel</option>
+                                     </select>
+                                        <div class="form-group">
+                                    <label for="vtype" class="col-form-label">Vehicle Type:</label>
+                                    <input type="text" class="form-control" value="{{v.vtype}}" name="vtype" style="text-transform: capitalize;" required>
+                                  </div>
+                                        <div class="form-group">
+                                    <label for="tankcap" class="col-form-label">Tank Capacity:</label>
+                                    <input type="number" class="form-control" value="{{v.tankcap}}" name="tankcap" style="text-transform: capitalize;" required>
+                                  </div>
+
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                <input type="submit" class="btn btn-primary" value="Submit"/>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                        </div>
+
+
                                         <a href="/vehdel/{{v.vid}}" class="table-link danger" onclick="return confirm('Are you sure to delete this item?');">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
