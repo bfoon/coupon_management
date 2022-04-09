@@ -148,11 +148,11 @@
                                 </button>
                               </div>
                               <div class="modal-body">
-                                <form method="POST" action="vehicles">
+                                <form method="POST" action={% url 'vehedit' v.vid %}>
                                     {% csrf_token %}
                                   <div class="form-group">
                                     <label for="asunit" class="col-form-label">Unit:</label>
-                                    <select class="form-control" id="v.asunit" name="asunit" required>
+                                    <select class="form-control" name="asunit" required>
                                     <option value="{{v.asunit}}">{{v.asunit}}</option>
                                     {% for u in ulist %}
                                     <option value="{{u.uname}}" style="text-transform:uppercase;">{{u.uname}}</option>
@@ -164,9 +164,9 @@
                                     <input type="text" class="form-control" value="{{v.vnum}}" name="vnum" style="text-transform:uppercase;" required>
                                   </div>
                                   <div class="form-group">
-                                    <label for="driver" class="col-form-label">Driver:</label>
-                                    <select class="form-control text-capitalize" id="v.driver" name="driver" required>
-                                          <option>{{v.driver}}</option>
+                                    <label for="driver" class="col-form-label">Driver: </label>
+                                    <select class="form-control text-capitalize" name="driver" required>
+                                            <option value="{{v.driver}}" selected>{{v.driver}}</option>
                                         {% for p in plist %}
                                           <option value="{{p.id}}">{{p.user}}</option>
                                          {% endfor %}
@@ -178,7 +178,7 @@
                                   </div>
                                     <div class="form-group">
                                     <label for="ftype" class="col-form-label">Fuel Type:</label>
-                                    <select class="form-control" id="v.ftype" name="ftype" required>
+                                    <select class="form-control" name="ftype" required>
                                           <option value="{{v.ftype}}">{{v.ftype}}</option>
                                           <option>Petrol</option>
                                           <option>Diesel</option>

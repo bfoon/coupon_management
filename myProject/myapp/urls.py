@@ -31,6 +31,7 @@ urlpatterns = [
     path('comments', views.comments, name='comments'),
     path('itemcomment/<str:pk>', views.itemcomment, name='itemcomment'),
     path('vehicles', views.vehicles, name='vehicles'),
+    path('vehedit/<str:pk>', views.vehedit, name='vehedit'),
     path('vehdel/<str:pk>', views.vehdel, name='vehdel'),
     path('delstock', views.delstock, name='delstock'),
     path('delst/<str:pk>', views.delst, name='delst'),

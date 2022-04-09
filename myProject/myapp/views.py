@@ -1207,9 +1207,22 @@ def vehedit(request, pk):
     maintemp = preloaddata(request)
     if maintemp['role'] == "Admin":
         if request.method == "POST":
-            pass
+            vnum = request.POST.get('vnum')
+            ftype = request.POST.get('ftype')
+            vtype = request.POST.get('vtype')
+            imile = request.POST.get('imile')
+            asunit = request.POST.get('asunit')
+            driver = request.POST.get('driver')
+            tankcap = request.POST.get('tankcap')
+            drv = User.objects.filter(username=driver).values_list('id', flat=True)[0]
+            driverid =  Profile.objects.filter(user=drv).values_list('id', flat=True)
+            Vehicle.objects.filter(vid=pk).update(vnum=vnum, ftype=ftype,
+                                         vtype=vtype, imile=imile, asunit=asunit, driver=driverid,
+                                                  tankcap=tankcap)
+            return redirect('vehicles')
+
     else:
-        context ={}
+        return redirect('perm')
 
 @login_required(login_url='login')
 def vehdel(request, pk):
@@ -1848,45 +1861,20 @@ def couponBatch(request):
                     return redirect("couponBatch")
 
             elif role == "Owner" or role == "Admin":
-                # # This is what is handling the book render.
-                # books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
-                #                                      percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
-                #     all()
-
-                # This is for calculating months
                 now = datetime.datetime.now()
                 one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
                 month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
                 two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
-                if CouponBatch.objects.filter(status=1):
-                    # This is what is handling the book render.
-                    books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
-                                                         percent=100 - (F('rbal') * 100) / (
-                                                                     F('totalAmount') / (F('dim')))).filter(bdel=0, datemodified=month_end). \
-                        all()
 
-                    ulist = Unit.objects.all()
-                    context = {
-                            'role': maintemp['role'],
-                            'settings': maintemp['setting'],
-                            'dcurmark': maintemp['dcurmark'],
-                            'pcurmark': maintemp['pcurmark'],
-                            'books': books,
-                            'msg': maintemp['msg'],
-                            'msg_co': maintemp['msg_co'],
-                            'ulist': ulist,
-                            'user_p': maintemp['user_p']
-                        }
-                    return render(request, 'couponbatch.html', context)
-                else:
-                    # This is what is handling the book render.
-                    books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
-                                                         percent=100 - (F('rbal') * 100) / (
-                                                                     F('totalAmount') / (F('dim')))).filter(bdel=0). \
-                        all()
+                # # This is what is handling the book render.
+                books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
+                                                     percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
+                    all()
 
-                    ulist = Unit.objects.all()
-                    context = {
+                # This is for calculating months
+
+                ulist = Unit.objects.all()
+                context = {
                         'role': maintemp['role'],
                         'settings': maintemp['setting'],
                         'dcurmark': maintemp['dcurmark'],
@@ -1896,8 +1884,8 @@ def couponBatch(request):
                         'msg_co': maintemp['msg_co'],
                         'ulist': ulist,
                         'user_p': maintemp['user_p']
-                    }
-                    return render(request, 'couponbatch.html', context)
+                        }
+                return render(request, 'couponbatch.html', context)
 
             elif role == "Issuer":
                 # This is for calculating months
@@ -1907,16 +1895,15 @@ def couponBatch(request):
 
 
 
-                if CouponBatch.objects.filter(status=1):
+
                     # This is what is handling the book render.
-                    books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
+                books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
                                                          percent=100 - (F('rbal') * 100) / (
-                                                                 F('totalAmount') / (F('dim')))).filter(used=1, bdel=0,
-                                                                                                        datemodified=month_end). \
+                                                                 F('totalAmount') / (F('dim')))).filter(used=1, bdel=0). \
                         all()
 
-                    ulist = Unit.objects.all()
-                    context = {
+                ulist = Unit.objects.all()
+                context = {
                         'role': maintemp['role'],
                         'settings': maintemp['setting'],
                         'dcurmark': maintemp['dcurmark'],
@@ -1927,26 +1914,7 @@ def couponBatch(request):
                         'ulist': ulist,
                         'user_p': maintemp['user_p']
                     }
-                    return render(request, 'couponbatch.html', context)
-                else:
-                    books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - F('rbal'),
-                                                         percent=100 - (F('rbal') * 100) / (
-                                                                 F('totalAmount') / F('dim'))).filter(used=1, bdel=0). \
-                        all()
-
-                    ulist = Unit.objects.all()
-                    context = {
-                        'role': maintemp['role'],
-                        'settings': maintemp['setting'],
-                        'dcurmark': maintemp['dcurmark'],
-                        'pcurmark': maintemp['pcurmark'],
-                        'books': books,
-                        'msg': maintemp['msg'],
-                        'msg_co': maintemp['msg_co'],
-                        'ulist': ulist,
-                        'user_p': maintemp['user_p']
-                    }
-                    return render(request, 'couponbatch.html', context)
+                return render(request, 'couponbatch.html', context)
             else:
                 return redirect(perm)
     except IndexError:
