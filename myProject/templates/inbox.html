@@ -179,10 +179,15 @@
                                         </tr>
                                     {% else %}
                                     <tr>
-                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary btn-block" data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}</a>
-                                            {% if i.sign == "1" %}
-                                                <sup class="badge badge-danger badge-counter"> Signed</sup>
+                                        {% if i.sign != "1" %}
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-primary btn-block" data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}
+                                            </a>
+                                            </td>
+                                            {% elif i.sign == "1" %}
+                                            <td><a href="approvalflow/{{ i.rid }}" type="button" class="btn btn-sm btn-dark btn-block" data-container="body"  title="{{i.requesterid}}" style="text-transform:uppercase;">{{i.vnum}}
+                                                <sup class="badge badge-danger badge-counter badge-sm"> Signed</sup>
                                              {% endif %}
+                                                </a>
                                             </td>
                                             <td>{{ i.ftype }}</td>
                                             <td>{{ i.amount }}</td>

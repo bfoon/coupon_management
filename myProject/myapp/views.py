@@ -1183,7 +1183,7 @@ def vehicles(request):
         else:
             vlist = Vehicle.objects.all()
             ulist = Unit.objects.all()
-            plist = Profile.objects.filter(role='Driver')
+            plist = Profile.objects.filter(role='Driver', status='active')
 
             context = {
                 'vlist': vlist,

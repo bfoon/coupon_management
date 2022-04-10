@@ -213,9 +213,7 @@
                          <div class="form-group">
                             <label for="status" class="col-form-label">Status:</label>
                             <select class="form-control" id="status" name="status" style="text-transform:uppercase;" required>
-                                {% if role != 'Admin' %}
-                                <option>{{ prof.status }}</option>
-                                {% endif %}
+                                <option selected>{{ prof.status }}</option>
                                 {% if role == 'Admin' %}
                                 {% if prof.status != "Active" %}
                                 <option value="active">Active</option>

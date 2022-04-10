@@ -131,13 +131,13 @@
                                             <td class="text-danger">{{ i.current_balance | intcomma }}</td>
                                             {% widthratio i.stockopen 2 1 as half %}
                                              {% elif i.current_balance  <  half|add:"0" %}
-                                            <td class="text-warning">{{ i.unit }}</td>
-                                            <td class="text-warning">{{ i.cdimension }}</td>
-                                            <td class="text-warning">{{ i.ftype }}</td>
-                                            <td class="text-warning">{{ i.camount }}</td>
-                                            <td class="text-warning">{{ i.total | intcomma }}</td>
-                                            <td class="text-warning">{{ i.stockopen | intcomma }}</td>
-                                            <td class="text-warning">{{ i.current_balance | intcomma }}</td>
+                                            <td class="text-warning"><strong>{{ i.unit }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.cdimension }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.ftype }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.camount }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.total | intcomma }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.stockopen | intcomma }}</strong></td>
+                                            <td class="text-warning"><strong>{{ i.current_balance | intcomma }}</strong></td>
                                              {% else %}
                                             <td>{{ i.unit }}</td>
                                             <td>{{ i.cdimension }}</td>
