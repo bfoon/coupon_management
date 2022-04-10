@@ -155,7 +155,9 @@
                                     <select class="form-control" name="asunit" required>
                                     <option value="{{v.asunit}}">{{v.asunit}}</option>
                                     {% for u in ulist %}
+                                    {% if u.uname != v.asunit %}
                                     <option value="{{u.uname}}" style="text-transform:uppercase;">{{u.uname}}</option>
+                                    {% endif %}
                                     {% endfor %}
                                      </select>
                                   </div>
@@ -166,9 +168,11 @@
                                   <div class="form-group">
                                     <label for="driver" class="col-form-label">Driver: </label>
                                     <select class="form-control text-capitalize" name="driver" required>
-                                            <option value="{{v.driver}}" selected>{{v.driver}}</option>
+                                            <option value="{{v.driver.id}}" selected>{{v.driver}}</option>
                                         {% for p in plist %}
+                                        {% if p.id != v.driver.id %}
                                           <option value="{{p.id}}">{{p.user}}</option>
+                                        {% endif %}
                                          {% endfor %}
                                      </select>
                                   </div>
@@ -180,8 +184,12 @@
                                     <label for="ftype" class="col-form-label">Fuel Type:</label>
                                     <select class="form-control" name="ftype" required>
                                           <option value="{{v.ftype}}">{{v.ftype}}</option>
+                                        {% if v.ftype != "Petrol" %}
                                           <option>Petrol</option>
+                                        {% endif %}
+                                        {% if v.ftype != "Diesel" %}
                                           <option>Diesel</option>
+                                        {% endif %}
                                      </select>
                                         <div class="form-group">
                                     <label for="vtype" class="col-form-label">Vehicle Type:</label>

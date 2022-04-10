@@ -33,7 +33,12 @@
                                   </div>
                                   <div class="form-group">
                                       <label for="capprover" class="col-form-label">Coupon Approver:</label>
-                                      <input type="text" class="form-control" id="capprover" name="capprover" style="text-transform:uppercase;" required>
+                                      <select class="form-control" id="capprover" name="capprover" required>
+                                    <option selected></option>
+                                          {% for a in appv %}
+                                          <option value="{{a.user}}">{{a.user}}</option>
+                                          {% endfor %}
+                                      </select>
                                   </div>
                                   <div class="modal-footer">
                                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -72,7 +77,7 @@
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
-                                        <a href="#" class="table-link text-info">
+                                        <a href="#" class="table-link text-info" data-toggle="modal" data-target="#editunitModal{{u.uid}}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-text-width fa-stack-1x fa-inverse"></i>
@@ -84,6 +89,48 @@
                                                 <i class="fa fa-trash fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
+                        <div class="modal fade" id="editunitModal{{u.uid}}" tabindex="-1" role="dialog" aria-labelledby="editunitModalLabel{{u.uid}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="editunitModalLabel{{u.uid}}">Edit {{ u.uname }} <i class="fa fa-briefcase" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action={% url 'unitedit' u.uid %}>
+                                  {% csrf_token %}
+                                  <div class="form-group">
+                                  <label for="uname" class="col-form-label">Unit Name:</label>
+                                  <input type="text" class="form-control" value="{{u.uname}}" name="uname" style="text-transform:uppercase;" required>
+                              </div>
+                                  <div class="form-group">
+                                      <label for="uhead" class="col-form-label">Unit Head:</label>
+                                      <input type="text" class="form-control" value="{{u.uhead}}" name="uhead" style="text-transform:uppercase;" required>
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="u.capprover" class="col-form-label">Coupon Approver:</label>
+                                      <select class="form-control" id="u.capprover" name="capprover" required>
+                                    <option value="{{u.capprover}}">{{ u.capprover }}</option>
+                                          {% for au in appv %}
+                                          {% if au.user.username != u.capprover %}
+                                          <option value="{{au.user.username}}">{{au.user.username}}</option>
+                                          {% endif %}
+                                          {% endfor %}
+                                      </select>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                      <input value="Update" type="submit" class="btn btn-primary"/>
+`                                  </div>
+                              </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+
                                     </td>
                                 </tr>
                             {% endfor %}

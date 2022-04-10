@@ -199,7 +199,6 @@
                          <label for="role" class="col-form-label">Role:</label>
                                   <select class="form-control" id="role" name="role" style="text-transform:uppercase;" required>
                                   <option>{{prof.role}}</option>
-                                <option></option>
                                       {% for u in ug %}
                                       {% if role == 'Admin' %}
                                 <option value="{{ u.groupname }}">{{ u.groupname }}</option>
@@ -214,12 +213,19 @@
                          <div class="form-group">
                             <label for="status" class="col-form-label">Status:</label>
                             <select class="form-control" id="status" name="status" style="text-transform:uppercase;" required>
-                                <option>{{prof.status}}</option>
-                                <option></option>
+                                {% if role != 'Admin' %}
+                                <option>{{ prof.status }}</option>
+                                {% endif %}
                                 {% if role == 'Admin' %}
+                                {% if prof.status != "Active" %}
                                 <option value="active">Active</option>
+                                {% endif %}
+                                {% if prof.status != "Pending" %}
                                 <option value="pending">Pending</option>
+                                {% endif %}
+                                {% if prof.status != "Inactive" %}
                                 <option value="inactive">Inactive</option>
+                                {% endif %}
                                 {% endif %}
 
                             </select>

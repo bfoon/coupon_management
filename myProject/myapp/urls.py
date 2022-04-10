@@ -36,6 +36,7 @@ urlpatterns = [
     path('delstock', views.delstock, name='delstock'),
     path('delst/<str:pk>', views.delst, name='delst'),
     path('unit', views.unit, name='unit'),
+    path('unitedit/<str:pk>', views.unitedit, name='unitedit'),
     path('unitdel/<str:pk>', views.unitdel, name='unitdel'),
     path('groupdel/<str:pk>', views.groupdel, name='groupdel'),
     path('invoice/<str:pk>', views.invoice, name='invoice'),

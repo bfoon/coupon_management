@@ -1214,10 +1214,8 @@ def vehedit(request, pk):
             asunit = request.POST.get('asunit')
             driver = request.POST.get('driver')
             tankcap = request.POST.get('tankcap')
-            drv = User.objects.filter(username=driver).values_list('id', flat=True)[0]
-            driverid =  Profile.objects.filter(user=drv).values_list('id', flat=True)
             Vehicle.objects.filter(vid=pk).update(vnum=vnum, ftype=ftype,
-                                         vtype=vtype, imile=imile, asunit=asunit, driver=driverid,
+                                         vtype=vtype, imile=imile, asunit=asunit, driver=driver,
                                                   tankcap=tankcap)
             return redirect('vehicles')
 
@@ -1275,8 +1273,11 @@ def unit(request):
             return redirect('unit')
         else:
             units = Unit.objects.all()
+
+            appv = Profile.objects.all().filter(role="Approver", status="active")
             context = {
                 'units': units,
+                'appv' : appv,
                 'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
@@ -1291,6 +1292,19 @@ def unit(request):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
+@login_required(login_url='login')
+def unitedit(request, pk):
+    maintemp = preloaddata(request)
+    if maintemp['role'] == 'Admin':
+        if request.method == 'POST':
+            uname = request.POST.get('uname')
+            uhead = request.POST.get('uhead')
+            capprover = request.POST.get('capprover')
+            Unit.objects.filter(uid=pk).update(uname=uname, uhead=uhead, capprover=capprover, aptype=0)
+            return redirect('unit')
+    else:
+        messages.warning(request, "You don't have permission on this page")
+        return redirect('404')
 @login_required(login_url='login')
 def unitdel(request, pk):
     maintemp = preloaddata(request)
