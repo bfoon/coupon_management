@@ -291,7 +291,7 @@
                                         <div class="small text-gray-500">{{ m.datemodified}} approver - {{m.approverid }}</div>
                                     </div>
                                 </a>
-                                {% elif m.status == 1 and m.ret == 1 %}
+                                {% elif m.status == 1 and m.ret == 1 and role == "Driver" or m.status == 1 and m.ret == 1 and role == "Admin" %}
                                 <a class="dropdown-item d-flex align-items-center" href="/approvalflow/{{ m.rid }}">
                                     <div class="dropdown-list-image mr-3">
                                         <img class="rounded-circle" src="{% static 'img/car refuel 3.png' %}"

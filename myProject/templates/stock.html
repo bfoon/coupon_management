@@ -34,7 +34,9 @@
                       </button>
                             {% endif %}
                         <a class="breadcrumb-item active" aria-current="page">Stock List</a>
+                            {% if role == "Issuer" or role == "Admin" %}
                          &nbsp;&nbsp; &nbsp; <a href="/getfile"><i class="fa fa-download" aria-hidden="true"></i></a>
+                            {% endif %}
 
                         <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                           <div class="modal-dialog" role="document">
@@ -131,7 +133,7 @@
                                             <td class="text-danger">{{ i.current_balance | intcomma }}</td>
                                             {% endif %}
                                             {% widthratio i.camount 2 1 as half %}
-                                             {% if i.current_balance  <  half|add:"0" %}
+                                             {% if i.current_balance  <  half|add:"0" and i.current_balance > 0 %}
                                             <td class="text-warning"><strong>{{ i.unit }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.cdimension }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.ftype }}</strong></td>
@@ -139,7 +141,9 @@
                                             <td class="text-warning"><strong>{{ i.total | intcomma }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.stockopen | intcomma }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.current_balance | intcomma }}</strong></td>
-                                             {% else %}
+                                            {% endif %}
+                                            {% widthratio i.camount 2 1 as half %}
+                                             {% if i.current_balance  >  half|add:"0" %}
                                             <td>{{ i.unit }}</td>
                                             <td>{{ i.cdimension }}</td>
                                             <td>{{ i.ftype }}</td>
@@ -205,8 +209,8 @@
             <br>
 
             </form>
-
-
+        {% else %}
+<a class="text-danger"><i class="fa fa-fw fa-ban"></i></a>
        {% endif %}
 
                                             </td>

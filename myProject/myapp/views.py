@@ -68,7 +68,7 @@ def preloaddata(request):
     server_url = settings.objects.values_list('appurl', flat=True)[0]
     user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), Q(ret=0) | Q(ret=1), requesterid=current_user)
         msg_co = msg.filter().count()
     elif role[0] == "Approver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
@@ -77,7 +77,7 @@ def preloaddata(request):
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
         msg_co = msg.filter(status=2).count()
     else:
-        msg = Requests.objects.filter(Q(status=1) | Q(status=2), ret=0)
+        msg = Requests.objects.filter(Q(status=1) | Q(status=2), Q(ret=0) | Q(ret=1))
         msg_co = msg.count()
 
     # Diesel market current rate
@@ -1110,7 +1110,7 @@ def comments(request):
             img = comment.objects.filter(username=i, rid__in=req).annotate(pic=prof,
                                                                            requ=Subquery(req.filter(rid=OuterRef('rid')).\
                                                                                          values('vnum')[:1])).\
-            values('id','rid', 'username', 'message', 'pic', 'requ', 'created_at')[0]
+            values('id','rid', 'username', 'message', 'pic', 'requ', 'created_at')
             imgid.append(img)
 
 

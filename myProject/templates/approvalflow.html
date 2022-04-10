@@ -2,6 +2,7 @@
 {% load humanize %}
 {% block content %}
 {% load static %}
+{% load to_space %}
 
 
 
@@ -11,7 +12,15 @@
             <div class="col-md-12">
                 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request Item
+        {% if aflow.status == 2 and aflow.ret == 0 %}
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request Item [<a class="text float-center text-success"> Approved </a>]
+            {% endif %}
+            {% if aflow.status == 3  and aflow.ret == 0  %}
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request Item [<a class="text text-center"> Issued </a>]
+            {% endif %}
+            {% if aflow.status == 1 and aflow.ret == 1  %}
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Request Item [<a class="text float-center text-danger"> Return </a>]
+            {% endif %}
             {% if comm == aflow.rid  %}
                     <a href="/itemcomment/{{aflow.rid}}" style="text-decoration: none;" class="fa fa-comments float-right" aria-hidden="true"></a>
         {% endif %}
@@ -52,19 +61,19 @@
 
 
 <!--                <li class="list-group-item active"><h5><strong>Request Item</strong></h5> </li>-->
-                <li class="list-group-item"><h6 ><strong>Requester Name:</strong></h6><p style="text-transform:uppercase;">{{ aflow.requesterid }}</p></li>
+                <li class="list-group-item"><h6 ><strong>Requester Name:</strong></h6><p style="text-transform:uppercase;">{{ aflow.requesterid|to_space}}</p></li>
                 <li class="list-group-item"><h6 ><strong>Vehicle Number:</strong></h6><p style="text-transform:uppercase;">{{ aflow.vnum }}</p></li>
                 <li class="list-group-item"><h6 ><strong>Fuel Type:</strong></h6> {{ aflow.ftype }}</li>
                 <li class="list-group-item"><h6 ><strong>Quantity (Litre):</strong>
                     {% if rflow.marketrate == 0 and aflow.status == 3 %}
-                <button type="button" class="btn btn-primary float-right btn-circle btn-md" data-toggle="modal" data-target="#exampleModal">
+                <button type="button" class="btn btn-primary float-right btn-circle btn-md" data-toggle="modal" data-target="#marketModal">
                 <i class="fa fa-cog" aria-hidden="true"></i>
                 </button>
 
-                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal fade" id="marketModal" tabindex="-1" role="dialog" aria-labelledby="marketModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLong">Market Rate Input</h5>
+        <h5 class="modal-title" id="marketModalLong">Market Rate Input</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -253,7 +262,7 @@
         <div class="row">
             <div class="col-md-6 col-md-offset-3 body-main">
                 <div class="col-md-12">
-                    <h6 style="text-transform:uppercase;">{{aflow.requesterid}} </h6>
+                    <h6 style="text-transform:uppercase;">{{aflow.requesterid|to_space}} </h6>
                     <i class="progress-bar-md bg-warning" style="text-transform:uppercase;">{{rflow.serialno}}-{{rflow.maxserialno}}</i>
 
                     <h6> ReceiptNo : <i class="text-danger">{{rflow.sid |stringformat:"04d"}}</i></h6>
@@ -261,11 +270,11 @@
                         </div>
                     </div> <br />
                     <div>
-                        <i  style="text-transform:uppercase;">{{aflow.vnum}}</i><i class="float-right" style="text-transform:uppercase;">{{aflow.amount}}L</i>
+                        <i  style="width:20% text-transform:uppercase;">{{aflow.vnum}} - [ <strong>{{aflow.amount}}L </strong>]</i>
                         <table class="table">
                             <tbody>
                             <tr>
-                                    <td class="text-right">
+                                    <td style="width:20%">
                                         <p> <strong>Unit:</strong> </p>
                                         <p> <strong>Fuel: </strong> </p>
                                         <p> <strong>CouponRate: </strong> </p>
@@ -282,14 +291,14 @@
                                         <p> <strong><i></i> {{rflow.quantity | floatformat:2}}L </strong> </p>
                                         <p> <strong><i></i> {{lit.makrate | floatformat:2}}L </strong> </p>
                                         <p> <strong><i></i>{{rflow.cnumber}} </strong> </p>
-                                        <p> <strong><i></i>{{aflow.approverid}} </strong> </p>
-                                        <p> <strong><i></i>{{aflow.issueid}} </strong> </p>
+                                        <p style="text-transform:uppercase;"> <strong><i></i>{{aflow.approverid|to_space}} </strong> </p>
+                                        <p style="text-transform:uppercase;"> <strong><i></i>{{aflow.issueid|to_space}} </strong> </p>
 <!--                                        <p> <strong><i></i>{{rflow.serialno}} </strong> </p>-->
                                         <p> <i></i>{{aflow.comm}} </p>
                                     </td>
                                 </tr>
                                 <tr style="color: #F81D2D;">
-                                    <td class="text-right">
+                                    <td>
                                         <h4><strong>Total:</strong></h4>
                                     </td>
                                     <td class="text-left">

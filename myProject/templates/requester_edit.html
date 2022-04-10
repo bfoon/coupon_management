@@ -2,13 +2,14 @@
 
 {% block content %}
 {% load static %}
+{% load to_space %}
  <ul class="container">
         <div class="row">
             <div class="col-md-12">
             <ul class="list-group list-group-flush">
 <div class="card shadow mb-4">
     <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Edit Request For Coupon
+        <h6 class="m-0 font-weight-bold " style="color:#5F5D5D">Edit Coupon Request
                     <i class="fas fa fa-credit-card rotate-n-15 "></i>
         </h6>
     </div>
@@ -31,13 +32,10 @@
 
     <form method="POST" action="requester">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="rid" class="col-form-label">ID:</label>
-            <input type="text" class="form-control" id="rid" name="rid" value="{{rq.rid}}" readonly hidden>
-        </div>
+        <input type="text" class="form-control" id="rid" name="rid" value="{{rq.rid}}" readonly hidden>
           <div class="form-group">
             <label for="requesterid" class="col-form-label">Requerter:</label>
-            <input type="text" class="form-control" id="requesterid" name="requesterid" placeholder="{{rq.requesterid}}" readonly>
+            <input type="text" class="form-control" id="requesterid" name="requesterid" placeholder="{{rq.requesterid|to_space }}" style="text-transform:uppercase;" readonly>
         </div>
 <!--        {{ stats }}-->
          <div class="form-group">
@@ -52,11 +50,18 @@
             <label for="tankcat" class="col-form-label">Tank Status:</label>
             <select class="form-control" id="tankcat" name="tankcat" style="text-transform:uppercase;" required>
                 <option selected>{{rq.tankcat}}</option>
-                <option></option>
-                <option style="text-transform:uppercase;">empty</option>
-                <option style="text-transform:uppercase;">quarter</option>
-                <option style="text-transform:uppercase;">half</option>
-                <option style="text-transform:uppercase;">3quarter</option>
+                {% if rq.tankcat != "empty" %}
+                <option>empty</option>
+                {% endif %}
+                {% if rq.tankcat != "quarter" %}
+                <option>quarter</option>
+                {% endif %}
+                {% if rq.tankcat != "half" %}
+                <option>half</option>
+                {% endif %}
+                {% if rq.tankcat != "3quarter" %}
+                <option>3quarter</option>
+                {% endif %}
             </select>
         </div>
 
