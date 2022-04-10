@@ -47,6 +47,47 @@
             <input type="number" class="form-control" id="amount" value="{{issue.amount}}" readonly>
         </div>
 
+            <button type="button" class="btn btn-sm btn-info float-right" id="btn-modal" data-toggle="popover"><i class="fa fa-calculator" aria-hidden="true"></i></button></li>
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalTitle" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModal">COUPON CALCULATOR</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+<div class="modal-body">
+      <div class="container">
+        <div class="input-prepend">
+          <span class="add-on">Requested Litre/s: </span> <input class="span2" id="lowSide"
+            type="text" />
+        </div>
+          <br>
+        <div class="input-prepend">
+          <span class="add-on">Coupon Rate: </span> <input class="span2" id="highSide"
+            type="text" />
+        </div>
+          <br>
+          <div class="input-prepend">
+          <span class="add-on"></span>Dimension: <input class="span3" id="metSide"
+            type="text" />
+        </div>
+          <br>
+        <button class="btn btn-sm btn-dark"
+          onClick="enteredRange(lowSide.value,highSide.value, metSide.value)">Enter</button>
+      </div>
+      <br />
+      <div class="form-inline">
+        <label>Coupons: </label> <strong><input class="text-info" id="middle" type="text" /></strong>
+      </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
          <div class="form-group">
              <label for="unit" class="col-form-label">Unit:</label>
              <select class="form-control" id="unit" name="unit" required>
@@ -71,12 +112,12 @@
     </button>
           <div class="form-group">
             <label for="cnumber" class="col-form-label">Number of Coupons:</label>
-            <input type="number" class="form-control" id="cnumber" name="cnumber" required>
+            <input type="number" class="form-control" id="cnumber" name="cnumber" min="0" step="1" oninput="validity.valid||(value='');" required>
         </div>
 
           <div class="form-group">
             <label for="rate" class="col-form-label">Coupon Rate:</label>
-            <input type="number" step="0.01" class="form-control" id="rate" name="rate"required>
+            <input type="number" step="0.01" class="form-control" id="rate" name="rate" required>
         </div>
 <!--        <div class="form-group">-->
 <!--            <label for="serialno" class="col-form-label">Coupon Serial No:</label>-->
@@ -125,3 +166,29 @@
             $(this).closest('#inputFormRow').remove();
         });
     </script>
+
+<script type='text/javascript'>
+function enteredRange(x, y, z) {
+    var low = parseFloat(x);
+    var high = parseFloat(y);
+    var met = parseFloat(z);
+    var rate = low * high;
+    var middle1 = rate / met;
+    middle.value = middle1;
+    document.getElementById('middle').value = middle1;
+}
+$(document).ready(function () {
+    $('#myModal').bind('show', function () {
+        //do stuf on show
+    });
+    $('#btn-modal').click(function() {
+        $('#myModal').modal('show');
+    });
+});
+function closeDialog() {
+    $('#myModal').modal('hide');
+};
+function okClicked() {
+    closeDialog();
+};
+</script>
