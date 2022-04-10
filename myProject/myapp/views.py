@@ -687,7 +687,7 @@ def ret(request, pk):
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
         html_content = f'<p>Dear {req}, </p>'\
-                                              '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
+                                              '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by Approver <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
                        f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
@@ -705,7 +705,7 @@ def ret(request, pk):
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
         html_content = f'<p>Dear {req}, </p>' \
-                       '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
+                       '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by Issuer <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
                        f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
