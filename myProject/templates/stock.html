@@ -129,7 +129,8 @@
                                             <td class="text-danger">{{ i.total | intcomma }}</td>
                                             <td class="text-danger">{{ i.stockopen | intcomma }}</td>
                                             <td class="text-danger">{{ i.current_balance | intcomma }}</td>
-                                             {% elif i.current_balance == 1 %}
+                                            {% widthratio i.stockopen 2 1 as half %}
+                                             {% elif i.current_balance  <  half|add:"0" %}
                                             <td class="text-warning">{{ i.unit }}</td>
                                             <td class="text-warning">{{ i.cdimension }}</td>
                                             <td class="text-warning">{{ i.ftype }}</td>
