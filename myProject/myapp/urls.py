@@ -39,6 +39,7 @@ urlpatterns = [
     path('unitedit/<str:pk>', views.unitedit, name='unitedit'),
     path('unitdel/<str:pk>', views.unitdel, name='unitdel'),
     path('groupdel/<str:pk>', views.groupdel, name='groupdel'),
+    path('groupedit/<str:pk>', views.groupedit, name='groupedit'),
     path('invoice/<str:pk>', views.invoice, name='invoice'),
     path('profile', views.profile, name='profile'),
     # path('pieplot', views.pieplot, name='pieplot'),

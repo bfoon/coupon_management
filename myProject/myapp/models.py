@@ -115,8 +115,6 @@ class Transaction(models.Model):
     #     self.quantity = self.totalamount / self.rate
     #     return super(Transaction, self).save(*args, **kwargs)
 
-
-
 # Logs for reporting on the startus of the books and more because the join statements don't work.
 class TransactionLogs(models.Model):
     id = models.BigAutoField(primary_key= True)
@@ -127,8 +125,6 @@ class TransactionLogs(models.Model):
     created_user = models.CharField(max_length=100) # This is the user who created the item
     actioned_user = models.CharField(max_length=100) # This is the user who acted on the item
     created_at = models.DateTimeField(auto_now_add=True)
-
-
 
 class coupon(models.Model):
     cid = models.BigAutoField(primary_key=True)
@@ -230,8 +226,6 @@ class activityReport(models.Model):
             self.datemodified = None
         super(activityReport, self).save(*args, **kwargs)
 
-
-
 class settings(models.Model):
     country = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
@@ -240,6 +234,7 @@ class settings(models.Model):
     address = models.CharField(max_length=100)
     phone = models.CharField(max_length=100)
     logo = models.ImageField(blank=True, null=True)
+    appurl = models.ImageField(blank=True, null=True, default="http://127.0.0.1:8000/") # This is the app url to help with email links and other links too.
     description = models.CharField(max_length=100) # This is for the software description
     created_at = models.DateTimeField(auto_now_add=True)  # This is the date it was created
     datemodified = models.DateField(auto_now=True)

@@ -65,7 +65,7 @@ def preloaddata(request):
     current_user = request.user.username
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     setting = settings.objects.all()
-    server_url = "127.0.0.1:8000"
+    server_url = settings.objects.values_list('appurl', flat=True)[0]
     user_p = Profile.objects.get(user=current_user_id)
     if role[0] == "Driver":
         msg = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0)
@@ -1362,6 +1362,16 @@ def userGroup(request):
         return redirect('404')
 
 @login_required(login_url='login')
+def groupedit(request, pk):
+    maintemp = preloaddata(request)
+    if maintemp['role']=="Admin":
+        if request.method == "POST":
+            groupname = request.POST.get('groupname')
+            desc = request.POST.get('desc')
+            group = UserGroup.objects.filter(id=pk).update(groupname=groupname, desc=desc)
+            return redirect('userGroup')
+
+@login_required(login_url='login')
 def groupdel(request, pk):
     maintemp = preloaddata(request)
     if maintemp['role'] == 'Admin':
@@ -2309,10 +2319,11 @@ def setupconfig(request):
             address = request.POST.get('address')
             company = request.POST.get('company')
             phone = request.POST.get('phone')
+            appurl = request.POST.get('appurl')
             description = request.POST.get('description')
             # logo = request.FILES['logo']
             stup = settings.objects.create(country=country, city=city, currency=currency,
-                                           address=address, phone=phone, description=description, company=company)
+                                           address=address, phone=phone, description=description, company=company, appurl=appurl)
             stup.save()
             return redirect('setupconfig')
         elif request.method == 'POST' and len(maintemp['setting'].country) > 0:
@@ -2322,13 +2333,16 @@ def setupconfig(request):
             address = request.POST.get('address')
             company = request.POST.get('company')
             phone = request.POST.get('phone')
+            appurl = request.POST.get('appurl')
             description = request.POST.get('description')
             # logo = request.FILES['logo']
             settings.objects.update(country=country, city=city, currency=currency,
-                                                            address=address, phone=phone, description=description, company=company)
+                                                            address=address, phone=phone, description=description, company=company, appurl=appurl)
             return redirect('setupconfig')
         else:
+            appurl = settings.objects.values_list('appurl', flat=True)
             context = {
+                'appurl': appurl,
                 'settings': maintemp['setting'],
                 'role': maintemp['role'],
                 'dcurmark': maintemp['dcurmark'],

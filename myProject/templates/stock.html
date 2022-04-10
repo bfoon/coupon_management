@@ -28,7 +28,7 @@
                     <!-- DataTales Example -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            {% if role == "issuer" or role == "Admin" %}
+                            {% if role == "Issuer" or role == "Admin" %}
                              <button type="button" class="btn btn-success btn-circle btn-md float-right" data-toggle="modal" data-target="#exampleModal" data-whatever="@getbootstrap">
                           <i class="fas fa-plus"></i>
                       </button>
@@ -147,7 +147,7 @@
                                             <td>{{ i.current_balance | intcomma }}</td>
                                             {% endif %}
                                             <td>
-                                                {% if role == "issuer" or role == "Admin" %}
+                                                {% if role == "Issuer" or role == "Admin" %}
                                                 <a href="/email_stock/{{i.cid}}" class="text-primary" data-toggle="modal" data-target="#emailforstock{{i.cid}}"><i class="fa fa-fw fa-envelope"></i></a>
                                                 <a href="/delstock" class="text-primary" ><i class="fa fa-fw fa-edit"></i></a>
                                         <div class="modal fade" id="emailforstock{{i.cid}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalTitle{{i.cid}}" aria-hidden="true"><div class="modal-dialog modal-dialog-centered" role="document">
