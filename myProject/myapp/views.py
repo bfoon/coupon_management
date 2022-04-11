@@ -1073,12 +1073,12 @@ def comments(request):
         req = Requests.objects.filter(Q(ret=0) | Q(ret=1),
                                                     Q(status=1) | Q(status=2),
                                                     requesterid=current_user)
-        ir = comment.objects.values_list('username', flat=True).filter(rid__in=req.values('rid'))
+        ir = comment.objects.filter(rid__in=req.values('rid'))
         imgid = []
         for i in ir:
-            uid = User.objects.values_list('id', flat=True).filter(username=i)[0]
+            uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
             prof = Profile.objects.values('pic').filter(user=uid)
-            img = comment.objects.filter(username=i, rid__in=req).\
+            img = comment.objects.filter(id=i.id, rid__in=req).\
             annotate(pic=prof, requ=Subquery(req.filter(rid=OuterRef('rid')).values('vnum')[:1])).values('id', 'rid', 'username',
                                                                                             'message', 'pic','requ',
                                                                                             'created_at')[0]
@@ -1102,15 +1102,15 @@ def comments(request):
         req = Requests.objects.values('rid').filter(Q(ret=0) | Q(ret=1),
                                                     Q(status=1) | Q(status=2))
 
-        ir = comment.objects.values_list('username', flat=True).filter(rid__in=req)
+        ir = comment.objects.filter(rid__in=req).all()
         imgid=[]
         for i in ir:
-            uid = User.objects.values_list('id', flat=True).filter(username=i)[0]
+            uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
             prof = Profile.objects.values('pic').filter(user=uid)
-            img = comment.objects.filter(username=i, rid__in=req).annotate(pic=prof,
+            img = comment.objects.filter(id=i.id).annotate(pic=prof,
                                                                            requ=Subquery(req.filter(rid=OuterRef('rid')).\
                                                                                          values('vnum')[:1])).\
-            values('id','rid', 'username', 'message', 'pic', 'requ', 'created_at')
+            values('id','rid', 'username', 'message', 'pic', 'requ', 'created_at')[0]
             imgid.append(img)
 
 
@@ -1138,11 +1138,11 @@ def itemcomment(request, pk):
     maintemp = preloaddata(request)
     imgid = []
     req = Requests.objects.filter(Q(ret=0) | Q(ret=1))
-    ir = comment.objects.values_list('username', flat=True).filter(rid=pk)
+    ir = comment.objects.filter(rid=pk).all()
     for i in ir:
-        uid = User.objects.values_list('id', flat=True).filter(username=i)[0]
+        uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
         prof = Profile.objects.values('pic').filter(user=uid)
-        img = comment.objects.filter(username=i, rid=pk).\
+        img = comment.objects.filter(id=i.id, rid=pk).\
         annotate(pic=prof, requ=req.values_list('vnum', flat=True).filter(rid=pk)).\
         values('id', 'rid', 'username','message', 'pic', 'requ','created_at')[0]
 
