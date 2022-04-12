@@ -1,5 +1,6 @@
 {% include 'base.html' %}
 {% load humanize %}
+{% load to_space %}
 {% block content %}
 {% load static %}
 <div class="container bootstrap snippets bootdey">
@@ -109,7 +110,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            {% for v in vlist %}
+                            {% for v in vlist reversed %}
                                 <tr>
                                     <td>
 <!--                                        <img src="{{ BASIC_DIR }}/{{v.pic}}" alt="">-->

@@ -1,5 +1,6 @@
 {% include 'base.html' %}
 {% load humanize %}
+{% load to_space %}
 {% block content %}
 {% load static %}
 <div class="container bootstrap snippets bootdey" xmlns="http://www.w3.org/1999/html">
@@ -68,7 +69,7 @@
                                     <td style="text-transform:uppercase;">{{u.uname}}</td>
                                     <td style="text-transform:uppercase;">{{u.uhead}}</td>
                                     <td class="text-center" style="text-transform:uppercase;">
-                                        <span class="label label-default" >{{u.capprover}}</span>
+                                        <span class="label label-default" >{{u.capprover |to_space}}</span>
                                     </td>
                                     <td style="width: 20%;">
                                         <a href="#" class="table-link text-warning">
