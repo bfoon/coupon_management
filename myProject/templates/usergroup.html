@@ -63,12 +63,42 @@
                                         <span class="label label-default" >{{u.created_at}}</span>
                                     </td>
                                     <td style="width: 20%;">
-                                        <a href="#" class="table-link text-warning">
+<!--                                        This is for just viewing the group-->
+                                        <a href="#" class="table-link text-warning" data-toggle="modal" data-target="#viewgroupModal{{u.id}}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
+
+                                        <div class="modal fade" id="viewgroupModal{{u.id}}" tabindex="-1" role="dialog" aria-labelledby="viewgroupLabel{{u.id}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="viewgroupLabel{{u.id}}">View {{u.groupname}} <i class="fa fa-users" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                  <div class="form-group">
+                                  <label for="groupname" class="col-form-label">Group Name:</label>
+                                  <input type="text" class="form-control" value="{{u.groupname}}" style="text-transform:uppercase;" required readonly>
+                              </div>
+                                  <div class="form-group">
+                                      <label for="desc" class="col-form-label">Description:</label>
+                                      <input type="text" class="form-control" value="{{u.desc}}" style="text-transform:uppercase;" required readonly>
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+`                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+
+<!--                                       This is for editing the groups -->
                                         <a href="#" class="table-link text-info" data-toggle="modal" data-target="#editgroupModal{{u.id}}">
                                             <span class="fa-stack">
                                                 <i class="fa fa-square fa-stack-2x"></i>
