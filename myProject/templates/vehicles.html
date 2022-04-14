@@ -128,11 +128,68 @@
                                     <td style="text-transform:uppercase;">{{v.tankcap | intcomma}}</td>
                                     <td style="width: 20%;">
                                         <a href="#" class="table-link text-warning">
-                                            <span class="fa-stack">
+                                            <span class="fa-stack" data-toggle="modal" data-target="#viewvehicle{{v.vid}}">
                                                 <i class="fa fa-square fa-stack-2x"></i>
                                                 <i class="fa fa-search-plus fa-stack-1x fa-inverse"></i>
                                             </span>
                                         </a>
+
+                                        <div class="modal fade" id="viewvehicle{{v.vid}}" tabindex="-1" role="dialog" aria-labelledby="viewvehicleLabel{{v.vid}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="viewvehicleLabel{{v.vid}}">View {{v.vnum}} <i class="fa fa-car" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                  <div class="form-group">
+                                    <label for="asunit" class="col-form-label">Unit:</label>
+                                    <select class="form-control" required disabled>
+                                    <option>{{v.asunit}}</option>
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="vnum" class="col-form-label">Vehicle Number:</label>
+                                    <input type="text" class="form-control" value="{{v.vnum}}" style="text-transform:uppercase;" required readonly>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="driver" class="col-form-label">Driver: </label>
+                                    <select class="form-control text-capitalize" required disabled>
+                                            <option selected>{{v.driver}}</option>
+                                     </select>
+                                  </div>
+                                  <div class="form-group">
+                                    <label for="imile" class="col-form-label">Initial Miles:</label>
+                                    <input type="number" class="form-control" value="{{v.imile}}" required readonly>
+                                  </div>
+                                    <div class="form-group">
+                                    <label for="ftype" class="col-form-label">Fuel Type:</label>
+                                    <select class="form-control" required disabled>
+                                          <option>{{v.ftype}}</option>
+                                     </select>
+                                        <div class="form-group">
+                                    <label for="vtype" class="col-form-label">Vehicle Type:</label>
+                                    <input type="text" class="form-control" value="{{v.vtype}}" style="text-transform: capitalize;" required readonly>
+                                  </div>
+                                        <div class="form-group">
+                                    <label for="tankcap" class="col-form-label">Tank Capacity:</label>
+                                    <input type="number" class="form-control" value="{{v.tankcap}}" style="text-transform: capitalize;" required readonly>
+                                  </div>
+
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+                        </div>
+
+
+
                                         <a href="#" class="table-link text-info">
                                             <span class="fa-stack" data-toggle="modal" data-target="#editvehicle{{v.vid}}">
                                                 <i class="fa fa-square fa-stack-2x"></i>

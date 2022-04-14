@@ -146,9 +146,13 @@ bottom: .5em;
                                 <dl class="dl-horizontal">
                                     <dt>Status:</dt> <dd><span class="progress-bar bg-success">Not Used</span></dd>
                                 </dl>
-                                {% else %}
+                                {% elif book.used == 1 and book.status == 0 %}
                                 <dl class="dl-horizontal">
-                                    <dt>Status:</dt> <dd><span class="progress-bar bg-danger">Used</span></dd>
+                                    <dt>Status:</dt> <dd><span class="progress-bar bg-warning">In Use</span></dd>
+                                </dl>
+                                {% elif book.used == 1 and book.status == 1 %}
+                                <dl class="dl-horizontal">
+                                    <dt>Status:</dt> <dd><span class="progress-bar bg-danger">All leaves Used</span></dd>
                                 </dl>
                                 {% endif %}
                             </div>
