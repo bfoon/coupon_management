@@ -370,6 +370,13 @@ def stock(request):
             }
             return render(request, 'stock.html', context)
 
+
+@login_required(login_url='login')
+def creditStock(request):
+    if  request.method == "POST":
+
+    return redirect('stock')
+
 @login_required(login_url='login')
 def requestlist(request):
     current_user_id = request.user.id

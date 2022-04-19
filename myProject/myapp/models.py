@@ -48,7 +48,6 @@ class Unit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     datemodified = models.DateField(auto_now=True)
 
-
 # User Groups
 class UserGroup(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -66,13 +65,19 @@ class Coupons(models.Model):
     total = models.PositiveIntegerField()
     stockopen = models.PositiveIntegerField()
     transamount = models.PositiveIntegerField()
-    unit = models.CharField(max_length= 100)
-    book_id = models.CharField(max_length= 100)
+    credit = models.PositiveIntegerField(null=True, blank=True) # This will handle amount credited.
+    debit = models.PositiveIntegerField(null=True, blank=True) # This will handle amount debit.
+    unit = models.CharField(max_length=100)
+    credit_status = models.CharField(max_length=100, null=True, blank=True) # This will handle the switch for credit(1), debit(2) or none(0).
+    credit_from = models.CharField(max_length=100, null=True, blank=True) # This will handle which unit it credit it from.
+    note = models.TextField(max_length=400, blank=True) # This is for the reason on credit
+    book_id = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     datemodified = models.DateField(auto_now=True)
 
 
     # For Requests
+
 class Requests(models.Model):
     rid = models.BigAutoField(primary_key=True)
     vnum = models.CharField(max_length=100)
@@ -134,6 +139,7 @@ class coupon(models.Model):
     datecreated = models.DateTimeField(auto_now_add=True)
 
     # Comment tables
+
 class comment(models.Model):
     id = models.BigAutoField(primary_key=True)
     rid = models.PositiveIntegerField()
@@ -142,6 +148,7 @@ class comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     # Individual coupon book record
+
 class CouponBatch(models.Model):
     id = models.BigAutoField(primary_key=True)
     book_id = models.PositiveIntegerField() # This is the book number
