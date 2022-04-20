@@ -5,7 +5,7 @@ from .dash_plotly import dashboard
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
     path('stock', views.stock, name='stock'),
-    path('creditStock', views.creditStock, name='creditStock'),
+    path('creditStock/<str:pk>', views.creditStock, name='creditStock'),
     path('requestlist', views.requestlist, name='requestlist'),
     path('inbox', views.inbox, name='inbox'),
     path('delete/<str:pk>', views.delete, name='delete'),

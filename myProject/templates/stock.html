@@ -177,7 +177,8 @@
                                                 <a href="#" style="color:#4863A0" data-toggle="modal" data-target="#creditforstock{{i.cid}}" ><i class="fas fa-file-invoice-dollar"></i></a>
                                                 <a href="#" class="text-danger text-sm" ><i class="material-icons">delete</i></a>
 
-                          <form method="POST" action="creditStock">
+                          <form method="POST" action={% url 'creditStock' i.cid %}>
+                           {% csrf_token %}
                           <div class="modal fade" id="creditforstock{{i.cid}}" tabindex="-1" role="dialog" aria-labelledby="creditLabel{{i.cid}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
@@ -188,12 +189,15 @@
                                 </button>
                               </div>
                               <div class="modal-body">
+                                  <input name="aunit" value="{{i.unit}}" hidden>
+                                  <input name="ftype" value="{{i.ftype}}" hidden>
+                                  <input name="cdimension" value="{{i.cdimension}}" hidden>
                                   <div class="form-group">
                                     <label class="col-form-label">Account to Debit | Credit:</label>
-                                    <select class="form-control" name="aunit" required>
+                                    <select class="form-control" name="funit" required>
                                         {% for s in stocks %}
                                         {% if i != s and s.cdimension == i.cdimension and s.ftype == i.ftype %}
-                                    <option value="s.unit">{{s.unit}} - {{ s.ftype }} - {{ s.cdimension }}</option>
+                                    <option value="{{s.unit}}">{{s.unit}} - {{ s.ftype }} - {{ s.cdimension }}</option>
                                         {% endif %}
                                     {% endfor %}
                                     </select>
@@ -201,9 +205,9 @@
                                   <div class="form-group">
                                     <label class="col-form-label">Transaction:</label>
                                     <select class="form-control" id="weather" name="transaction" required>
-                                    <option value="0"></option>
+<!--                                    <option value="0"></option>-->
                                     <option value="1">Credit</option>
-                                    <option value="2">Debit</option>
+<!--                                    <option value="2">Debit</option>-->
                                      </select>
 
                                   </div>

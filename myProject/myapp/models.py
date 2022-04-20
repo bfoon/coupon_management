@@ -65,8 +65,8 @@ class Coupons(models.Model):
     total = models.PositiveIntegerField()
     stockopen = models.PositiveIntegerField()
     transamount = models.PositiveIntegerField()
-    credit = models.PositiveIntegerField(null=True, blank=True) # This will handle amount credited.
-    debit = models.PositiveIntegerField(null=True, blank=True) # This will handle amount debit.
+    credit = models.PositiveIntegerField(null=True, blank=True, default=0) # This will handle amount credited.
+    debit = models.PositiveIntegerField(null=True, blank=True, default=0) # This will handle amount debit.
     unit = models.CharField(max_length=100)
     credit_status = models.CharField(max_length=100, null=True, blank=True) # This will handle the switch for credit(1), debit(2) or none(0).
     credit_from = models.CharField(max_length=100, null=True, blank=True) # This will handle which unit it credit it from.
