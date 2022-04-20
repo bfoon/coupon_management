@@ -2,26 +2,17 @@ from django.urls import path
 from . import views
 from .dash_plotly import dashboard
 
-
-# from django.urls import re_path
-# from django.views.static import serve
-
 urlpatterns = [
     path('', views.dashboard, name='dashboard'),
-    # path('tables', views.tables, name='tables'),
-    # path('charts', views.charts, name='charts'),
     path('stock', views.stock, name='stock'),
-    #path('stocklist', views.stocklist, name='stocklist'),
+    path('creditStock', views.creditStock, name='creditStock'),
     path('requestlist', views.requestlist, name='requestlist'),
     path('inbox', views.inbox, name='inbox'),
     path('delete/<str:pk>', views.delete, name='delete'),
     path('requester', views.requester, name='requester'),
     path('register', views.register, name='register'),
-    # re_path(r'^media/(?P<path>.*)$', serve,{'document_root': settings.MEDIA_ROOT}),
     path('approve/<str:pk>', views.approve, name='approve'),
-    # path('issued/<str:pk>', views.issued, name='issued'),
     path('ret/<str:pk>', views.ret, name='ret'),
-    # path('marketrate/<int:pk>/', views.marketrate, name='marketrate'),
     path('approvalflow/<int:pk>', views.approvalflow, name='approvalflow'),
     path('login', views.login, name='login'),
     path('requests', views.requests, name='requests'),
@@ -42,7 +33,6 @@ urlpatterns = [
     path('groupedit/<str:pk>', views.groupedit, name='groupedit'),
     path('invoice/<str:pk>', views.invoice, name='invoice'),
     path('profile', views.profile, name='profile'),
-    # path('pieplot', views.pieplot, name='pieplot'),
     path('passwordreset/<str:pk>', views.passwordreset, name='passwordreset'),
     path('user_profile/<str:pk>', views.user_profile, name='user_profile'),
     path('user_pic/<str:pk>', views.user_pic, name='user_pic'),

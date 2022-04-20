@@ -164,26 +164,25 @@
 
                                                 <a href="#" style="color:#728FCE" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                                   id="infoDropdown"><i class="fa fa-fw fa-info"></i></a>
+                                                   id="infoDropdown{{i.cid}}"><i class="fa fa-fw fa-info"></i></a>
 
                                                 <div class="dropdown-list dropdown-menu dropdown-menu-right shadow"
-                                                    aria-labelledby="infoDropdown">
+                                                    aria-labelledby="infoDropdown{{i.cid}}">
                                                 <h6 class="dropdown-header">
-
-                                                Message Center
+                                                    <div class="text-truncate">{{i.note}}</div>
                                                 </h6>
                                                 </div>
 
                                                 <br>
-                                                <a href="#" style="color:#4863A0" data-toggle="modal" data-target="#creditforstock{{i.cid}}" ><i class="fa fa-fw fa-hand-holding-usd"></i></a>
+                                                <a href="#" style="color:#4863A0" data-toggle="modal" data-target="#creditforstock{{i.cid}}" ><i class="fas fa-file-invoice-dollar"></i></a>
                                                 <a href="#" class="text-danger text-sm" ><i class="material-icons">delete</i></a>
 
-                          <form method="POST" action="">
-                          <div class="modal fade" id="creditforstock{{i.cid}}" tabindex="-1" role="dialog" aria-labelledby="creditLabel{{v.vid}}" aria-hidden="true">
+                          <form method="POST" action="creditStock">
+                          <div class="modal fade" id="creditforstock{{i.cid}}" tabindex="-1" role="dialog" aria-labelledby="creditLabel{{i.cid}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
-                                <h5 class="modal-title" id="creditLabel{{v.vid}}">Credit | Debit Transaction - {{i.unit}} <i class="fas fa-coins" ></i></h5>
+                                <h5 class="modal-title" id="creditLabel{{i.cid}}">Credit | Debit Transaction - {{i.unit}} <i class="fas fa-coins" ></i></h5>
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                   <span aria-hidden="true">&times;</span>
                                 </button>
@@ -191,7 +190,7 @@
                               <div class="modal-body">
                                   <div class="form-group">
                                     <label class="col-form-label">Account to Debit | Credit:</label>
-                                    <select class="form-control" required>
+                                    <select class="form-control" name="aunit" required>
                                         {% for s in stocks %}
                                         {% if i != s and s.cdimension == i.cdimension and s.ftype == i.ftype %}
                                     <option value="s.unit">{{s.unit}} - {{ s.ftype }} - {{ s.cdimension }}</option>
@@ -201,7 +200,7 @@
                                   </div>
                                   <div class="form-group">
                                     <label class="col-form-label">Transaction:</label>
-                                    <select class="form-control" id="weather" required>
+                                    <select class="form-control" id="weather" name="transaction" required>
                                     <option value="0"></option>
                                     <option value="1">Credit</option>
                                     <option value="2">Debit</option>
@@ -212,11 +211,11 @@
 
                                   <div class="form-group">
                                     <label class="col-form-label">Amount:  </label>
-                                    <input type="number" class="form-control" value="{{v.vnum}}" style="text-transform:uppercase;" min="0" step="1" oninput="validity.valid||(value='');" required >
+                                    <input type="number" class="form-control" name="amount" style="text-transform:uppercase;" min="0" step="1" oninput="validity.valid||(value='');" required >
                                   </div>
                                   <div class="form-group">
                                     <label class="col-form-label">Reason: </label>
-                                      <textarea autocomplete="on" name="" required></textarea>
+                                      <textarea autocomplete="on" name="note" required></textarea>
                                   </div>
                               <div class="modal-footer">
                                 <button type="submit" class="btn btn-primary" value="Credit" >Credit</button>
