@@ -311,6 +311,15 @@ def stock(request):
             cdimension = request.POST.get('cdimension')
             ftype = request.POST.get('ftype')
             camount = request.POST.get('camount')
+
+            crdact = Coupons.objects.filter(unit=unit, cdimension=cdimension,
+                                            ftype=ftype).last()
+            if crdact is None:
+                crd = 0
+                dbt = 0
+            else:
+                crd = crdact.credit
+                dbt = crdact.debit
             bal = Coupons.objects.values_list('total', flat=True).filter(unit=unit, cdimension=cdimension,
                                                                          ftype=ftype).last()
             tran = Coupons.objects.values_list('transamount', flat=True).filter(unit=unit, cdimension=cdimension,
@@ -322,9 +331,24 @@ def stock(request):
                 for bl in bls:
                     fueldump.objects.filter(lnum=bl).update(trans_id=1)
                 total = int(bal) + int(camount)
-                cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension, ftype=ftype, camount=camount,
-                                                total=total, transamount=tran, stockopen=bal - tran)
-                cstock.save();
+                # check if there is a credit activite balance if yes move the credit line else drop the credit line
+                # Create new stock line with no credit value carry forward
+
+                if (crd - dbt) == 0:
+                    cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension,
+                                                    ftype=ftype, camount=camount,
+                                                    total=total, transamount=tran, stockopen=bal - tran)
+                    cstock.save();
+
+                # Create new stock line with credit value carry forward
+
+                elif (crd - dbt) > 0:
+
+                    cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension,
+                                                    ftype=ftype, camount=camount, credit=crdact.credit,
+                                                    debit=crdact.debit, note=crdact.note,
+                                                    total=total, transamount=tran, stockopen=bal - tran)
+                    cstock.save();
 
                 return redirect('stock')
             except TypeError or IntegrityError:
@@ -346,8 +370,9 @@ def stock(request):
             # tra = Transaction.objects.values('unit','cdimension','ftype').annotate(camount = Sum('cnumber'))
             t = Coupons.objects.values('unit', 'cdimension', 'ftype').annotate(cid=Max('cid')).values_list('cid',
                                                                                                            flat=True)  # Get only the ids
-            stocks = (Coupons.objects.values('cid', 'unit', 'cdimension', 'ftype', 'total', 'camount', 'stockopen').filter(
-                cid__in=t)).annotate(current_balance=F('total') - F('transamount'))
+            # Annotate debit balance or credit balance by subtracting debit from credit
+            stocks = Coupons.objects.filter(
+                cid__in=t).annotate(current_balance=F('total') - F('transamount'), credit_bal=F('credit') - F('debit'))
 
             js = CouponBatch.objects.values('id', 'unit','dim','ftype','totalAmount').filter(bdel=0)
             books = CouponBatch.objects.filter(used=0, bdel=0, hide=0).values()
@@ -370,11 +395,36 @@ def stock(request):
             }
             return render(request, 'stock.html', context)
 
-
 @login_required(login_url='login')
-def creditStock(request):
-    if  request.method == "POST":
+def creditStock(request, pk):
+    if request.method == "POST":
+        aunit = request.POST.get('aunit') # This will be the listed item the operation is been conduct on
+        funit = request.POST.get('funit') # This is the account selected for the operation
+        trans = request.POST.get('transaction') # This is the kind of transaction, if debit or credit
+        credit = request.POST.get('amount') # This is the amount involved in the transaction
+        ftype = request.POST.get('ftype') # This is the fuel type
+        cdimension = request.POST.get('cdimension') # This is the dimension of the coupon
+        current_balance = request.POST.get('current_balance')
+        note = request.POST.get('note')
+        # We should be able to create a new stock line with all the previous values but just the amount affected
+        # Check if it's debit or credit
 
+        if trans == "1":
+            leaveUpdate = fueldump.objects.filter(unit=funit, dim=cdimension, ftype=ftype, used=0, trans_id=1)
+            bookupdate = Coupons.objects.filter(cid=pk)
+            if len(leaveUpdate) >= int(credit) and int(current_balance) == bookupdate.values_list('camount', flat=True):
+                Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit, credit_status=trans, credit_from=funit, note=note)
+                # We should add to the debit account to match the books and stock link
+                Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype).\
+                    update(debit=F('debit') + credit, credit_status=2, total=F('total') - credit, credit_from=aunit, note=note)
+                # We should be able to update the leaves or fueldumps with the new unit
+                ls = int(credit)
+                lus = leaveUpdate[0:ls]
+                for lu in lus:
+                    lu.unit = aunit
+                    lu.save()
+            else:
+                messages.warning(request,'The stock is not enough to conduct this transaction')
     return redirect('stock')
 
 @login_required(login_url='login')
@@ -1312,6 +1362,7 @@ def unitedit(request, pk):
     else:
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
+
 @login_required(login_url='login')
 def unitdel(request, pk):
     maintemp = preloaddata(request)
@@ -1393,7 +1444,6 @@ def transac(request, pk):
     current_user = request.user.username
     maintemp = preloaddata(request)
     role = maintemp['role']
-
 
     try:
         if role == "Issuer" or role == "Admin":

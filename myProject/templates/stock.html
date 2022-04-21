@@ -133,10 +133,16 @@
                                             <td class="text-danger">{{ i.total | intcomma }}</td>
                                             <td class="text-danger">{{ i.stockopen | intcomma }}</td>
                                             <td class="text-danger">{{ i.current_balance | intcomma }}</td>
-                                            <td class="text-danger">0</td>
+                                            {% if i.credit_bal < 0 %}
+                                            <td class="text-danger"><i class="fas fa-caret-down me-1"></i>{{i.credit_bal}}</td>
+                                            {% elif i.credit_bal > 0 %}
+                                            <td class="text-success"><i class="fas fa-caret-up me-1"></i>+{{i.credit_bal}}</td>
+                                            {% else %}
+                                            <td class="text-success">{{i.credit_bal}}</td>
+                                            {% endif %}
                                             {% endif %}
                                             {% widthratio i.camount 2 1 as half %}
-                                             {% if i.current_balance  <  half|add:"0" and i.current_balance > 0 %}
+                                             {% if i.current_balance  <=  half|add:"0" and i.current_balance > 0 %}
                                             <td class="text-warning"><strong>{{ i.unit }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.cdimension }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.ftype }}</strong></td>
@@ -144,7 +150,13 @@
                                             <td class="text-warning"><strong>{{ i.total | intcomma }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.stockopen | intcomma }}</strong></td>
                                             <td class="text-warning"><strong>{{ i.current_balance | intcomma }}</strong></td>
-                                            <td class="text-success"><strong><i class="fas fa-caret-up me-1"></i>+2</strong></td>
+                                            {% if i.credit_bal < 0 %}
+                                            <td class="text-danger"><i class="fas fa-caret-down me-1"></i>{{i.credit_bal}}</td>
+                                            {% elif i.credit_bal > 0 %}
+                                            <td class="text-success"><i class="fas fa-caret-up me-1"></i>+{{i.credit_bal}}</td>
+                                            {% else %}
+                                            <td class="text-success">{{i.credit_bal}}</td>
+                                            {% endif %}
                                             {% endif %}
                                             {% widthratio i.camount 2 1 as half %}
                                              {% if i.current_balance  >  half|add:"0" %}
@@ -155,7 +167,13 @@
                                             <td>{{ i.total | intcomma }}</td>
                                             <td>{{ i.stockopen | intcomma }}</td>
                                             <td>{{ i.current_balance | intcomma }}</td>
-                                            <td class="text-danger"><i class="fas fa-caret-down me-1"></i>-2</td>
+                                            {% if i.credit_bal < 0 %}
+                                            <td class="text-danger"><i class="fas fa-caret-down me-1"></i>{{i.credit_bal}}</td>
+                                            {% elif i.credit_bal > 0 %}
+                                            <td class="text-success"><i class="fas fa-caret-up me-1"></i>+{{i.credit_bal}}</td>
+                                            {% else %}
+                                            <td class="text-success">{{i.credit_bal}}</td>
+                                            {% endif %}
                                             {% endif %}
                                             <td>
                                                 {% if role == "Issuer" or role == "Admin" %}
@@ -192,6 +210,7 @@
                                   <input name="aunit" value="{{i.unit}}" hidden>
                                   <input name="ftype" value="{{i.ftype}}" hidden>
                                   <input name="cdimension" value="{{i.cdimension}}" hidden>
+                                  <input name="current_balance" value="{{i.current_balance}}" hidden>
                                   <div class="form-group">
                                     <label class="col-form-label">Account to Debit | Credit:</label>
                                     <select class="form-control" name="funit" required>
