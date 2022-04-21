@@ -72,7 +72,7 @@ class Coupons(models.Model):
     credit_from = models.CharField(max_length=100, null=True, blank=True) # This will handle which unit it credit it from.
     note = models.TextField(max_length=400, blank=True) # This is for the reason on credit
     book_id = models.CharField(max_length=100)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateField(auto_now_add=True)
     datemodified = models.DateField(auto_now=True)
 
 
@@ -82,6 +82,7 @@ class Requests(models.Model):
     rid = models.BigAutoField(primary_key=True)
     vnum = models.CharField(max_length=100)
     ftype = models.CharField(max_length=100)
+    unit = models.CharField(max_length=100)
     requesterid = models.CharField(max_length=100)
     amount = models.PositiveIntegerField()
     comm = models.CharField(max_length= 1000)

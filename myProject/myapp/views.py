@@ -411,8 +411,8 @@ def creditStock(request, pk):
 
         if trans == "1":
             leaveUpdate = fueldump.objects.filter(unit=funit, dim=cdimension, ftype=ftype, used=0, trans_id=1)
-            bookupdate = Coupons.objects.filter(cid=pk)
-            if len(leaveUpdate) >= int(credit) and int(current_balance) == bookupdate.values_list('camount', flat=True):
+            bookupdate = Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype)
+            if len(leaveUpdate) >= int(credit) and int(current_balance) <= bookupdate.values_list('camount', flat=True)[0]:
                 Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit, credit_status=trans, credit_from=funit, note=note)
                 # We should add to the debit account to match the books and stock link
                 Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype).\
@@ -538,34 +538,40 @@ def requester(request):
 
                     if tankcat == 'empty':
                         tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.values_list('ftype', flat=True).filter(vnum=vnum)[0]
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel, mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, amount=float(tank), comm=comm, status=1, ret=0)
+                        fuel = Vehicle.objects.filter(vnum=vnum)
+                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                                                      mread=mread, requesterid=current_user,
+                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                                                      amount=tank, comm=comm, status=1, ret=0)
                         req.save();
                     elif tankcat == 'quarter':
                         t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.values_list('ftype', flat=True).filter(vnum=vnum)[0]
+                        fuel = Vehicle.objects.filter(vnum=vnum)
                         tankmath = float(t) / 4
                         tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel, mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, amount=tank, comm=comm, status=1, ret=0)
+                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                                                      mread=mread, requesterid=current_user,
+                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                                                      amount=tank, comm=comm, status=1, ret=0)
                         req.save();
                     elif tankcat == 'half':
                         t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.values_list('ftype', flat=True).filter(vnum=vnum)[0]
+                        fuel = Vehicle.objects.filter(vnum=vnum)
                         tankmath = float(t) / 2
                         tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel, mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, amount=tank, comm=comm, status=1, ret=0)
+                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True), mread=mread, requesterid=current_user,
+                                                      tankcat=tankcat, unit= fuel.values_list('asunit', flat=True), amount=tank, comm=comm, status=1, ret=0)
                         req.save();
                     elif tankcat == '3quarter':
                         t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.values_list('ftype', flat=True).filter(vnum=vnum)[0]
+                        fuel = Vehicle.filter(vnum=vnum)
                         s = 3 / 4
                         tankmath = float(s) * float(t)
                         tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel, mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, amount=tank, comm=comm, status=1, ret=0)
+                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                                                      mread=mread, requesterid=current_user,
+                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                                                      amount=tank, comm=comm, status=1, ret=0)
                         req.save();
                     email = \
                         Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(
@@ -1807,11 +1813,12 @@ def getfile(request):
         response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
         stocks = Coupons.objects.all()
         writer = csv.writer(response)
-        writer.writerow(['ID', 'Dimension', 'Fuel Type', 'Stock Amount',
-                         'Total', 'Opening Stock', 'Amount of Transactions', 'Unit', 'Date created'])
+        writer.writerow(['Unit', 'Dimension', 'Fuel Type', 'Stock Amount',
+                        'Opening Stock', 'Current Balance', 'Credit', 'Note', 'Date created'])
         for stock in stocks:
-            writer.writerow([stock.cid, stock.cdimension, stock.ftype, stock.camount,
-                             stock.total, stock.stockopen, stock.transamount, stock.unit, stock.created_at])
+            writer.writerow([stock.unit, stock.cdimension, stock.ftype, stock.camount,
+                             stock.stockopen, stock.total - stock.transamount,  stock.credit - stock.debit,
+                             stock.note, stock.created_at])
         return response
 
 @login_required(login_url='login')

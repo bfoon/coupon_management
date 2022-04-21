@@ -92,12 +92,7 @@
 
          <div class="form-group">
              <label for="unit" class="col-form-label">Unit:</label>
-             <select class="form-control" id="unit" name="unit" required>
-                 <option></option>
-                 {% for u in ulist %}
-                 <option value="{{u.uname}}">{{u.uname}}</option>
-                 {% endfor %}
-             </select>
+             <input type="text" class="form-control" id="unit" name ="unit" value="{{issue.unit}}" readonly>
          </div>
 
         <div id="inputFormRow">

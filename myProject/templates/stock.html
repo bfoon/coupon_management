@@ -215,7 +215,7 @@
                                     <label class="col-form-label">Account to Debit | Credit:</label>
                                     <select class="form-control" name="funit" required>
                                         {% for s in stocks %}
-                                        {% if i != s and s.cdimension == i.cdimension and s.ftype == i.ftype %}
+                                        {% if i != s and s.cdimension == i.cdimension and s.ftype == i.ftype and s.current_balance > 0 %}
                                     <option value="{{s.unit}}">{{s.unit}} - {{ s.ftype }} - {{ s.cdimension }}</option>
                                         {% endif %}
                                     {% endfor %}
