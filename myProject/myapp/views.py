@@ -314,6 +314,7 @@ def stock(request):
 
             crdact = Coupons.objects.filter(unit=unit, cdimension=cdimension,
                                             ftype=ftype).last()
+            # This is to help in for
             if crdact is None:
                 crd = 0
                 dbt = 0
@@ -347,8 +348,11 @@ def stock(request):
                     cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension,
                                                     ftype=ftype, camount=camount, credit=crdact.credit,
                                                     debit=crdact.debit, note=crdact.note,
+                                                    credit_from=crdact.credit_from, credit_status =crdact.credit_status,
                                                     total=total, transamount=tran, stockopen=bal - tran)
                     cstock.save();
+                # This is to remove the old record after it's been populated on the new record.
+                Coupons.objects.filter(unit=unit, cdimension=cdimension, ftype=ftype).first().delete()
 
                 return redirect('stock')
             except TypeError or IntegrityError:
@@ -1050,7 +1054,8 @@ def requests(request):
     if role[0] == "Driver":
 
         r = Requests.objects.filter(Q(status=1, ret=0) |
-                                    Q(status=1, ret=1) | Q(status=2, ret=0) |
+                                    Q(status=1, ret=1) |
+                                    Q(status=2, ret=0) |
                                     Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-created_at')
         context = {
             'requests': r,
@@ -1065,7 +1070,10 @@ def requests(request):
         return render(request, 'requests.html', context)
     else:
         r = Requests.objects.filter(
-            Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0) | Q(status=3, ret=0)).order_by('-created_at')
+            Q(status=1, ret=0) |
+            Q(status=1, ret=1) |
+            Q(status=2, ret=0) |
+            Q(status=3, ret=0)).order_by('-created_at')
         context = {
             'requests': r,
             'settings': maintemp['setting'],

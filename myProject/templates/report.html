@@ -131,6 +131,7 @@ table.center {
 <thead>
     <tr bgcolor="yellow" >
       <th>Unit</th>
+      <th>Feul Type</th>
       <th>Credit</th>
       <th>Credit/Debit From</th>
       <th>Note</th>
@@ -140,6 +141,7 @@ table.center {
     {% if br.credit_debit != 0 %}
      <tr>
       <td style="text-align:center">{{ br.unit }}</td>
+      <td style="text-align:center">{{ br.ftype }}</td>
       <td style="text-align:center">{{ br.credit_debit }}</td>
       <td style="text-align:center">{{ br.credit_from }}</td>
       <td style="text-align:center">{{ br.note }}</td>

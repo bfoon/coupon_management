@@ -96,6 +96,16 @@ class Requests(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     datemodified = models.DateField(auto_now=True)
 
+    def save(self, *args, **kwargs):
+        if self.status and self.datemodified is None:
+            self.datemodified = datetime.now()
+        elif not self.status and self.datemodified is not None:
+            self.datemodified = None
+        super(Requests, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.vnum} - {self.tankcat}"
+
 # Stock transaction table
 class Transaction(models.Model):
     sid = models.BigAutoField(primary_key=True)
