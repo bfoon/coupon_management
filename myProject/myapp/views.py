@@ -397,35 +397,39 @@ def stock(request):
 
 @login_required(login_url='login')
 def creditStock(request, pk):
-    if request.method == "POST":
-        aunit = request.POST.get('aunit') # This will be the listed item the operation is been conduct on
-        funit = request.POST.get('funit') # This is the account selected for the operation
-        trans = request.POST.get('transaction') # This is the kind of transaction, if debit or credit
-        credit = request.POST.get('amount') # This is the amount involved in the transaction
-        ftype = request.POST.get('ftype') # This is the fuel type
-        cdimension = request.POST.get('cdimension') # This is the dimension of the coupon
-        current_balance = request.POST.get('current_balance')
-        note = request.POST.get('note')
-        # We should be able to create a new stock line with all the previous values but just the amount affected
-        # Check if it's debit or credit
+    maintemp = preloaddata(request)
+    if maintemp['role'] == 'Issuer' or maintemp['role'] == 'Admin':
+        if request.method == "POST":
+            aunit = request.POST.get('aunit') # This will be the listed item the operation is been conduct on
+            funit = request.POST.get('funit') # This is the account selected for the operation
+            trans = request.POST.get('transaction') # This is the kind of transaction, if debit or credit
+            credit = request.POST.get('amount') # This is the amount involved in the transaction
+            ftype = request.POST.get('ftype') # This is the fuel type
+            cdimension = request.POST.get('cdimension') # This is the dimension of the coupon
+            current_balance = request.POST.get('current_balance')
+            note = request.POST.get('note')
+            # We should be able to create a new stock line with all the previous values but just the amount affected
+            # Check if it's debit or credit
 
-        if trans == "1":
-            leaveUpdate = fueldump.objects.filter(unit=funit, dim=cdimension, ftype=ftype, used=0, trans_id=1)
-            bookupdate = Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype)
-            if len(leaveUpdate) >= int(credit) and int(current_balance) <= bookupdate.values_list('camount', flat=True)[0]:
-                Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit, credit_status=trans, credit_from=funit, note=note)
-                # We should add to the debit account to match the books and stock link
-                Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype).\
-                    update(debit=F('debit') + credit, credit_status=2, total=F('total') - credit, credit_from=aunit, note=note)
-                # We should be able to update the leaves or fueldumps with the new unit
-                ls = int(credit)
-                lus = leaveUpdate[0:ls]
-                for lu in lus:
-                    lu.unit = aunit
-                    lu.save()
-            else:
-                messages.warning(request,'The stock is not enough to conduct this transaction')
-    return redirect('stock')
+            if trans == "1":
+                leaveUpdate = fueldump.objects.filter(unit=funit, dim=cdimension, ftype=ftype, used=0, trans_id=1)
+                bookupdate = Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype)
+                if len(leaveUpdate) >= int(credit) and int(current_balance) <= bookupdate.values_list('camount', flat=True)[0]:
+                    Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit, credit_status=trans, credit_from=funit, note=note)
+                    # We should add to the debit account to match the books and stock link
+                    Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype).\
+                        update(debit=F('debit') + credit, credit_status=2, total=F('total') - credit, credit_from=aunit, note=note)
+                    # We should be able to update the leaves or fueldumps with the new unit
+                    ls = int(credit)
+                    lus = leaveUpdate[0:ls]
+                    for lu in lus:
+                        lu.unit = aunit
+                        lu.save()
+                else:
+                    messages.warning(request,'The stock is not enough to conduct this transaction')
+        return redirect('stock')
+    else:
+        return redirect(perm)
 
 @login_required(login_url='login')
 def requestlist(request):
@@ -1864,7 +1868,8 @@ def couponbooksreport(request):
         writer.writerow(['Book','Start Serial', 'End Serial', 'Quantity','Fuel Type', 'Unit'])
         for book in books:
             if book.quan == 1:
-                writer.writerow([book.book_id, book.fmin, book.serial_end,int(book.serial_end)+1-book.fmin, book.ftype, book.unit])
+                writer.writerow([book.book_id, book.fmin, book.serial_end,
+                                 int(book.serial_end)+1-book.fmin, book.ftype, book.unit])
         return response
 
 @login_required(login_url='login')
@@ -2177,10 +2182,14 @@ def reportpdf(request):
                 petrol += p+1
                 petrolam += pa
 
+        # This for the borrowed coupon report.
+        borcoupon = Coupons.objects.annotate(credit_debit = F('credit') - F('debit')).order_by('unit', 'ftype', 'cdimension')
+
         return render_to_pdf(
             template_name,
             {
                 "logs": logs,
+                "borrowed": borcoupon,
                 "usr": usr,
                 'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],

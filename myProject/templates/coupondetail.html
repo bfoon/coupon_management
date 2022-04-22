@@ -241,23 +241,23 @@ bottom: .5em;
             </tr>
             {% elif l.used == 0 and l.unit != book.unit %}
            <tr>
-              <td class="bg bg-info text text-white">{{ forloop.counter }}</td>
-              <td class="bg bg-info text text-white">{{l.lnum}} <bar> {{ l.lnum }}</bar>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{ forloop.counter }}</td>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{l.lnum}} <bar> {{ l.lnum }}</bar>
               </td>
-              <td class="bg bg-info text text-white">{{l.datemodified}}</td>
-                <td class="bg bg-info text text-white"></td>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{l.datemodified}}</td>
+                <td class="bg bg-info text text-white" title="{{l.unit}}"></td>
             </tr>
             {% elif l.used == 1 and l.unit != book.unit %}
             <tr>
-              <td class="bg bg-info text text-white">{{ forloop.counter }}</td>
-              <td class="bg bg-info text text-white">{{l.lnum}} <bar> {{ l.lnum }}</bar></td>
-              <td class="bg bg-info text text-white">{{l.datemodified}}</td>
-                <td class="bg bg-info text text-white"><small><a href="/approvalflow/{{l.transac}}"><i class="fa fa-check text-white"></i></a></small></td>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{ forloop.counter }}</td>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{l.lnum}} <bar> {{ l.lnum }}</bar></td>
+              <td class="bg bg-info text text-white" title="{{l.unit}}">{{l.datemodified}}</td>
+                <td class="bg bg-info text text-white" title="{{l.unit}}"><small><a href="/approvalflow/{{l.transac}}"><i class="fa fa-check text-white"></i></a></small></td>
             </tr>
           {% else %}
            <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{l.lnum}} <bar> {{ l.lnum }}</bar></td>
+              <td >{{l.lnum}} <bar> {{ l.lnum }}</bar></td>
               <td>{{l.datemodified}}</td>
                 <td><small><a href="/approvalflow/{{l.transac}}"><i class="fa fa-check text-success"></i></a></small></td>
             </tr>

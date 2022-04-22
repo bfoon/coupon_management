@@ -118,7 +118,6 @@ table.center {
 
   </tbody>
 </table>
-{{bamunt}}
 
 <h6 class="text-dark">Diesel Total: {{settings.currency}}{{ dieselam | intcomma }}   |   Remaining coupons: {{ diesel }} </h6>
 <h6 class="text-dark">Petrol Total: {{settings.currency}}{{ petrolam |intcomma}}   |   Remaining coupons: {{ petrol }}</h6>
@@ -126,6 +125,28 @@ table.center {
 <h6 align="right"> Book Keeper:_______________________________ Sign:_________________</h6>
 <br>
 <h6 align="right"> Issuer:_______________________________ Sign:_________________</h6>
+<br>
+<h5 align="center">  Credit | Debit Report <strong>{% now "F-Y" %} </strong></h5>
+<table>
+<thead>
+    <tr bgcolor="yellow" >
+      <th>Unit</th>
+      <th>Credit</th>
+      <th>Credit/Debit From</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+    {% for br in borrowed %}
+    {% if br.credit_debit != 0 %}
+     <tr>
+      <td style="text-align:center">{{ br.unit }}</td>
+      <td style="text-align:center">{{ br.credit_debit }}</td>
+      <td style="text-align:center">{{ br.credit_from }}</td>
+      <td style="text-align:center">{{ br.note }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </table>
 <br>
 <table>
  <thead>

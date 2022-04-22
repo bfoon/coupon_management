@@ -233,7 +233,7 @@
 
 
                                   <div class="form-group">
-                                    <label class="col-form-label">Amount:  </label>
+                                      <label class="col-form-label">Amount: <p></p> </label>
                                     <input type="number" class="form-control" name="amount" style="text-transform:uppercase;" min="0" step="1" oninput="validity.valid||(value='');" required >
                                   </div>
                                   <div class="form-group">
@@ -241,7 +241,7 @@
                                       <textarea autocomplete="on" name="note" required></textarea>
                                   </div>
                               <div class="modal-footer">
-                                <button type="submit" class="btn btn-primary" value="Credit" >Credit</button>
+                                <button type="submit" class="btn btn-primary" value="Credit" onclick="return confirm('You are about to credit {{i.unit}} do you want to continue?');">Credit</button>
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                   </div>
                               </div>
