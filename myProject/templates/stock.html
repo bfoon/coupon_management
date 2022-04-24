@@ -182,18 +182,18 @@
 
                                                 <a href="#" style="color:#728FCE" role="button"
                                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                                   id="infoDropdown{{i.cid}}"><i class="fa fa-fw fa-info"></i></a>
-
+                                                   id="infoDropdown{{i.cid}}"><i class="fa fa-info"></i></a>
+                                                {% if i.note != "" %}
                                                 <div class="dropdown-list dropdown-menu dropdown-menu-right shadow"
                                                     aria-labelledby="infoDropdown{{i.cid}}">
                                                 <h6 class="dropdown-header">
                                                     <div class="text-truncate">{{i.note}}</div>
                                                 </h6>
                                                 </div>
-
+                                                {% endif %}
                                                 <br>
                                                 <a href="#" style="color:#4863A0" data-toggle="modal" data-target="#creditforstock{{i.cid}}" ><i class="fas fa-file-invoice-dollar"></i></a>
-                                                <a href="#" class="text-danger text-sm" ><i class="material-icons">delete</i></a>
+                                                <a href="#" class="text-danger text-sm" ><i class="fa fa-trash"></i></a>
 
                           <form method="POST" action={% url 'creditStock' i.cid %}>
                            {% csrf_token %}

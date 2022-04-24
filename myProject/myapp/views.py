@@ -31,7 +31,8 @@ import os
 from django.utils.timezone import now
 from django.core.exceptions import MultipleObjectsReturned
 from django.db import IntegrityError, transaction
-from .models import Vehicle, Profile, Unit, Coupons, Requests, Transaction, comment, CouponBatch, fueldump, UserGroup, settings
+from .models import Vehicle, Profile, Unit, Coupons, Requests, Transaction, comment, CouponBatch, fueldump, UserGroup, \
+    settings
 from .models import activityReport
 from .utils import render_to_pdf
 from django.db.models import Count, F, Value, Sum, Q, Count, Max, CASCADE, Min, FloatField, Avg
@@ -55,6 +56,7 @@ from django.http import HttpResponseRedirect
 import sys
 from django.contrib.auth.decorators import login_required
 import threading
+
 
 # Create your views here.
 
@@ -81,13 +83,13 @@ def preloaddata(request):
         msg_co = msg.count()
 
     # Diesel market current rate
-    dcm =  Transaction.objects.filter(marketrate__gt=0.1, ftype='Diesel').last()
+    dcm = Transaction.objects.filter(marketrate__gt=0.1, ftype='Diesel').last()
     if dcm == None:
         dcurmark = None
     else:
         dcurmark = dcm
     # Petrol market current rate
-    pcm =  Transaction.objects.filter(marketrate__gt=0.1, ftype='Petrol').last()
+    pcm = Transaction.objects.filter(marketrate__gt=0.1, ftype='Petrol').last()
     if pcm == None:
         pcurmark = None
     else:
@@ -101,10 +103,10 @@ def preloaddata(request):
 
     context = {
         'server_url': server_url,
-        'stocks':stocks,
-        'setting':setting[0],
-        'dcurmark':dcurmark,
-        'pcurmark':pcurmark,
+        'stocks': stocks,
+        'setting': setting[0],
+        'dcurmark': dcurmark,
+        'pcurmark': pcurmark,
         'role': role[0],
         'user_p': user_p,
         'msg': msg,
@@ -112,6 +114,7 @@ def preloaddata(request):
 
     }
     return context
+
 
 # This is the dashboard display data.
 @login_required(login_url='login')
@@ -152,7 +155,8 @@ def dashboard(request):
         current_user_id = request.user.id
         role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
         user_p = Profile.objects.get(user=current_user_id)
-        vehnum = Requests.objects.values('vnum').filter(Q(ret=0) | Q(ret=1), created_at__year=today.year).annotate(vcount = Count('vnum'))
+        vehnum = Requests.objects.values('vnum').filter(Q(ret=0) | Q(ret=1), created_at__year=today.year).annotate(
+            vcount=Count('vnum'))
 
         # Area Chart Data
         month_req = Requests.objects.filter(Q(ret=0) | Q(ret=1), created_at__year=today.year) \
@@ -185,14 +189,14 @@ def dashboard(request):
 
             req = Requests.objects.filter(Q(status=1, ret=0) | Q(status=2, ret=0) | Q(status=1, ret=1)).aggregate(
                 pen=Count('rid'))
-            rreq = Requests.objects.filter(ret=0,  created_at__year=today.year).order_by('-created_at')
+            rreq = Requests.objects.filter(ret=0, created_at__year=today.year).order_by('-created_at')
             maintemp = preloaddata(request)
             context = {
                 'diesel': diesel,
                 'petrol': petrol,
                 'req': req,
                 'msg': maintemp['msg'],
-                'settings' : maintemp['setting'],
+                'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'stocks': maintemp['stocks'],
                 'pcurmark': maintemp['pcurmark'],
@@ -256,6 +260,7 @@ def register(request):
     else:
         return render(request, 'register.html')
 
+
 def login(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -277,6 +282,7 @@ def login(request):
     else:
         return render(request, 'login.html')
 
+
 # This is to send email at the background to improve performance of the app
 class EmailThreading(threading.Thread):
     def __init__(self, msg):
@@ -286,10 +292,12 @@ class EmailThreading(threading.Thread):
     def run(self):
         self.msg.send(fail_silently=True)
 
+
 @login_required(login_url='login')
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
 
 # This is what handles the stock.
 @login_required(login_url='login')
@@ -348,7 +356,7 @@ def stock(request):
                     cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension,
                                                     ftype=ftype, camount=camount, credit=crdact.credit,
                                                     debit=crdact.debit, note=crdact.note,
-                                                    credit_from=crdact.credit_from, credit_status =crdact.credit_status,
+                                                    credit_from=crdact.credit_from, credit_status=crdact.credit_status,
                                                     total=total, transamount=tran, stockopen=bal - tran)
                     cstock.save();
                 # This is to remove the old record after it's been populated on the new record.
@@ -365,7 +373,8 @@ def stock(request):
                 bls = fueldump.objects.filter(trans_id=0, book_id=bid, used=0).values_list('lnum', flat=True)
                 for bl in bls:
                     fueldump.objects.filter(lnum=bl).update(trans_id=1)
-                cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension, ftype=ftype, camount=camount,
+                cstock = Coupons.objects.create(book_id=id, unit=unit, cdimension=cdimension, ftype=ftype,
+                                                camount=camount,
                                                 total=total, transamount=0, stockopen=bal - tran)
                 cstock.save();
                 return redirect('stock')
@@ -378,7 +387,7 @@ def stock(request):
             stocks = Coupons.objects.filter(
                 cid__in=t).annotate(current_balance=F('total') - F('transamount'), credit_bal=F('credit') - F('debit'))
 
-            js = CouponBatch.objects.values('id', 'unit','dim','ftype','totalAmount').filter(bdel=0)
+            js = CouponBatch.objects.values('id', 'unit', 'dim', 'ftype', 'totalAmount').filter(bdel=0)
             books = CouponBatch.objects.filter(used=0, bdel=0, hide=0).values()
 
             # books = serializers.serialize('json', qs)
@@ -399,17 +408,18 @@ def stock(request):
             }
             return render(request, 'stock.html', context)
 
+
 @login_required(login_url='login')
 def creditStock(request, pk):
     maintemp = preloaddata(request)
     if maintemp['role'] == 'Issuer' or maintemp['role'] == 'Admin':
         if request.method == "POST":
-            aunit = request.POST.get('aunit') # This will be the listed item the operation is been conduct on
-            funit = request.POST.get('funit') # This is the account selected for the operation
-            trans = request.POST.get('transaction') # This is the kind of transaction, if debit or credit
-            credit = request.POST.get('amount') # This is the amount involved in the transaction
-            ftype = request.POST.get('ftype') # This is the fuel type
-            cdimension = request.POST.get('cdimension') # This is the dimension of the coupon
+            aunit = request.POST.get('aunit')  # This will be the listed item the operation is been conduct on
+            funit = request.POST.get('funit')  # This is the account selected for the operation
+            trans = request.POST.get('transaction')  # This is the kind of transaction, if debit or credit
+            credit = request.POST.get('amount')  # This is the amount involved in the transaction
+            ftype = request.POST.get('ftype')  # This is the fuel type
+            cdimension = request.POST.get('cdimension')  # This is the dimension of the coupon
             current_balance = request.POST.get('current_balance')
             note = request.POST.get('note')
             # We should be able to create a new stock line with all the previous values but just the amount affected
@@ -418,11 +428,14 @@ def creditStock(request, pk):
             if trans == "1":
                 leaveUpdate = fueldump.objects.filter(unit=funit, dim=cdimension, ftype=ftype, used=0, trans_id=1)
                 bookupdate = Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype)
-                if len(leaveUpdate) >= int(credit) and int(current_balance) <= bookupdate.values_list('camount', flat=True)[0]:
-                    Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit, credit_status=trans, credit_from=funit, note=note)
+                if len(leaveUpdate) >= int(credit) and int(current_balance) <= \
+                        bookupdate.values_list('camount', flat=True)[0]:
+                    Coupons.objects.filter(cid=pk).update(credit=F('credit') + credit, total=F('total') + credit,
+                                                          credit_status=trans, credit_from=funit, note=note)
                     # We should add to the debit account to match the books and stock link
-                    Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype).\
-                        update(debit=F('debit') + credit, credit_status=2, total=F('total') - credit, credit_from=aunit, note=note)
+                    Coupons.objects.filter(unit=funit, cdimension=cdimension, ftype=ftype). \
+                        update(debit=F('debit') + credit, credit_status=2, total=F('total') - credit, credit_from=aunit,
+                               note=note)
                     # We should be able to update the leaves or fueldumps with the new unit
                     ls = int(credit)
                     lus = leaveUpdate[0:ls]
@@ -430,16 +443,18 @@ def creditStock(request, pk):
                         lu.unit = aunit
                         lu.save()
                 else:
-                    messages.warning(request,'The stock is not enough to conduct this transaction')
+                    messages.warning(request, 'The stock is not enough to conduct this transaction')
         return redirect('stock')
     else:
         return redirect(perm)
+
 
 @login_required(login_url='login')
 def requestlist(request):
     current_user_id = request.user.id
     user_p = Profile.objects.get(user=current_user_id)
     return render(request, 'requestlist.html', {'user_p': user_p})
+
 
 @login_required(login_url='login')
 def inbox(request):
@@ -461,11 +476,17 @@ def inbox(request):
         paginator_app = Paginator(approve, 10)  # Show 10 contacts per page.
         page_number_app = request.GET.get('page')
         page_obj_app = paginator_app.get_page(page_number_app)
-        issu = Transaction.objects.select_related('tid').annotate(amount=F('tid__amount'), approverid=F('tid__approverid'), issueid=F('tid__issueid'),
-                     requesterid=F('tid__requesterid'),
-                     rid=F('tid__rid'), vnum=F('tid__vnum'), reqdate=F('tid__created_at'), status=F('tid__status')). \
+        issu = Transaction.objects.select_related('tid').annotate(amount=F('tid__amount'),
+                                                                  approverid=F('tid__approverid'),
+                                                                  issueid=F('tid__issueid'),
+                                                                  requesterid=F('tid__requesterid'),
+                                                                  rid=F('tid__rid'), vnum=F('tid__vnum'),
+                                                                  reqdate=F('tid__created_at'),
+                                                                  status=F('tid__status')). \
             values('amount', 'approverid', 'issueid', 'rid', 'vnum', 'marketrate', 'requesterid', 'ftype', 'reqdate',
-                   'status', 'sign').filter(tid__status=3, tid__ret=0 ,tid__requesterid=current_user, created_at__year=today.year, created_at__month=today.month).order_by('sign','-reqdate')
+                   'status', 'sign').filter(tid__status=3, tid__ret=0, tid__requesterid=current_user,
+                                            created_at__year=today.year, created_at__month=today.month).order_by('sign',
+                                                                                                                 '-reqdate')
         paginator_iss = Paginator(issu, 10)  # Show 10 contacts per page.
         page_number_iss = request.GET.get('page')
         page_obj_iss = paginator_iss.get_page(page_number_iss)
@@ -500,7 +521,8 @@ def inbox(request):
                      requesterid=F('tid__requesterid'),
                      rid=F('tid__rid'), vnum=F('tid__vnum'), reqdate=F('tid__created_at'), status=F('tid__status')). \
             values('amount', 'approverid', 'issueid', 'rid', 'vnum', 'marketrate', 'requesterid', 'ftype', 'reqdate',
-                   'status', 'sign').filter(tid__status=3, tid__ret=0, created_at__year=today.year).order_by('sign','-reqdate')
+                   'status', 'sign').filter(tid__status=3, tid__ret=0, created_at__year=today.year).order_by('sign',
+                                                                                                             '-reqdate')
         paginator_iss = Paginator(issu, 10)  # Show 10 contacts per page.
         page_number_iss = request.GET.get('page')
         page_obj_iss = paginator_iss.get_page(page_number_iss)
@@ -519,6 +541,7 @@ def inbox(request):
         }
         return render(request, 'inbox.html', context)
 
+
 @login_required(login_url='login')
 def requester(request):
     current_user = request.user.username
@@ -534,10 +557,12 @@ def requester(request):
             mread = request.POST.get('mread')
             tankcat = request.POST.get('tankcat')
 
-            stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1) | Q(ret=0), Q(vnum=vnum)
+            stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1) | Q(ret=0),
+                                                                             Q(vnum=vnum)
                                                                              ).last()
-            mileage = Requests.objects.values_list('mread', flat=True).filter(Q(vnum=vnum), Q(ret=1) | Q(ret=0), Q(vnum=vnum)
-                                                                             ).last()
+            mileage = Requests.objects.values_list('mread', flat=True).filter(Q(vnum=vnum), Q(ret=1) | Q(ret=0),
+                                                                              Q(vnum=vnum)
+                                                                              ).last()
             inmileage = Vehicle.objects.values_list('imile', flat=True).filter(vnum=vnum)[0]
             if stats == 3 or stats == None:
 
@@ -567,8 +592,10 @@ def requester(request):
                         fuel = Vehicle.objects.filter(vnum=vnum)
                         tankmath = float(t) / 2
                         tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True), mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, unit= fuel.values_list('asunit', flat=True), amount=tank, comm=comm, status=1, ret=0)
+                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                                                      mread=mread, requesterid=current_user,
+                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                                                      amount=tank, comm=comm, status=1, ret=0)
                         req.save();
                     elif tankcat == '3quarter':
                         t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
@@ -604,10 +631,10 @@ def requester(request):
                         subject, from_email, to = 'New Request for Coupon add by ' + current_user, 'service.gm@undp.org', email
                         text_content = 'This is an important message.'
                         html_content = '<p>Your coupon request for <strong>' + vnum + '</strong> was created, go to the link below.' \
-                                                                                 '<br>' \
-                                                                                 f'<a href="{maintemp["server_url"]}/inbox">Request Item</a></p>' \
-                                                                                 '<br> ' \
-                                                                                 '<p> Thank you 😊 </p>'
+                                                                                      '<br>' \
+                                                                                      f'<a href="{maintemp["server_url"]}/inbox">Request Item</a></p>' \
+                                                                                      '<br> ' \
+                                                                                      '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
                         msg.attach_alternative(html_content, "text/html")
 
@@ -620,18 +647,18 @@ def requester(request):
 
 
                 else:
-                     messages.warning(request, "The Mileage indicated is less than the last mileage!")
-                     context = {
-                         'vlist': vlist,
-                         'msg': maintemp['msg'],
-                         'settings': maintemp['setting'],
-                         'dcurmark': maintemp['dcurmark'],
-                         'pcurmark': maintemp['pcurmark'],
-                         'msg_co': maintemp['msg_co'],
-                         'user_p': maintemp['user_p'],
-                         'role': maintemp['role']
-                     }
-                     return render(request, 'requester.html', context)
+                    messages.warning(request, "The Mileage indicated is less than the last mileage!")
+                    context = {
+                        'vlist': vlist,
+                        'msg': maintemp['msg'],
+                        'settings': maintemp['setting'],
+                        'dcurmark': maintemp['dcurmark'],
+                        'pcurmark': maintemp['pcurmark'],
+                        'msg_co': maintemp['msg_co'],
+                        'user_p': maintemp['user_p'],
+                        'role': maintemp['role']
+                    }
+                    return render(request, 'requester.html', context)
             else:
                 messages.info(request, f"The Vehicle {vnum} already has a request in progress!")
                 context = {
@@ -660,6 +687,7 @@ def requester(request):
     else:
         return redirect('404')
 
+
 @login_required(login_url='login')
 def approve(request, pk):
     maintemp = preloaddata(request)
@@ -669,13 +697,14 @@ def approve(request, pk):
     emial_group = Profile.objects.values_list('email', flat=True).filter(
         Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
     recipients = list(i for i in emial_group if bool(i))
-    email = Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
-        .values_list('email', flat=True)[0]
+    email = \
+        Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
+            .values_list('email', flat=True)[0]
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     if role[0] == "Approver":
         Requests.objects.filter(rid=pk, status=1).update(status=2,
-                                               ret=0, approverid=current_user)
+                                                         ret=0, approverid=current_user)
         try:
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', recipients
@@ -709,13 +738,15 @@ def approve(request, pk):
     elif role[0] == "Admin":
         Requests.objects.filter(rid=pk).update(status=2, ret=0, approverid=current_user)
         try:
-            subject, from_email, to = 'Coupon requested for ' + str(vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', recipients
+            subject, from_email, to = 'Coupon requested for ' + str(
+                vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', recipients
             text_content = 'This is an important message.'
-            html_content = '<p>Coupon requested by <strong>' + str(req) + '</strong> was approved, go to the link below.' \
-                                                                          '<br>' \
-                                                                          f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
-                                                                          '<br> ' \
-                                                                          '<p> Thank you 😊 </p>'
+            html_content = '<p>Coupon requested by <strong>' + str(
+                req) + '</strong> was approved, go to the link below.' \
+                       '<br>' \
+                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                       '<br> ' \
+                       '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             EmailThreading(msg).start()
@@ -723,12 +754,12 @@ def approve(request, pk):
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', email
             text_content = 'This is an important message.'
-            html_content = '<p>Your coupon requested has been approved by <strong>' + current_user +\
+            html_content = '<p>Your coupon requested has been approved by <strong>' + current_user + \
                            '</strong> go to the link below.' \
-                       '<br>' \
-                       f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
-                       '<br> ' \
-                       '<p> Thank you 😊 </p>'
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                           '<br> ' \
+                           '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
             msg.attach_alternative(html_content, "text/html")
             EmailThreading(msg).start()
@@ -741,6 +772,7 @@ def approve(request, pk):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
+
 @login_required(login_url='login')
 def ret(request, pk):
     maintemp = preloaddata(request)
@@ -749,22 +781,23 @@ def ret(request, pk):
     req = Requests.objects.values_list('requesterid', flat=True).get(rid=pk)
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    email = Profile.objects.select_related('user').annotate(user1 = F('user_id__username')).filter(user1 = req, status='active')\
-        .values_list('email', flat=True)[0]
+    email = \
+        Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
+            .values_list('email', flat=True)[0]
     if role[0] == "Approver":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
 
         subject, from_email, to = 'Coupon requested for ' + str(
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
-        html_content = f'<p>Dear {req}, </p>'\
-                                              '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by Approver <strong>' + current_user + \
+        html_content = f'<p>Dear {req}, </p>' \
+                       '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by Approver <strong>' + current_user + \
                        '</strong> go to the link below.' \
                        '<br>' \
                        f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])# Am having error on this line saying
-                                                                            # 'EmailMultiAlternatives' object has no attribute 'user'
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])  # Am having error on this line saying
+        # 'EmailMultiAlternatives' object has no attribute 'user'
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
 
@@ -807,6 +840,7 @@ def ret(request, pk):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
+
 @login_required(login_url='login')
 def delete(request, pk):
     try:
@@ -828,6 +862,7 @@ def delete(request, pk):
         messages.warning(request, "You can't delete items created by other users")
         return redirect('inbox')
 
+
 @login_required(login_url='login')
 def approvalflow(request, pk):
     try:
@@ -844,7 +879,7 @@ def approvalflow(request, pk):
         if request.method == 'POST' and len(request.FILES) != 0:
             receipt = Transaction.objects.get(tid=pk)
             try:
-                if len(receipt.uploadedFile) > 0 :
+                if len(receipt.uploadedFile) > 0:
                     os.remove(receipt.uploadedFile.path)
                 receipt.uploadedFile = request.FILES['uploadedFile']
                 receipt.save()
@@ -864,19 +899,20 @@ def approvalflow(request, pk):
 
             subject, from_email, to = 'Coupon market rate added by ' + current_user, 'service.gm@undp.org', [email]
             text_content = 'This is an important message.'
-            html_content = '<p> The market price for <strong>' + vnum +  'Coupon'\
-                           '</strong> was added by <strong>' + current_user + '</strong> go to the link below.' \
-                                                                                    '<br>' \
-                                                                                    f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
-                                                                                    '<br> ' \
-                                                                                    '<p> Thank you 😊 </p>'
+            html_content = '<p> The market price for <strong>' + vnum + 'Coupon' \
+                                                                        '</strong> was added by <strong>' + current_user + '</strong> go to the link below.' \
+                                                                                                                           '<br>' \
+                                                                                                                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                                                                                                                           '<br> ' \
+                                                                                                                           '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             EmailThreading(msg).start()
 
             return redirect('approvalflow', str(pk))
 
-        elif request.method == 'POST' and t[0] == 3 and sig[0] == "0" and markt[0] != 0 and len(fileup[0]) > 2 and psign[0] == request.user.username:
+        elif request.method == 'POST' and t[0] == 3 and sig[0] == "0" and markt[0] != 0 and len(fileup[0]) > 2 and \
+                psign[0] == request.user.username:
             Transaction.objects.filter(tid=pk).update(sign=request.POST.get('sign'))
             activityReport.objects.filter(tid=pk).update(sign=request.POST.get('sign'))
 
@@ -889,11 +925,11 @@ def approvalflow(request, pk):
             subject, from_email, to = 'Coupon signed by ' + current_user, 'service.gm@undp.org', [email]
             text_content = 'This is an important message.'
             html_content = '<p> The Coupon for <strong>' + vnum + \
-                                                                        '</strong> was signed by <strong>' + current_user + '</strong> go to the link below.' \
-                                                                                                                           '<br>' \
-                                                                                                                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
-                                                                                                                           '<br> ' \
-                                                                                                                           '<p> Thank you 😊 </p>'
+                           '</strong> was signed by <strong>' + current_user + '</strong> go to the link below.' \
+                                                                               '<br>' \
+                                                                               f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                                                                               '<br> ' \
+                                                                               '<p> Thank you 😊 </p>'
             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
             msg.attach_alternative(html_content, "text/html")
             EmailThreading(msg).start()
@@ -905,17 +941,17 @@ def approvalflow(request, pk):
             aflow = Requests.objects.get(rid=pk)
             comm = comment.objects.values_list('rid', flat=True).filter(rid=pk)[0]
             context = {
-                    'aflow': aflow,
-                    'comm': comm,
-                    'settings': maintemp['setting'],
-                    'dcurmark': maintemp['dcurmark'],
-                    'pcurmark': maintemp['pcurmark'],
-                    'msg': maintemp['msg'],
-                    'msg_co': maintemp['msg_co'],
-                    'user_p': maintemp['user_p'],
-                    'psign': psign,
-                    'role': maintemp['role']
-                       }
+                'aflow': aflow,
+                'comm': comm,
+                'settings': maintemp['setting'],
+                'dcurmark': maintemp['dcurmark'],
+                'pcurmark': maintemp['pcurmark'],
+                'msg': maintemp['msg'],
+                'msg_co': maintemp['msg_co'],
+                'user_p': maintemp['user_p'],
+                'psign': psign,
+                'role': maintemp['role']
+            }
             return render(request, 'approvalflow.html', context)
         elif Requests.objects.filter(status=3, rid=pk):
             aflow = Requests.objects.get(rid=pk)
@@ -980,7 +1016,8 @@ def approvalflow(request, pk):
                 Transaction.objects.filter(tid=pk).update(marketrate=request.POST.get('marketrate'))
                 return redirect('approvalflow', str(pk))
 
-            elif request.method == 'POST' and t[0] == 3 and sig[0] == "0" and markt[0] != 0 and psign[0] == request.user.username:
+            elif request.method == 'POST' and t[0] == 3 and sig[0] == "0" and markt[0] != 0 and psign[
+                0] == request.user.username:
                 Transaction.objects.filter(tid=pk).update(sign=request.POST.get('sign'))
                 return redirect('approvalflow', str(pk))
 
@@ -1043,7 +1080,8 @@ def approvalflow(request, pk):
             return redirect('inbox')
         except IntegrityError:
             messages.info(request, ' Please browse and upload a file. Your have not selected a file.')
-            return redirect('approvalflow',pk)
+            return redirect('approvalflow', pk)
+
 
 @login_required(login_url='login')
 def requests(request):
@@ -1086,6 +1124,7 @@ def requests(request):
         }
         return render(request, 'requests.html', context)
 
+
 @login_required(login_url='login')
 def perm(request):
     maintemp = preloaddata(request)
@@ -1102,6 +1141,7 @@ def perm(request):
     }
     return render(request, '404.html', context)
 
+
 @login_required(login_url='login')
 def nav(request):
     current_user_id = request.user.id
@@ -1112,6 +1152,7 @@ def nav(request):
         'nav': nav2
     }
     return render(request, 'nav.html', context)
+
 
 @login_required(login_url='login')
 def comments(request):
@@ -1125,19 +1166,22 @@ def comments(request):
         comm = comment.objects.create(rid=rid, username=current_user, message=message)
         comm.save();
         messages.info(request, ' Successfully Submitted!')
-        requestid = Requests.objects.values_list('requesterid', flat=True).filter(rid = rid)
-        email = Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=requestid[0], status='active') \
+        requestid = Requests.objects.values_list('requesterid', flat=True).filter(rid=rid)
+        email = Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=requestid[0],
+                                                                                                     status='active') \
             .values_list('email', flat=True)[0]
-        email2 = Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=current_user, status='active') \
-            .values_list('email', flat=True)[0]
+        email2 = \
+            Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=current_user,
+                                                                                                 status='active') \
+                .values_list('email', flat=True)[0]
 
         subject, from_email, to = ' Comment by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
         html_content = message + '<p> go to the link below.' \
-                       '<br>' \
-                       f'<a href="{maintemp["server_url"]}/comments">Request Item</a></p>' \
-                       '<br> ' \
-                       '<p> Thank you 😊 </p>'
+                                 '<br>' \
+                                 f'<a href="{maintemp["server_url"]}/comments">Request Item</a></p>' \
+                                 '<br> ' \
+                                 '<p> Thank you 😊 </p>'
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
@@ -1146,17 +1190,22 @@ def comments(request):
     elif role[0] == "Driver":
 
         req = Requests.objects.filter(Q(ret=0) | Q(ret=1),
-                                                    Q(status=1) | Q(status=2),
-                                                    requesterid=current_user)
+                                      Q(status=1) | Q(status=2),
+                                      requesterid=current_user)
         ir = comment.objects.filter(rid__in=req.values('rid'))
         imgid = []
         for i in ir:
             uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
             prof = Profile.objects.values('pic').filter(user=uid)
-            img = comment.objects.filter(id=i.id, rid__in=req).\
-            annotate(pic=prof, requ=Subquery(req.filter(rid=OuterRef('rid')).values('vnum')[:1])).values('id', 'rid', 'username',
-                                                                                            'message', 'pic','requ',
-                                                                                            'created_at')[0]
+            img = comment.objects.filter(id=i.id, rid__in=req). \
+                annotate(pic=prof, requ=Subquery(req.filter(rid=OuterRef('rid')).values('vnum')[:1])).values('id',
+                                                                                                             'rid',
+                                                                                                             'username',
+                                                                                                             'message',
+                                                                                                             'pic',
+                                                                                                             'requ',
+                                                                                                             'created_at')[
+                0]
             imgid.append(img)
         comm = imgid
         requests = Requests.objects.filter(Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0),
@@ -1178,21 +1227,18 @@ def comments(request):
                                                     Q(status=1) | Q(status=2))
 
         ir = comment.objects.filter(rid__in=req).all()
-        imgid=[]
+        imgid = []
         for i in ir:
             uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
             prof = Profile.objects.values('pic').filter(user=uid)
             img = comment.objects.filter(id=i.id).annotate(pic=prof,
-                                                                           requ=Subquery(req.filter(rid=OuterRef('rid')).\
-                                                                                         values('vnum')[:1])).\
-            values('id','rid', 'username', 'message', 'pic', 'requ', 'created_at')[0]
+                                                           requ=Subquery(req.filter(rid=OuterRef('rid')). \
+                                                                         values('vnum')[:1])). \
+                values('id', 'rid', 'username', 'message', 'pic', 'requ', 'created_at')[0]
             imgid.append(img)
-
 
         requests = Requests.objects.filter(Q(status=1, ret=0) | Q(status=1, ret=1) | Q(status=2, ret=0))
         comm = imgid
-
-
 
         context = {
             'comm': comm,
@@ -1207,6 +1253,7 @@ def comments(request):
         }
         return render(request, 'comment.html', context)
 
+
 @login_required(login_url='login')
 def itemcomment(request, pk):
     current_user = request.user.username
@@ -1217,9 +1264,9 @@ def itemcomment(request, pk):
     for i in ir:
         uid = User.objects.values_list('id', flat=True).filter(username=i.username)[0]
         prof = Profile.objects.values('pic').filter(user=uid)
-        img = comment.objects.filter(id=i.id, rid=pk).\
-        annotate(pic=prof, requ=req.values_list('vnum', flat=True).filter(rid=pk)).\
-        values('id', 'rid', 'username','message', 'pic', 'requ','created_at')[0]
+        img = comment.objects.filter(id=i.id, rid=pk). \
+            annotate(pic=prof, requ=req.values_list('vnum', flat=True).filter(rid=pk)). \
+            values('id', 'rid', 'username', 'message', 'pic', 'requ', 'created_at')[0]
 
         imgid.append(img)
     comm = imgid
@@ -1234,6 +1281,7 @@ def itemcomment(request, pk):
         'role': maintemp['role']
     }
     return render(request, 'itemcomment.html', context)
+
 
 @login_required(login_url='login')
 def vehicles(request):
@@ -1277,6 +1325,7 @@ def vehicles(request):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
+
 @login_required(login_url='login')
 def vehedit(request, pk):
     maintemp = preloaddata(request)
@@ -1290,12 +1339,13 @@ def vehedit(request, pk):
             driver = request.POST.get('driver')
             tankcap = request.POST.get('tankcap')
             Vehicle.objects.filter(vid=pk).update(vnum=vnum, ftype=ftype,
-                                         vtype=vtype, imile=imile, asunit=asunit, driver=driver,
+                                                  vtype=vtype, imile=imile, asunit=asunit, driver=driver,
                                                   tankcap=tankcap)
             return redirect('vehicles')
 
     else:
         return redirect('perm')
+
 
 @login_required(login_url='login')
 def vehdel(request, pk):
@@ -1306,6 +1356,7 @@ def vehdel(request, pk):
         return redirect('vehicles')
     else:
         return redirect('404')
+
 
 @login_required(login_url='login')
 def delstock(request):
@@ -1326,6 +1377,7 @@ def delstock(request):
     else:
         return redirect('404')
 
+
 @login_required(login_url='login')
 def delst(request, pk):
     maintemp = preloaddata(request)
@@ -1334,6 +1386,7 @@ def delst(request, pk):
         return redirect('delstock')
     else:
         return redirect('404')
+
 
 @login_required(login_url='login')
 def unit(request):
@@ -1352,7 +1405,7 @@ def unit(request):
             appv = Profile.objects.all().filter(role="Approver", status="active")
             context = {
                 'units': units,
-                'appv' : appv,
+                'appv': appv,
                 'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
                 'pcurmark': maintemp['pcurmark'],
@@ -1366,6 +1419,7 @@ def unit(request):
     else:
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
+
 
 @login_required(login_url='login')
 def unitedit(request, pk):
@@ -1381,6 +1435,7 @@ def unitedit(request, pk):
         messages.warning(request, "You don't have permission on this page")
         return redirect('404')
 
+
 @login_required(login_url='login')
 def unitdel(request, pk):
     maintemp = preloaddata(request)
@@ -1389,6 +1444,7 @@ def unitdel(request, pk):
         return redirect('unit')
     else:
         return redirect('404')
+
 
 @login_required(login_url='login')
 def profile(request):
@@ -1409,11 +1465,12 @@ def profile(request):
     else:
         return redirect('404')
 
+
 @login_required(login_url='login')
 def userGroup(request):
     maintemp = preloaddata(request)
 
-    if maintemp['role']=="Admin":
+    if maintemp['role'] == "Admin":
         if request.method == "POST":
             groupname = request.POST.get('groupname')
             desc = request.POST.get('desc')
@@ -1422,7 +1479,7 @@ def userGroup(request):
             return redirect('userGroup')
         else:
             ug = UserGroup.objects.all()
-            context ={
+            context = {
                 'ug': ug,
                 'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
@@ -1437,15 +1494,17 @@ def userGroup(request):
     else:
         return redirect('404')
 
+
 @login_required(login_url='login')
 def groupedit(request, pk):
     maintemp = preloaddata(request)
-    if maintemp['role']=="Admin":
+    if maintemp['role'] == "Admin":
         if request.method == "POST":
             groupname = request.POST.get('groupname')
             desc = request.POST.get('desc')
             group = UserGroup.objects.filter(id=pk).update(groupname=groupname, desc=desc)
             return redirect('userGroup')
+
 
 @login_required(login_url='login')
 def groupdel(request, pk):
@@ -1455,6 +1514,7 @@ def groupdel(request, pk):
         return redirect('userGroup')
     else:
         return redirect('404')
+
 
 # This function handles the transaction. It updates the coupon leaves, create transaction and update the request item
 @login_required(login_url='login')
@@ -1488,7 +1548,7 @@ def transac(request, pk):
                     try:
                         total = Coupons.objects.values_list('total', flat=True).filter(unit=unit, cdimension=cdimension,
                                                                                        ftype=ftype)[0]
-                        comp = total - int(cnumber)+1
+                        comp = total - int(cnumber) + 1
                     except IndexError:
                         messages.warning(request, "There is no stock for this unit to issue this amount of Coupon/s")
                         return redirect('transac', str(tid))
@@ -1499,28 +1559,30 @@ def transac(request, pk):
                     return redirect('transac', str(tid))
                 #
 
-
                 else:
                     bupdate = fueldump.objects.filter(used=0, unit=unit, ftype=ftype, dim=cdimension,
                                                       trans_id=1).all().order_by('lnum')
                     e = int(cnumber)
                     bc = bupdate[:e]
-                    c =bc.values_list('lnum', flat=True)
-                    cp = Coupons.objects.annotate(am = F('total')-F('transamount')).values_list('am', flat=True).\
+                    c = bc.values_list('lnum', flat=True)
+                    cp = Coupons.objects.annotate(am=F('total') - F('transamount')).values_list('am', flat=True). \
                         filter(unit=unit, ftype=ftype, cdimension=cdimension).last()
                     lbu = len(bupdate)
                     # This will check if the transaction doesn't exist and if the book issued is equal to the stock
-                    if len(Transaction.objects.filter(tid=tid))==0 and cp == lbu:
+                    if len(Transaction.objects.filter(tid=tid)) == 0 and cp == lbu:
                         tran = Transaction.objects.create(tid_id=tid, cdimension=cdimension, totalamount=totalamount,
                                                           ftype=ftype,
-                                                          cnumber=cnumber, quantity=quantity, rate=rate, marketrate=0, sign=0,
-                                                          unit=unit, uploadedFile="0", note=note, serialno=min(c), maxserialno=max(c))
+                                                          cnumber=cnumber, quantity=quantity, rate=rate, marketrate=0,
+                                                          sign=0,
+                                                          unit=unit, uploadedFile="0", note=note, serialno=min(c),
+                                                          maxserialno=max(c))
                         tran.save();
 
                         Requests.objects.filter(rid=tid).update(status=3,
                                                                 ret=0, issueid=str(current_user))
 
-                        t = Coupons.objects.filter(unit=unit, cdimension=cdimension, ftype=ftype).annotate(id = Max('cid'))\
+                        t = Coupons.objects.filter(unit=unit, cdimension=cdimension, ftype=ftype).annotate(
+                            id=Max('cid')) \
                             .values_list('cid', flat=True)  # Get only the last id of this category.
 
                         # This is the stock update
@@ -1535,51 +1597,56 @@ def transac(request, pk):
 
                         # This is handling the book update.
                         for i in sorted(c):
-                            fueldump.objects.filter(lnum=i).update(used=1, transac= tid, issuer=str(current_user), datemodified = datetime.datetime.now())
-
+                            fueldump.objects.filter(lnum=i).update(used=1, transac=tid, issuer=str(current_user),
+                                                                   datemodified=datetime.datetime.now())
 
                         # This will update the book status
                         bookstat = CouponBatch.objects.filter(status=0, hide=0, bdel=0)
 
                         for i in bookstat:
-                            if len(fueldump.objects.filter(used=0,book_id=i.bookref))<= 0:
-                                CouponBatch.objects.filter(bookref=i.bookref).update(status=1, rbal=(i.totalAmount) / (i.dim))
+                            if len(fueldump.objects.filter(used=0, book_id=i.bookref)) <= 0:
+                                CouponBatch.objects.filter(bookref=i.bookref).update(status=1,
+                                                                                     rbal=(i.totalAmount) / (i.dim))
 
-                       # calculate fuel consumption by vehicle
+                        # calculate fuel consumption by vehicle
                         rq = Requests.objects.filter(rid=tid)
-                        cmill = rq.values_list('mread', flat=True)[0] #Current Milleage
-                        clitre = rq.values_list('amount', flat=True)[0] #Current Litre
+                        cmill = rq.values_list('mread', flat=True)[0]  # Current Milleage
+                        clitre = rq.values_list('amount', flat=True)[0]  # Current Litre
                         lmill = activityReport.objects.filter(vnum=rq.values_list('vnum', flat=True)[0]).values_list(
-                            'mread', flat=True).last() # The last millage of this vehicle
+                            'mread', flat=True).last()  # The last millage of this vehicle
 
                         if lmill:
-                            fconsumption = round((cmill-lmill)/clitre, 2)
+                            fconsumption = round((cmill - lmill) / clitre, 2)
                         else:
                             lastmill = Vehicle.objects.values_list('imile', flat=True)[0]
                             fconsumption = round((cmill - lastmill) / clitre, 2)
 
                         # This is handling the Report logs for the monthly and annual fuel usage report
-                        fd_s = fueldump.objects.filter(lnum = min(c))
-                        fd_e = fueldump.objects.filter(lnum = max(c))
-                        if len(comment.objects.filter(rid=tid))>0:
+                        fd_s = fueldump.objects.filter(lnum=min(c))
+                        fd_e = fueldump.objects.filter(lnum=max(c))
+                        if len(comment.objects.filter(rid=tid)) > 0:
                             comm = 1
                         else:
                             comm = 0
 
-                        acreort = activityReport.objects.create(tid=tid, totalamount=totalamount, litre=quantity, vnum=rq.values_list('vnum', flat=True),
-                                                               mread = rq.values_list('mread', flat=True),
-                                                               unit = unit, requesterid = rq.values_list('requesterid', flat=True),
-                                                               approverid = rq.values_list('approverid', flat=True),
-                                                               issueid = rq.values_list('issueid', flat=True),
-                                                               serial_start = min(c),
-                                                               serial_end = max(c), ftype=ftype,
-                                                                bookref_s =fd_s.values_list('book_id',flat=True) ,
-                                                                bookref = fd_e.values_list('book_id',flat=True),
-                                                                note=note, comm = comm ,cdimension=cdimension, fconsumption=fconsumption)
+                        acreort = activityReport.objects.create(tid=tid, totalamount=totalamount, litre=quantity,
+                                                                vnum=rq.values_list('vnum', flat=True),
+                                                                mread=rq.values_list('mread', flat=True),
+                                                                unit=unit,
+                                                                requesterid=rq.values_list('requesterid', flat=True),
+                                                                approverid=rq.values_list('approverid', flat=True),
+                                                                issueid=rq.values_list('issueid', flat=True),
+                                                                serial_start=min(c),
+                                                                serial_end=max(c), ftype=ftype,
+                                                                bookref_s=fd_s.values_list('book_id', flat=True),
+                                                                bookref=fd_e.values_list('book_id', flat=True),
+                                                                note=note, comm=comm, cdimension=cdimension,
+                                                                fconsumption=fconsumption)
                         acreort.save();
 
                     else:
-                        messages.warning(request, "The stock and the books are not tally Please contact the Administrator!!!")
+                        messages.warning(request,
+                                         "The stock and the books are not tally Please contact the Administrator!!!")
                         return redirect('approvalflow', str(tid))
 
                     emial_group = Profile.objects.values_list('email', flat=True).filter(
@@ -1587,8 +1654,9 @@ def transac(request, pk):
                     recipients = list(i for i in emial_group if bool(i))
                     req = Requests.objects.values_list('requesterid', flat=True).get(rid=tid)
                     email = \
-                    Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
-                        .values_list('email', flat=True)[0]
+                        Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req,
+                                                                                                             status='active') \
+                            .values_list('email', flat=True)[0]
 
                     try:
                         subject, from_email, to = 'Coupon requested Issued by ' + current_user, 'service.gm@undp.org', email
@@ -1607,10 +1675,10 @@ def transac(request, pk):
                         text_content = 'This is an important message.'
                         html_content = '<p> Coupon requested by <strong>' + str(req) + \
                                        '</strong> has been issued by <strong>' + current_user + '</strong> go to the link below.' \
-                                       '<br>' \
-                                       f'<a href="{maintemp["server_url"]}/approvalflow/{tid}">Request Item</a></p>' \
-                                       '<br> ' \
-                                       '<p> Thank you 😊 </p>'
+                                                                                                '<br>' \
+                                                                                                f'<a href="{maintemp["server_url"]}/approvalflow/{tid}">Request Item</a></p>' \
+                                                                                                '<br> ' \
+                                                                                                '<p> Thank you 😊 </p>'
                         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
                         msg.attach_alternative(html_content, "text/html")
                         EmailThreading(msg).start()
@@ -1645,9 +1713,11 @@ def transac(request, pk):
         messages.warning(request, "The stock  does not exit for this coupon dimension")
         return redirect('stock')
 
+
 @login_required(login_url='login')
 def invoice(request, pk):
     return render(request, 'invoice.html')
+
 
 @login_required(login_url='login')
 def user_profile(request, pk):
@@ -1657,7 +1727,7 @@ def user_profile(request, pk):
     role = maintemp['role']
     if role == "Admin":
         try:
-            if request.method == 'POST' and len(request.FILES)>0:
+            if request.method == 'POST' and len(request.FILES) > 0:
                 prof = Profile.objects.get(id=pk)
                 if len(prof.pic) > 0:
                     os.remove(prof.pic.path)
@@ -1678,16 +1748,18 @@ def user_profile(request, pk):
             else:
                 prof_us = Profile.objects.select_related('user_id'). \
                     annotate(email1=F('user_id__email'), user1=F('user_id__username')). \
-                    values('email1', 'id', 'fname', 'lname', 'role', 'unit', 'status', 'user_id', 'user1', 'pic', 'email').get(
+                    values('email1', 'id', 'fname', 'lname', 'role', 'unit', 'status', 'user_id', 'user1', 'pic',
+                           'email').get(
                     id=pk)
 
                 rl = Profile.objects.values_list('role', flat=True).get(id=pk)
-                pic =Profile.objects.get(id=pk)
+                pic = Profile.objects.get(id=pk)
                 ug = UserGroup.objects.exclude(groupname=rl)
                 tranam = activityReport.objects.filter(requesterid=pic).count()
                 tranlast = activityReport.objects.filter(requesterid=pic).last()
                 tranpen = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=pic, ret=0).count()
-                trantotal = activityReport.objects.values_list('totalamount', flat=True).filter(requesterid=pic).aggregate(total = Sum('totalamount'))
+                trantotal = activityReport.objects.values_list('totalamount', flat=True).filter(
+                    requesterid=pic).aggregate(total=Sum('totalamount'))
 
                 context = {
                     'prof': prof_us,
@@ -1711,7 +1783,7 @@ def user_profile(request, pk):
 
     elif role != "Admin":
         try:
-            if request.method == 'POST' and len(request.FILES)>0:
+            if request.method == 'POST' and len(request.FILES) > 0:
                 prof = Profile.objects.get(id=pk)
                 if len(prof.pic) > 0:
                     os.remove(prof.pic.path)
@@ -1732,11 +1804,12 @@ def user_profile(request, pk):
             else:
                 prof_us = Profile.objects.select_related('user_id'). \
                     annotate(email1=F('user_id__email'), user1=F('user_id__username')). \
-                    values('email1', 'id', 'fname', 'lname', 'role', 'unit', 'status', 'user_id', 'user1', 'pic', 'email').get(
+                    values('email1', 'id', 'fname', 'lname', 'role', 'unit', 'status', 'user_id', 'user1', 'pic',
+                           'email').get(
                     user=current_user_id)
 
                 rl = Profile.objects.values_list('role', flat=True).get(user=current_user_id)
-                pic =Profile.objects.get(user=current_user_id)
+                pic = Profile.objects.get(user=current_user_id)
                 ug = UserGroup.objects.exclude(groupname=rl)
                 tranam = Requests.objects.filter(requesterid=current_user, ret=0).count()
                 tranlast = Requests.objects.filter(requesterid=current_user, ret=0).last()
@@ -1767,7 +1840,8 @@ def user_profile(request, pk):
             return redirect('user_profile', pk)
 
     else:
-         return redirect('404')
+        return redirect('404')
+
 
 @login_required(login_url='login')
 def user_pic(request, pk):
@@ -1781,9 +1855,11 @@ def user_pic(request, pk):
     else:
         return redirect('404')
 
+
 @login_required(login_url='login')
 def login404(request):
     return render(request, '404login.html')
+
 
 @login_required(login_url='login')
 def passwordreset(request, pk):
@@ -1802,19 +1878,24 @@ def passwordreset(request, pk):
                 return redirect('passwordreset', str(pk))
             else:
                 messages.info(request, "Password mismatch. Please try again!")
-                return render(request, 'passwordreset.html',{'role': maintemp['role'],  'settings' : maintemp['setting'], 'dcurmark': maintemp['dcurmark'],
-                'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
-                                                             'msg_co': maintemp['msg_co'] })
+                return render(request, 'passwordreset.html', {'role': maintemp['role'], 'settings': maintemp['setting'],
+                                                              'dcurmark': maintemp['dcurmark'],
+                                                              'pcurmark': maintemp['pcurmark'],
+                                                              'user_p': maintemp['user_p'], 'msg': maintemp['msg'],
+                                                              'msg_co': maintemp['msg_co']})
         else:
             messages.info(request, "Incorrect current password. Please try again!")
-            return render(request, 'passwordreset.html', {'role': maintemp['role'],  'settings' : maintemp['setting'],'dcurmark': maintemp['dcurmark'],
-                'pcurmark': maintemp['pcurmark'], 'user_p':maintemp['user_p'], 'msg': maintemp['msg'],
-                                                          'msg_co': maintemp['msg_co']})
+            return render(request, 'passwordreset.html',
+                          {'role': maintemp['role'], 'settings': maintemp['setting'], 'dcurmark': maintemp['dcurmark'],
+                           'pcurmark': maintemp['pcurmark'], 'user_p': maintemp['user_p'], 'msg': maintemp['msg'],
+                           'msg_co': maintemp['msg_co']})
 
     else:
-        return render(request, 'passwordreset.html', {'role':maintemp['role'],  'settings' : maintemp['setting'],'dcurmark': maintemp['dcurmark'],
-                'pcurmark': maintemp['pcurmark'], 'user_p': maintemp['user_p'], 'msg':maintemp['msg'],
-                                                      'msg_co': maintemp['msg_co']})
+        return render(request, 'passwordreset.html',
+                      {'role': maintemp['role'], 'settings': maintemp['setting'], 'dcurmark': maintemp['dcurmark'],
+                       'pcurmark': maintemp['pcurmark'], 'user_p': maintemp['user_p'], 'msg': maintemp['msg'],
+                       'msg_co': maintemp['msg_co']})
+
 
 @login_required(login_url='login')
 def getfile(request):
@@ -1826,12 +1907,13 @@ def getfile(request):
         stocks = Coupons.objects.all()
         writer = csv.writer(response)
         writer.writerow(['Unit', 'Dimension', 'Fuel Type', 'Stock Amount',
-                        'Opening Stock', 'Current Balance', 'Credit', 'Note', 'Date created'])
+                         'Opening Stock', 'Current Balance', 'Credit', 'Note', 'Date created'])
         for stock in stocks:
             writer.writerow([stock.unit, stock.cdimension, stock.ftype, stock.camount,
-                             stock.stockopen, stock.total - stock.transamount,  stock.credit - stock.debit,
+                             stock.stockopen, stock.total - stock.transamount, stock.credit - stock.debit,
                              stock.note, stock.created_at])
         return response
+
 
 @login_required(login_url='login')
 def bookreport(request, pk):
@@ -1839,26 +1921,28 @@ def bookreport(request, pk):
     if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
-        response['Content-Disposition'] = f'attachment; filename="bookreport {now }.csv"'
+        response['Content-Disposition'] = f'attachment; filename="bookreport {now}.csv"'
         book = CouponBatch.objects.values_list('bookref').filter(id=pk, bdel=0)[0][0]
         bk = book
-        leaves = fueldump.objects.all().annotate(vnum =Subquery(
+        leaves = fueldump.objects.all().annotate(vnum=Subquery(
             Requests.objects.filter(rid=OuterRef('transac')).values('vnum').order_by('vnum')[:1]),
-        requester = Subquery(
-            Requests.objects.filter(rid=OuterRef('transac')).values('requesterid')[:1]
-        ),
-            approver = Subquery(
-            Requests.objects.filter(rid=OuterRef('transac')).values('approverid')[:1]
-        )).filter(book_id= bk, used=1).order_by('lnum')
-
+            requester=Subquery(
+                Requests.objects.filter(rid=OuterRef('transac')).values('requesterid')[:1]
+            ),
+            approver=Subquery(
+                Requests.objects.filter(rid=OuterRef('transac')).values('approverid')[:1]
+            )).filter(book_id=bk, used=1).order_by('lnum')
 
         writer = csv.writer(response)
         writer.writerow(['Book', 'Leave No', 'Fuel Type', 'Used',
-                         'Book serial', 'Allocated stock', 'Dimension', 'Requester', 'Approver', 'Issuer', 'Vehicle',  'Unit', 'Date modified'])
+                         'Book serial', 'Allocated stock', 'Dimension', 'Requester', 'Approver', 'Issuer', 'Vehicle',
+                         'Unit', 'Date modified'])
         for leave in leaves:
             writer.writerow([leave.book, leave.lnum, leave.ftype, leave.used,
-                             leave.book_id, leave.trans_id, leave.dim, leave.requester, leave.approver, leave.issuer,  leave.vnum,  leave.unit, leave.datemodified])
+                             leave.book_id, leave.trans_id, leave.dim, leave.requester, leave.approver, leave.issuer,
+                             leave.vnum, leave.unit, leave.datemodified])
         return response
+
 
 @login_required(login_url='login')
 def couponbooksreport(request):
@@ -1867,18 +1951,19 @@ def couponbooksreport(request):
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         response['Content-Disposition'] = f'attachment; filename="couponbooksreport {now}.csv"'
-        books = CouponBatch.objects.all().annotate(quan = Count(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used = 0)[:1])),
-            fmin = Min(Subquery(
-            fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used = 0)[:1])),
+        books = CouponBatch.objects.all().annotate(quan=Count(Subquery(
+            fueldump.objects.filter(book_id=OuterRef('bookref')).values('book_id').filter(used=0)[:1])),
+            fmin=Min(Subquery(
+                fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[:1])),
         ).filter(bdel=0, hide=0)
         writer = csv.writer(response)
-        writer.writerow(['Book','Start Serial', 'End Serial', 'Quantity','Fuel Type', 'Unit'])
+        writer.writerow(['Book', 'Start Serial', 'End Serial', 'Quantity', 'Fuel Type', 'Unit'])
         for book in books:
             if book.quan == 1:
                 writer.writerow([book.book_id, book.fmin, book.serial_end,
-                                 int(book.serial_end)+1-book.fmin, book.ftype, book.unit])
+                                 int(book.serial_end) + 1 - book.fmin, book.ftype, book.unit])
         return response
+
 
 @login_required(login_url='login')
 def fuelconsreport(request):
@@ -1888,16 +1973,17 @@ def fuelconsreport(request):
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         responsed['Content-Disposition'] = f'attachment; filename="fuelconsreport {now}.csv"'
         writer = csv.writer(responsed)
-        result = Transaction.objects.select_related('tid').annotate(vehicle = F('tid__vnum')).order_by('vehicle')
+        result = Transaction.objects.select_related('tid').annotate(vehicle=F('tid__vnum')).order_by('vehicle')
         writer.writerow(['Vehicle', 'Fuel Type', 'Litres consume', 'Unit', 'Date created'])
         for res in result:
             writer.writerow([res.vehicle, res.ftype, res.quantity, res.unit, res.created_at])
         return responsed
 
+
 @login_required(login_url='login')
 def translog(request):
     maintemp = preloaddata(request)
-    if maintemp['role'] =="Driver":
+    if maintemp['role'] == "Driver":
         return redirect('404')
     else:
 
@@ -1912,8 +1998,11 @@ def translog(request):
         }
         return render(request, 'translog.html', context)
 
-#------ This is to genrate a unique ID ------
+
+# ------ This is to genrate a unique ID ------
 import uuid
+
+
 @login_required(login_url='login')
 def couponBatch(request):
     current_user = request.user.username
@@ -1921,7 +2010,7 @@ def couponBatch(request):
         maintemp = preloaddata(request)
         role = maintemp['role']
 
-        if role =="Driver" or role =="Approver":
+        if role == "Driver" or role == "Approver":
             return redirect('404')
         else:
             if request.method == "POST":
@@ -1932,33 +2021,35 @@ def couponBatch(request):
                 ftype = request.POST.get('ftype')
                 unit = request.POST.get('unit')
                 bookref = uuid.uuid4().hex[:6].upper()
-                ex = CouponBatch.objects.filter(serial_start = serial_start, serial_end = serial_end, bdel=0)
+                ex = CouponBatch.objects.filter(serial_start=serial_start, serial_end=serial_end, bdel=0)
                 ux = CouponBatch.objects.filter(bookref=bookref)
                 if ex:
-                    messages.info(request,f"This book exit! book - {serial_start}")
+                    messages.info(request, f"This book exit! book - {serial_start}")
                     return redirect('couponBatch')
                 elif ux:
-                    messages.info(request,f"This book is not unique (Hash collision!) {bookref} ")
+                    messages.info(request, f"This book is not unique (Hash collision!) {bookref} ")
                     return redirect('couponBatch')
                 else:
-                    tx = int(serial_start) -1 # This is to create the exact number of coupon leaves
-                    tm = int(serial_end) - tx # This creates the number of leaves to be created.
-                    totalamount = tm * int(dim) # This is the amount in cash
+                    tx = int(serial_start) - 1  # This is to create the exact number of coupon leaves
+                    tm = int(serial_end) - tx  # This creates the number of leaves to be created.
+                    totalamount = tm * int(dim)  # This is the amount in cash
                     b = []
                     d = int(serial_start)
                     for i in range(tm):
-                        b.append(i+d)
+                        b.append(i + d)
 
                     # This is what creates the book
                     book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
-                                               dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0, bdel=0,
+                                                      dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0,
+                                                      bdel=0,
                                                       hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
 
                     book.save();
 
                     # This is what create the leaves on the fuel dump table
-                    fueldump.objects.bulk_create([fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
-                                                           dim=dim, used=0, trans_id=0, transac=0) for e in b])
+                    fueldump.objects.bulk_create(
+                        [fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
+                                  dim=dim, used=0, trans_id=0, transac=0) for e in b])
                     return redirect("couponBatch")
 
             elif role == "Owner" or role == "Admin":
@@ -1968,24 +2059,25 @@ def couponBatch(request):
                 two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
 
                 # # This is what is handling the book render.
-                books = CouponBatch.objects.annotate(quan=(F('totalAmount')/F('dim')) - (F('rbal')),
-                                                     percent =  100 - (F('rbal')*100)/(F('totalAmount')/(F('dim')))).filter(bdel=0).\
+                books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
+                                                     percent=100 - (F('rbal') * 100) / (
+                                                             F('totalAmount') / (F('dim')))).filter(bdel=0). \
                     all()
 
                 # This is for calculating months
 
                 ulist = Unit.objects.all()
                 context = {
-                        'role': maintemp['role'],
-                        'settings': maintemp['setting'],
-                        'dcurmark': maintemp['dcurmark'],
-                        'pcurmark': maintemp['pcurmark'],
-                        'books': books,
-                        'msg': maintemp['msg'],
-                        'msg_co': maintemp['msg_co'],
-                        'ulist': ulist,
-                        'user_p': maintemp['user_p']
-                        }
+                    'role': maintemp['role'],
+                    'settings': maintemp['setting'],
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
+                    'books': books,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
+                    'ulist': ulist,
+                    'user_p': maintemp['user_p']
+                }
                 return render(request, 'couponbatch.html', context)
 
             elif role == "Issuer":
@@ -1994,50 +2086,49 @@ def couponBatch(request):
                 one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
                 month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
 
-
-
-
-                    # This is what is handling the book render.
+                # This is what is handling the book render.
                 books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
-                                                         percent=100 - (F('rbal') * 100) / (
-                                                                 F('totalAmount') / (F('dim')))).filter(used=1, bdel=0). \
-                        all()
+                                                     percent=100 - (F('rbal') * 100) / (
+                                                             F('totalAmount') / (F('dim')))).filter(used=1, bdel=0). \
+                    all()
 
                 ulist = Unit.objects.all()
                 context = {
-                        'role': maintemp['role'],
-                        'settings': maintemp['setting'],
-                        'dcurmark': maintemp['dcurmark'],
-                        'pcurmark': maintemp['pcurmark'],
-                        'books': books,
-                        'msg': maintemp['msg'],
-                        'msg_co': maintemp['msg_co'],
-                        'ulist': ulist,
-                        'user_p': maintemp['user_p']
-                    }
+                    'role': maintemp['role'],
+                    'settings': maintemp['setting'],
+                    'dcurmark': maintemp['dcurmark'],
+                    'pcurmark': maintemp['pcurmark'],
+                    'books': books,
+                    'msg': maintemp['msg'],
+                    'msg_co': maintemp['msg_co'],
+                    'ulist': ulist,
+                    'user_p': maintemp['user_p']
+                }
                 return render(request, 'couponbatch.html', context)
             else:
                 return redirect(perm)
     except IndexError:
         return redirect('couponBatch')
 
+
 @login_required(login_url='login')
 def coupondetail(request, pk):
     try:
         maintemp = preloaddata(request)
         role = maintemp['role']
-        if role =="Driver" or role =="Issuer" or role =="Approver":
+        if role == "Driver" or role == "Issuer" or role == "Approver":
             return redirect('404')
         else:
 
-            book = CouponBatch.objects.get(Q(bdel=0) |  Q(bdel = 2), id=pk)
+            book = CouponBatch.objects.get(Q(bdel=0) | Q(bdel=2), id=pk)
             b = CouponBatch.objects.values_list('bookref', flat=True).filter(id=pk, bdel=0)[0]
-            leaves = fueldump.objects.filter(book_id = b).order_by('lnum')
-            used = fueldump.objects.filter(book_id = b, used=1).annotate(cn=Count('used')).values_list('cn', flat=True)
+            leaves = fueldump.objects.filter(book_id=b).order_by('lnum')
+            used = fueldump.objects.filter(book_id=b, used=1).annotate(cn=Count('used')).values_list('cn', flat=True)
             notused = fueldump.objects.filter(book_id=b, used=0).annotate(cn=Count('used')).values_list('cn', flat=True)
             total = fueldump.objects.filter(book_id=b).annotate(cn=Count('used')).values_list('cn', flat=True)
-            lastu = fueldump.objects.filter(book_id=b, used=1).annotate(lastmod = Subquery(
-            Transaction.objects.filter(tid=OuterRef('transac')).values('created_at')[:1])).order_by('lastmod').last()
+            lastu = fueldump.objects.filter(book_id=b, used=1).annotate(lastmod=Subquery(
+                Transaction.objects.filter(tid=OuterRef('transac')).values('created_at')[:1])).order_by(
+                'lastmod').last()
 
             context = {
                 'role': maintemp['role'],
@@ -2058,6 +2149,7 @@ def coupondetail(request, pk):
     except ObjectDoesNotExist:
         return redirect('couponBatch')
 
+
 # This is to soft delete a book with it's leave
 @login_required(login_url='login')
 def deletebook(request, pk):
@@ -2066,9 +2158,10 @@ def deletebook(request, pk):
         b = CouponBatch.objects.filter(id=pk, used=0).values_list('bookref', flat=True)[0]
         lid = fueldump.objects.filter(book_id=b).values_list('lnum', flat=True)
         for i in lid:
-            fueldump.objects.filter(lnum = i, used=0).delete()
+            fueldump.objects.filter(lnum=i, used=0).delete()
         CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
         return redirect('couponBatch')
+
 
 @login_required(login_url='login')
 def hidebook(request, pk):
@@ -2081,6 +2174,7 @@ def hidebook(request, pk):
             CouponBatch.objects.filter(id=pk, used=0, hide=1).update(hide=0)
             return redirect('coupondetail', pk)
 
+
 # This is for the search
 @login_required(login_url='login')
 def search(request):
@@ -2088,39 +2182,41 @@ def search(request):
     role = maintemp['role']
 
     if role == "Driver":
-        if request.method=='POST':
+        if request.method == 'POST':
             sear = request.POST.get('sear')
 
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
-                                      Q(created_at__icontains=sear), requesterid = request.user.username).order_by('-created_at')[:23]
+                                      Q(created_at__icontains=sear), requesterid=request.user.username).order_by(
+            '-created_at')[:23]
         context = {
             'settings': maintemp['setting'],
-            'role':maintemp['role'],
-            'lst':lst,
+            'role': maintemp['role'],
+            'lst': lst,
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
-            'msg':maintemp['msg'],
-            'msg_co':maintemp['msg_co'],
-            'user_p':maintemp['user_p']
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
+            'user_p': maintemp['user_p']
 
         }
         return render(request, 'search.html', context)
     else:
-        if request.method=='POST':
+        if request.method == 'POST':
             sear = request.POST.get('sear')
 
         lst = Requests.objects.filter(Q(vnum__icontains=sear) | Q(requesterid__icontains=sear) |
                                       Q(created_at__icontains=sear)).order_by('-created_at')[:23]
         context = {
             'settings': maintemp['setting'],
-            'role':maintemp['role'],
-            'msg':maintemp['msg'],
-            'msg_co':maintemp['msg_co'],
-            'lst':lst,
+            'role': maintemp['role'],
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
+            'lst': lst,
             'user_p': maintemp['user_p']
 
         }
         return render(request, 'search.html', context)
+
 
 # This is not in use because the sign function is handle at the transaction logic
 @login_required(login_url='login')
@@ -2135,20 +2231,22 @@ def signed(request):
         activityReport.objects.filter(tid=tid).update(sign=sign)
         return redirect('approvalflow.html', tid)
 
+
 @login_required(login_url='login')
 def reportpdf(request):
     maintemp = preloaddata(request)
     if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
-        today = datetime.datetime.now() # This is to generate the date today.
-        template_name = "report.html" # This is the template to generate pdf
+        today = datetime.datetime.now()  # This is to generate the date today.
+        template_name = "report.html"  # This is the template to generate pdf
 
         # This is for the request
-        logs = activityReport.objects.filter(created_at__year=today.year, created_at__month=today.month).order_by("ftype", "-created_at")
+        logs = activityReport.objects.filter(created_at__year=today.year, created_at__month=today.month).order_by(
+            "ftype", "-created_at")
 
         # Report on transaction per request.
-        damount = activityReport.objects.\
-            filter(created_at__year=today.year, created_at__month=today.month).\
-            values('ftype').annotate(asum = Sum('totalamount'), lt=Sum('litre'))
+        damount = activityReport.objects. \
+            filter(created_at__year=today.year, created_at__month=today.month). \
+            values('ftype').annotate(asum=Sum('totalamount'), lt=Sum('litre'))
 
         usr = request.user.username
 
@@ -2162,7 +2260,8 @@ def reportpdf(request):
         # This is the monthly fuel consumption by vehicle report for PDF generator.
         vamount = activityReport.objects. \
             filter(created_at__year=today.year, created_at__month=today.month). \
-            values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'), consum = Avg('fconsumption'))
+            values('vnum').order_by('vnum').annotate(lt=Sum('litre'), asum=Sum('totalamount'),
+                                                     consum=Avg('fconsumption'))
 
         # This is the querset that creates the dictionary
         bamount = CouponBatch.objects.values('ftype', 'unit', 'bookref', 'serial_end', 'dim').annotate(
@@ -2171,7 +2270,6 @@ def reportpdf(request):
             minlnum=Min(Subquery(
                 fueldump.objects.filter(book_id=OuterRef('bookref')).values('lnum').filter(used=0)[0:1])),
         ).filter(bdel=0, hide=0)
-
 
         # This is for the coupon book total calculations for leaves and cost. Should be improve in the future.
         diesel = 0
@@ -2182,22 +2280,27 @@ def reportpdf(request):
             if i['quan'] == 1 and i['ftype'] == 'Diesel':
                 d = int(i['serial_end']) - i['minlnum']
                 da = i['dim'] * (d + 1)
-                diesel += d+1
+                diesel += d + 1
                 dieselam += da
             elif i['quan'] == 1 and i['ftype'] == 'Petrol':
                 p = int(i['serial_end']) - i['minlnum']
                 pa = i['dim'] * (p + 1)
-                petrol += p+1
+                petrol += p + 1
                 petrolam += pa
 
         # This for the borrowed coupon report.
-        borcoupon = Coupons.objects.annotate(credit_debit = F('credit') - F('debit')).order_by('unit', 'ftype', 'cdimension')
+        borcoupon = Coupons.objects.annotate(
+            credit_debit=F('credit') - F('debit')).order_by('unit', 'ftype',
+                                                            'cdimension')
+
+        chckempty = Coupons.objects.values_list('credit', flat=True).annotate(credit_sum=F('credit')-F('debit'))
 
         return render_to_pdf(
             template_name,
             {
                 "logs": logs,
                 "borrowed": borcoupon,
+                "chckempty": chckempty,
                 "usr": usr,
                 'settings': maintemp['setting'],
                 'dcurmark': maintemp['dcurmark'],
@@ -2212,6 +2315,7 @@ def reportpdf(request):
             },
         )
 
+
 # This is for top messages. This is not in use.
 @login_required(login_url='login')
 def msgtop(request):
@@ -2224,9 +2328,10 @@ def msgtop(request):
         #     popmsg = msg
 
     context = {
-            'popmsg': msg
+        'popmsg': msg
     }
-    return render(request,'nav.html', context)
+    return render(request, 'nav.html', context)
+
 
 @login_required(login_url='login')
 def requestEdit(request, pk):
@@ -2239,10 +2344,12 @@ def requestEdit(request, pk):
         tankcat = request.POST.get('tankcat')
         comm = request.POST.get('comm')
 
-        stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1),  ~Q(rid=rid) | Q(ret=0), Q(vnum=vnum),  ~Q(rid=rid)
+        stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1), ~Q(rid=rid) | Q(ret=0),
+                                                                         Q(vnum=vnum), ~Q(rid=rid)
                                                                          ).last()
-        mileage = Requests.objects.values_list('mread', flat=True).filter(Q(vnum=vnum), Q(ret=1), ~Q(rid=rid) | Q(ret=0),
-                                                                          Q(vnum=vnum),  ~Q(rid=rid)
+        mileage = Requests.objects.values_list('mread', flat=True).filter(Q(vnum=vnum), Q(ret=1),
+                                                                          ~Q(rid=rid) | Q(ret=0),
+                                                                          Q(vnum=vnum), ~Q(rid=rid)
                                                                           ).last()
         inmileage = Vehicle.objects.values_list('imile', flat=True).filter(vnum=vnum)[0]
         if stats == 3 or stats == None:
@@ -2253,27 +2360,28 @@ def requestEdit(request, pk):
                 if tankcat == 'empty':
                     tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
                     Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                              tankcat=tankcat,
-                                                                                              amount=float(tank),
-                                                                                              comm=comm, ret=0)
+                                                                                                       tankcat=tankcat,
+                                                                                                       amount=float(
+                                                                                                           tank),
+                                                                                                       comm=comm, ret=0)
 
                 elif tankcat == 'quarter':
                     t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
                     tankmath = float(t) / 4
                     tank = t - tankmath
                     Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                              tankcat=tankcat,
-                                                                                              amount=tank,
-                                                                                              comm=comm, ret=0)
+                                                                                                       tankcat=tankcat,
+                                                                                                       amount=tank,
+                                                                                                       comm=comm, ret=0)
 
                 elif tankcat == 'half':
                     t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
                     tankmath = float(t) / 2
                     tank = t - tankmath
                     Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                              tankcat=tankcat,
-                                                                                              amount=tank,
-                                                                                              comm=comm, ret=0)
+                                                                                                       tankcat=tankcat,
+                                                                                                       amount=tank,
+                                                                                                       comm=comm, ret=0)
 
                 elif tankcat == '3quarter':
                     t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
@@ -2281,19 +2389,20 @@ def requestEdit(request, pk):
                     tankmath = float(s) * float(t)
                     tank = t - tankmath
                     Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                              tankcat=tankcat, amount=tank,
-                                                                                              comm=comm, ret=0)
+                                                                                                       tankcat=tankcat,
+                                                                                                       amount=tank,
+                                                                                                       comm=comm, ret=0)
 
                 emial_group = Profile.objects.values_list('email', flat=True).filter(
-                            Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
+                    Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
                 recipients = list(i for i in emial_group if bool(i))
                 subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
                 text_content = 'This is an important message.'
                 html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
-                                                                                         '<br>' \
-                                                                                         f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
-                                                                                         '<br> ' \
-                                                                                         '<p> Thank you 😊 </p>'
+                                                                         '<br>' \
+                                                                         f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
+                                                                         '<br> ' \
+                                                                         '<p> Thank you 😊 </p>'
                 msg = EmailMultiAlternatives(subject, text_content, from_email, to)
                 msg.attach_alternative(html_content, "text/html")
                 EmailThreading(msg).start()
@@ -2304,7 +2413,7 @@ def requestEdit(request, pk):
     else:
         rq = Requests.objects.get(rid=pk)
         context = {
-            'rq':rq,
+            'rq': rq,
             'settings': maintemp['setting'],
             'dcurmark': maintemp['dcurmark'],
             'pcurmark': maintemp['pcurmark'],
@@ -2315,6 +2424,7 @@ def requestEdit(request, pk):
 
         }
         return render(request, 'requester_edit.html', context)
+
 
 @login_required(login_url='login')
 def activityreport(request):
@@ -2336,21 +2446,23 @@ def activityreport(request):
     }
     return render(request, 'activityreport.html', context)
 
+
 @login_required(login_url='login')
 def vehicle_detail(request, pk):
     maintemp = preloaddata(request)
 
     context = {
-            'settings': maintemp['setting'],
-            'role': maintemp['role'],
-            'dcurmark': maintemp['dcurmark'],
-            'pcurmark': maintemp['pcurmark'],
-            'user_p': maintemp['user_p'],
-            'msg': maintemp['msg'],
-            'msg_co': maintemp['msg_co']
+        'settings': maintemp['setting'],
+        'role': maintemp['role'],
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
+        'user_p': maintemp['user_p'],
+        'msg': maintemp['msg'],
+        'msg_co': maintemp['msg_co']
 
-        }
+    }
     return render(request, 'vehicle_detail.html', context)
+
 
 # This is what is handling the stock requesting email.
 @login_required(login_url='login')
@@ -2370,24 +2482,25 @@ def email_stock(request, pk):
         subject, from_email, to = subject + ' from ' + current_user, 'service.gm@undp.org', recipients
         text_content = 'This is an important message.'
         html_content = '<p>Stock request:' \
-                                        '<br>' \
-                                        f'Unit: <strong>{unit}</strong>' \
-                                        '<br> ' \
-                                        f'Dimension: <strong>{dim}</strong>' \
-                                        '<br> ' \
-                                        f'Fuel Type: <strong>{ftype}</strong>' \
-                                        '<br> ' \
-                                        f'Balance: <strong>{current_balance}</strong>' \
-                                        '<br> ' \
-                                        f'{message}' \
-                                        '<br> ' \
-                                        '<p> Thank you 😊 </p>'
+                       '<br>' \
+                       f'Unit: <strong>{unit}</strong>' \
+                       '<br> ' \
+                       f'Dimension: <strong>{dim}</strong>' \
+                       '<br> ' \
+                       f'Fuel Type: <strong>{ftype}</strong>' \
+                       '<br> ' \
+                       f'Balance: <strong>{current_balance}</strong>' \
+                       '<br> ' \
+                       f'{message}' \
+                       '<br> ' \
+                       '<p> Thank you 😊 </p>'
 
         msg = EmailMultiAlternatives(subject, text_content, from_email, to)
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
 
         return redirect('stock')
+
 
 @login_required(login_url='login')
 def setupconfig(request):
@@ -2404,7 +2517,8 @@ def setupconfig(request):
             description = request.POST.get('description')
             # logo = request.FILES['logo']
             stup = settings.objects.create(country=country, city=city, currency=currency,
-                                           address=address, phone=phone, description=description, company=company, appurl=appurl)
+                                           address=address, phone=phone, description=description, company=company,
+                                           appurl=appurl)
             stup.save()
             return redirect('setupconfig')
         elif request.method == 'POST' and len(maintemp['setting'].country) > 0:
@@ -2418,7 +2532,8 @@ def setupconfig(request):
             description = request.POST.get('description')
             # logo = request.FILES['logo']
             settings.objects.update(country=country, city=city, currency=currency,
-                                                            address=address, phone=phone, description=description, company=company, appurl=appurl)
+                                    address=address, phone=phone, description=description, company=company,
+                                    appurl=appurl)
             return redirect('setupconfig')
         else:
             appurl = settings.objects.values_list('appurl', flat=True)
@@ -2434,4 +2549,3 @@ def setupconfig(request):
 
             }
             return render(request, 'settings.html', context)
-
