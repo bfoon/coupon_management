@@ -13,7 +13,7 @@
         <h1 class="h2">{{activitydetail.vnum}}</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
           <div class="btn-group me-2">
-            <a class="btn btn-sm btn-outline-secondary" href="mailto:?subject={{activitydetail.vnum}}%20Activities&body=Please click on the link: http://{{settings.appurl}}/{{activitydetail.id}} to view the activities of {{activitydetail.vnum}}">Share</a>
+            <a class="btn btn-sm btn-outline-secondary" href="mailto:?subject={{activitydetail.vnum}}%20Activities&body=Please click on the link: {{settings.appurl}}/{{activitydetail.id}} to view the activities of {{activitydetail.vnum}}">Share</a>
             <a type="button" class="btn btn-sm btn-outline-secondary" href="/activitiesExport/{{activitydetail.id}}">Export</a>
           </div>
           <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">

@@ -2010,53 +2010,54 @@ def couponBatch(request):
         maintemp = preloaddata(request)
         role = maintemp['role']
 
-        if role == "Driver" or role == "Approver":
+        if role == "Driver" or role == "Approver" or role == "Owner":
             return redirect('404')
         else:
             if request.method == "POST":
-                book_id = request.POST.get('book_id')
-                serial_start = request.POST.get('serial_start')
-                serial_end = request.POST.get('serial_end')
-                dim = request.POST.get('dim')
-                ftype = request.POST.get('ftype')
-                unit = request.POST.get('unit')
-                bookref = uuid.uuid4().hex[:6].upper()
-                ex = CouponBatch.objects.filter(serial_start=serial_start, serial_end=serial_end, bdel=0)
-                ux = CouponBatch.objects.filter(bookref=bookref)
-                if ex:
-                    messages.info(request, f"This book exit! book - {serial_start}")
-                    return redirect('couponBatch')
-                elif ux:
-                    messages.info(request, f"This book is not unique (Hash collision!) {bookref} ")
-                    return redirect('couponBatch')
-                else:
-                    tx = int(serial_start) - 1  # This is to create the exact number of coupon leaves
-                    tm = int(serial_end) - tx  # This creates the number of leaves to be created.
-                    totalamount = tm * int(dim)  # This is the amount in cash
-                    b = []
-                    d = int(serial_start)
-                    for i in range(tm):
-                        b.append(i + d)
+                if maintemp['role'] == 'Admin' or maintemp['role'] == 'Owner':
+                    book_id = request.POST.get('book_id')
+                    serial_start = request.POST.get('serial_start')
+                    serial_end = request.POST.get('serial_end')
+                    dim = request.POST.get('dim')
+                    ftype = request.POST.get('ftype')
+                    unit = request.POST.get('unit')
+                    bookref = uuid.uuid4().hex[:6].upper()
+                    ex = CouponBatch.objects.filter(serial_start=serial_start, serial_end=serial_end, bdel=0)
+                    ux = CouponBatch.objects.filter(bookref=bookref)
+                    if ex:
+                        messages.info(request, f"This book exit! book - {serial_start}")
+                        return redirect('couponBatch')
+                    elif ux:
+                        messages.info(request, f"This book is not unique (Hash collision!) {bookref} ")
+                        return redirect('couponBatch')
+                    else:
+                        tx = int(serial_start) - 1  # This is to create the exact number of coupon leaves
+                        tm = int(serial_end) - tx  # This creates the number of leaves to be created.
+                        totalamount = tm * int(dim)  # This is the amount in cash
+                        b = []
+                        d = int(serial_start)
+                        for i in range(tm):
+                            b.append(i + d)
 
-                    # This is what creates the book
-                    book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
-                                                      dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0,
-                                                      bdel=0,
-                                                      hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
+                        # This is what creates the book
+                        book = CouponBatch.objects.create(book_id=book_id, serial_start=serial_start, serial_end=serial_end,
+                                                          dim=dim, ftype=ftype, unit=unit, totalAmount=totalamount, used=0,
+                                                          bdel=0,
+                                                          hide=1, rbal=0, status=0, creator=current_user, bookref=bookref)
 
-                    book.save();
+                        book.save();
 
-                    # This is what create the leaves on the fuel dump table
-                    fueldump.objects.bulk_create(
-                        [fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
-                                  dim=dim, used=0, trans_id=0, transac=0) for e in b])
-                    return redirect("couponBatch")
+                        # This is what create the leaves on the fuel dump table
+                        fueldump.objects.bulk_create(
+                            [fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
+                                      dim=dim, used=0, trans_id=0, transac=0) for e in b])
+                        return redirect("couponBatch")
 
             elif role == "Owner" or role == "Admin":
-                now = datetime.datetime.now()
-                one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
-                month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
-                two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
+                # now = datetime.datetime.now()
+                # one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
+                # month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
+                # two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
 
                 # # This is what is handling the book render.
                 books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
@@ -2082,9 +2083,9 @@ def couponBatch(request):
 
             elif role == "Issuer":
                 # This is for calculating months
-                now = datetime.datetime.now()
-                one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
-                month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
+                # now = datetime.datetime.now()
+                # one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
+                # month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
 
                 # This is what is handling the book render.
                 books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
@@ -2116,7 +2117,7 @@ def coupondetail(request, pk):
     try:
         maintemp = preloaddata(request)
         role = maintemp['role']
-        if role == "Driver" or role == "Issuer" or role == "Approver":
+        if role == "Driver" or role == "Issuer" or role == "Approver" or role == "Owner":
             return redirect('404')
         else:
 
@@ -2429,56 +2430,59 @@ def requestEdit(request, pk):
 @login_required(login_url='login')
 def activityreport(request):
     maintemp = preloaddata(request)
-    logs = activityReport.objects.all().order_by("-created_at")
-    casham = activityReport.objects.aggregate(Sum('totalamount'))
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
+        logs = activityReport.objects.all().order_by("-created_at")
+        casham = activityReport.objects.aggregate(Sum('totalamount'))
 
-    context = {
-        'settings': maintemp['setting'],
-        'role': maintemp['role'],
-        'logs': logs,
-        'casham': casham,
-        'dcurmark': maintemp['dcurmark'],
-        'pcurmark': maintemp['pcurmark'],
-        'user_p': maintemp['user_p'],
-        'msg': maintemp['msg'],
-        'msg_co': maintemp['msg_co']
+        context = {
+            'settings': maintemp['setting'],
+            'role': maintemp['role'],
+            'logs': logs,
+            'casham': casham,
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
+            'user_p': maintemp['user_p'],
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co']
 
-    }
-    return render(request, 'activityreport.html', context)
+        }
+        return render(request, 'activityreport.html', context)
 
 
 @login_required(login_url='login')
 def activityDetail(request, pk):
     maintemp = preloaddata(request)
-    activitydtl = activityReport.objects.all().filter(id=pk)[0]
-    actlist = activityReport.objects.filter(vnum=activitydtl.vnum)
-    actchart = activityReport.objects.filter(vnum=activitydtl.vnum).\
-        annotate(month=TruncMonth('created_at')).\
-        values('month').\
-        annotate(total_litre=Sum('litre')).order_by('month')
-    context = {
-        'activitydetail': activitydtl,
-        'actlist': actlist,
-        'actchart': actchart,
-        'settings': maintemp['setting'],
-        'role': maintemp['role'],
-        'dcurmark': maintemp['dcurmark'],
-        'pcurmark': maintemp['pcurmark'],
-        'user_p': maintemp['user_p'],
-        'msg': maintemp['msg'],
-        'msg_co': maintemp['msg_co']
-    }
-    return render(request, 'activitydetail.html', context)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
+        activitydtl = activityReport.objects.all().filter(id=pk)[0]
+        actlist = activityReport.objects.filter(vnum=activitydtl.vnum)
+        actchart = activityReport.objects.filter(vnum=activitydtl.vnum).\
+            annotate(month=TruncMonth('created_at')).\
+            values('month').\
+            annotate(total_litre=Sum('litre')).order_by('month')
+        context = {
+            'activitydetail': activitydtl,
+            'actlist': actlist,
+            'actchart': actchart,
+            'settings': maintemp['setting'],
+            'role': maintemp['role'],
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
+            'user_p': maintemp['user_p'],
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co']
+        }
+        return render(request, 'activitydetail.html', context)
 
 @login_required(login_url='login')
 def activitiesExport(request, pk):
     maintemp = preloaddata(request)
-    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
         responsed = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         responsed['Content-Disposition'] = f'attachment; filename="Activities_Report_{now}.csv"'
         writer = csv.writer(responsed)
-        result = activityReport.objects.all().filter(id=pk).order_by('created_at')
+        activitydtl = activityReport.objects.all().filter(id=pk)[0]
+        result = activityReport.objects.all().filter(vnum=activitydtl.vnum).order_by('created_at')
         writer.writerow(['Serial no', 'Litre', 'Mileage', 'Consumption', 'Unit','Requester','Approver','Issuer',
                          'Comment','Sign', 'Dimension', f"Cost({maintemp['setting'].currency})", 'note','Date'])
         for r in result:
