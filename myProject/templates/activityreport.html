@@ -40,7 +40,7 @@ cellspacing="0" width="100%">
   <tbody>
 
       {% for log in logs %}
-      <th scope="row"><a href="#" class="text-dark">{{log.vnum}}</a></th>
+      <th scope="row"><a href="/activityDetail/{{log.id}}" class="text-dark">{{log.vnum}}</a></th>
       <td>
         <span class="text-danger">
           <i class="me-1"></i><span>{{log.totalamount }}</span>

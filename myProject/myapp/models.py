@@ -216,9 +216,9 @@ class activityReport(models.Model):
     tid = models.CharField(max_length=100)
     serial_start = models.CharField(max_length=100)  # This is the first serial number on the first page
     serial_end = models.CharField(max_length=100)  # This is the last serial number on the last page
-    vnum = models.CharField(max_length=100)
-    litre = models.FloatField(blank=True)
-    mread = models.PositiveIntegerField()
+    vnum = models.CharField(max_length=100) # This is the vehicle number of the requesting vehicle
+    litre = models.FloatField(blank=True) # This is the liter requested
+    mread = models.PositiveIntegerField() # This is the mileage read
     totalamount = models.FloatField(blank=True)  # The total price of litres in dalasi
     unit = models.CharField(max_length=1000)  # This is for different units
     approverid = models.CharField(max_length=1000)

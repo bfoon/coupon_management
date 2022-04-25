@@ -2293,7 +2293,7 @@ def reportpdf(request):
             credit_debit=F('credit') - F('debit')).order_by('unit', 'ftype',
                                                             'cdimension')
 
-        chckempty = Coupons.objects.values_list('credit', flat=True).annotate(credit_sum=F('credit')-F('debit'))
+        chckempty = Coupons.objects.values_list('credit', flat=True).annotate(credit_sum=F('credit') - F('debit'))
 
         return render_to_pdf(
             template_name,
@@ -2445,6 +2445,30 @@ def activityreport(request):
 
     }
     return render(request, 'activityreport.html', context)
+
+
+@login_required(login_url='login')
+def activityDetail(request, pk):
+    maintemp = preloaddata(request)
+    activitydtl = activityReport.objects.all().filter(id=pk)[0]
+    actlist = activityReport.objects.filter(vnum=activitydtl.vnum)
+    actchart = activityReport.objects.filter(vnum=activitydtl.vnum).\
+        annotate(month=TruncMonth('created_at')).\
+        values('month').\
+        annotate(total_litre=Sum('litre')).order_by('month')
+    context = {
+        'activitydetail': activitydtl,
+        'actlist': actlist,
+        'actchart': actchart,
+        'settings': maintemp['setting'],
+        'role': maintemp['role'],
+        'dcurmark': maintemp['dcurmark'],
+        'pcurmark': maintemp['pcurmark'],
+        'user_p': maintemp['user_p'],
+        'msg': maintemp['msg'],
+        'msg_co': maintemp['msg_co']
+    }
+    return render(request, 'activitydetail.html', context)
 
 
 @login_required(login_url='login')
