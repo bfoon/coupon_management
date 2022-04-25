@@ -2470,6 +2470,22 @@ def activityDetail(request, pk):
     }
     return render(request, 'activitydetail.html', context)
 
+@login_required(login_url='login')
+def activitiesExport(request):
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+        responsed = HttpResponse(content_type='text/csv')
+        now = time.strftime('%d-%m-%Y %H:%M:%S')
+        responsed['Content-Disposition'] = f'attachment; filename="Activities_Report_{now}.csv"'
+        writer = csv.writer(responsed)
+        result = activityReport.objects.all().order_by('created_at')
+        writer.writerow(['Serial no', 'Litre', 'Mileage', 'Consumption', 'Unit','Requester','Approver','Issuer',
+                         'Comment','Sign', 'Dimension', f"Cost({maintemp['setting'].currency})", 'note','Date'])
+        for r in result:
+            writer.writerow([f'{r.serial_start} - {r.serial_end}', r.litre, r.mread, r.fconsumption,
+                             r.unit, r.requesterid, r.approverid, r.issueid,
+                             r.comm, r.sign, r.cdimension, r.totalamount, r.note, r.created_at.strftime('%Y-%m-%d')])
+        return responsed
 
 @login_required(login_url='login')
 def vehicle_detail(request, pk):

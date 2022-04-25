@@ -53,6 +53,7 @@ urlpatterns = [
     path('reportpdf', views.reportpdf, name='reportpdf'),
     path('activityreport', views.activityreport, name='activityreport'),
     path('activityDetail/<str:pk>', views.activityDetail, name='activityDetail'),
+    path('activitiesExport', views.activitiesExport, name='activitiesExport'),
     path('signed', views.signed, name='signed'),
     path('msgtop', views.msgtop, name='msgtop'),
     path('email_stock/<str:pk>', views.email_stock, name='email_stock'),
