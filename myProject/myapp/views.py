@@ -1813,7 +1813,12 @@ def user_profile(request, pk):
                 pic = Profile.objects.get(user=current_user_id)
                 ug = UserGroup.objects.exclude(groupname=rl)
                 tranam = Requests.objects.filter(requesterid=current_user, ret=0).count()
-                vehdetail = Vehicle.objects.filter(driver__user=current_user_id).all()[0]  # ForeignKey relationship
+                try:
+                     vehdetail = Vehicle.objects.filter(driver__user=current_user_id).all()[0]  # ForeignKey relationship
+
+                except IndexError:
+                    vehdetail = "NA"
+
                 tranlast = Requests.objects.filter(requesterid=current_user, ret=0).last()
                 tranpen = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0).count()
                 trantotal = activityReport.objects.values_list('totalamount', flat=True).filter(
