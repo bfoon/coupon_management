@@ -548,8 +548,8 @@ def requester(request):
     current_user_id = request.user.id
     role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
-
-    vlist = Vehicle.objects.values('vnum', 'ftype')
+    # defualtveh = Vehicle.objects.values('vnum', 'ftype')
+    vlist = Vehicle.objects.all()
     if role[0] == "Driver" or role[0] == "Admin":
         if request.method == 'POST':
             vnum = request.POST.get('vnum')
@@ -1755,6 +1755,7 @@ def user_profile(request, pk):
                 rl = Profile.objects.values_list('role', flat=True).get(id=pk)
                 pic = Profile.objects.get(id=pk)
                 ug = UserGroup.objects.exclude(groupname=rl)
+
                 tranam = activityReport.objects.filter(requesterid=pic).count()
                 tranlast = activityReport.objects.filter(requesterid=pic).last()
                 tranpen = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=pic, ret=0).count()
@@ -1812,6 +1813,7 @@ def user_profile(request, pk):
                 pic = Profile.objects.get(user=current_user_id)
                 ug = UserGroup.objects.exclude(groupname=rl)
                 tranam = Requests.objects.filter(requesterid=current_user, ret=0).count()
+                vehdetail = Vehicle.objects.filter(driver__user=current_user_id).all()[0]  # ForeignKey relationship
                 tranlast = Requests.objects.filter(requesterid=current_user, ret=0).last()
                 tranpen = Requests.objects.filter(Q(status=1) | Q(status=2), requesterid=current_user, ret=0).count()
                 trantotal = activityReport.objects.values_list('totalamount', flat=True).filter(
@@ -1820,6 +1822,7 @@ def user_profile(request, pk):
                 context = {
                     'prof': prof_us,
                     'ug': ug,
+                    'vehdetail': vehdetail,
                     'trantotal': trantotal,
                     'tranam': tranam,
                     'tranlast': tranlast,

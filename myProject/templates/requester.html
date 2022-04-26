@@ -1,6 +1,7 @@
 {% include 'base.html' %}
 
 {% block content %}
+{% load to_space %}
 {% load static %}
  <ul class="container">
         <div class="row">
@@ -34,7 +35,7 @@
 
           <div class="form-group">
             <label for="requesterid" class="col-form-label">Requerter:</label>
-            <input type="text" class="form-control" id="requesterid" name="requesterid" placeholder="{{user.first_name}} {{user.last_name}}" readonly>
+            <input type="text" class="form-control" id="requesterid" name="requesterid" style="text-transform:uppercase;" placeholder="{{user.username|to_space}}" readonly>
         </div>
 <!--        {{ stats }}-->
         <div class="form-group">
@@ -42,7 +43,12 @@
             <select class="form-control" id="vnum" name="vnum" style="text-transform:uppercase;" required>
                 <option></option>
                 {% for v in vlist %}
-                        <option value="{{v.vnum}}" style="text-transform:uppercase;">{{v.vnum}}</option>
+                {% if v.driver.user.username == user.username %}
+                        <option class="fa fa-key" value="{{v.vnum}}" style="text-transform:uppercase;" selected>{{v.vnum}}
+                            </option>
+                {% else %}
+                <option value="{{v.vnum}}" style="text-transform:uppercase;">{{v.vnum}}</option>
+                {% endif %}
                 {% endfor %}
             </select>
         </div>
