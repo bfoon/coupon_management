@@ -75,8 +75,51 @@
 
             <a href="/approvalflow/{{ rq.rid }}" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
             {% if rq.ret == 1 and rq.requesterid == user.username %}
-            <input type="submit" class="btn btn-primary" value="Edit"/>
+            <a href="#" type="button" class="btn btn-primary" data-toggle="modal" data-target="#editModal">Edit</a>
+
+            <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="editLabel">Edit Request <i class="fa fa-pen" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action={% url 'ret' rq.rid %}>
+                                    {% csrf_token %}
+                                    <strong> Vehicle No:</strong> {{rq.vnum}}
+                                    <br>
+                                    <strong>Fuel Type:</strong> {{rq.ftype}}
+                                    <br>
+                                    <strong>Liters requested:</strong> {{rq.amount}}
+                                    <br>
+                                    <strong>Milleage:</strong> {{rq.mread}}
+                                    <br>
+                                    <strong>Request date:</strong> {{rq.created_at}}
+                                    <br>
+                                    <strong>Note:</strong> {{rq.comm}}
+                                  <div class="form-group">
+                                    <label for="message" class="col-form-label">comment:</label>
+                                      <textarea type="text" class="form-control" id="message" name="message" ></textarea>
+                                  </div>
+<!--                                <input name="rid" value="{{aflow.rid}}" hidden>-->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+<!--                              <a href="/approve/{{ aflow.rid }}" class="btn btn-primary btn-sm active" type="submit">Approve</a>-->
+                                  <input type="submit" value="Confirm" class="btn btn-primary float-right"/>
+                                </form>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
             {% endif %}
+
+
+
+
         </div>
         </form>
     </div>
@@ -86,6 +129,11 @@
 </div>
 </ul>
 </div>
+
+<script>
+    var comm = document.getElementById("comm").value;
+
+</script>
 
 {% include 'footer.html' %}
 

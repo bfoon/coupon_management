@@ -5,8 +5,7 @@
 {% load to_space %}
 
 
-
-<div class="container-fluid">
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     <div class="container">
         <div class="row">
             <div class="col-md-12">
@@ -187,18 +186,137 @@
                 <a href="/comments" type="button" class="btn btn-secondary btn-sm"> << Back</a>
 
                   {% elif aflow.status == 1 and role == 'Approver' and aflow.ret == 0 or aflow.status == 1 and aflow.ret == 0 and role == 'Admin' %}
-                <a href="/approve/{{ aflow.rid }}" class="btn btn-primary btn-sm active" role="button" aria-pressed="true">Approve</a>
+                <a href="#" class="btn btn-primary btn-sm active" role="button" aria-pressed="true" data-toggle="modal" data-target="#approvalModal">Approve</a>
                     |
+                   <div class="modal fade" id="approvalModal" tabindex="-1" role="dialog" aria-labelledby="approvalLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="approvalLabel">Approve Request <i class="fa fa-check" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action={% url 'approve' aflow.rid %}>
+                                    {% csrf_token %}
+                                    <strong> Vehicle No:</strong> {{aflow.vnum}}
+                                    <br>
+                                    <strong>Fuel Type:</strong> {{aflow.ftype}}
+                                    <br>
+                                    <strong>Liters requested:</strong> {{aflow.amount}}
+                                    <br>
+                                    <strong>Milleage:</strong> {{aflow.mread}}
+                                    <br>
+                                    <strong>Request date:</strong> {{aflow.created_at}}
+                                    <br>
+                                    <strong>Note:</strong> {{aflow.comm}}
+                                  <div class="form-group">
+                                    <label for="message" class="col-form-label">comment:</label>
+                                      <textarea type="text" class="form-control" id="message" name="message" ></textarea>
+                                  </div>
+<!--                                <input name="rid" value="{{aflow.rid}}" hidden>-->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+<!--                              <a href="/approve/{{ aflow.rid }}" class="btn btn-primary btn-sm active" type="submit">Approve</a>-->
+                                  <input type="submit" value="Confirm" class="btn btn-success float-right"/>
+                                </form>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+
+
+
                   {% if aflow.ret == 0 %}
-                      <a href="/ret/{{ aflow.rid }}" class="btn btn-warning btn-sm active" role="button" aria-pressed="true">Return</a>
+                      <a href="#" class="btn btn-warning btn-sm active" role="button" aria-pressed="true" data-toggle="modal" data-target="#returnModal">Return</a>
                   |
+
+                  <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="returnLabel">Return Request <i class="fa fa-check" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action={% url 'ret' aflow.rid %}>
+                                    {% csrf_token %}
+                                    <strong> Vehicle No:</strong> {{aflow.vnum}}
+                                    <br>
+                                    <strong>Fuel Type:</strong> {{aflow.ftype}}
+                                    <br>
+                                    <strong>Liters requested:</strong> {{aflow.amount}}
+                                    <br>
+                                    <strong>Milleage:</strong> {{aflow.mread}}
+                                    <br>
+                                    <strong>Request date:</strong> {{aflow.created_at}}
+                                    <br>
+                                    <strong>Note:</strong> {{aflow.comm}}
+                                  <div class="form-group">
+                                    <label for="message" class="col-form-label">comment:</label>
+                                      <textarea type="text" class="form-control" id="message" name="message" ></textarea>
+                                  </div>
+<!--                                <input name="rid" value="{{aflow.rid}}" hidden>-->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <input type="submit" value="Confirm" class="btn btn-danger float-right"/>
+                                </form>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+
                   {% endif %}
                <a href="/inbox" type="button" class="btn btn-secondary btn-sm" >Cancel</a>
                   {% elif aflow.status == 2 and role == 'Issuer' or aflow.status == 2 and role == 'Admin'%}
                <a href="/transac/{{ aflow.rid }}" class="btn btn-success btn-sm active" role="button" aria-pressed="true">Issue</a>
                   |
-                  <a href="/ret/{{ aflow.rid }}" class="btn btn-danger btn-sm active" role="button" aria-pressed="true">Return</a>
+                  <a href="#" class="btn btn-danger btn-sm active" role="button" aria-pressed="true" data-toggle="modal" data-target="#returnModal">Return</a>
                   |
+                  <div class="modal fade" id="returnModal" tabindex="-1" role="dialog" aria-labelledby="returnLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="returnLabel">Return Request <i class="fa fa-check" aria-hidden="true"></i></h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <form method="POST" action={% url 'ret' aflow.rid %}>
+                                    {% csrf_token %}
+                                    <strong> Vehicle No:</strong> {{aflow.vnum}}
+                                    <br>
+                                    <strong>Fuel Type:</strong> {{aflow.ftype}}
+                                    <br>
+                                    <strong>Liters requested:</strong> {{aflow.amount}}
+                                    <br>
+                                    <strong>Milleage:</strong> {{aflow.mread}}
+                                    <br>
+                                    <strong>Request date:</strong> {{aflow.created_at}}
+                                    <br>
+                                    <strong>Note:</strong> {{aflow.comm}}
+                                  <div class="form-group">
+                                    <label for="message" class="col-form-label">comment:</label>
+                                      <textarea type="text" class="form-control" id="message" name="message" ></textarea>
+                                  </div>
+<!--                                <input name="rid" value="{{aflow.rid}}" hidden>-->
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+<!--                              <a href="/approve/{{ aflow.rid }}" class="btn btn-primary btn-sm active" type="submit">Approve</a>-->
+                                  <input type="submit" value="Confirm" class="btn btn-danger float-right"/>
+                                </form>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+                              </div>
+
                <a href="/inbox" type="button" class="btn btn-secondary btn-sm" id="nav-profile">Cancel</a>
                   {% elif aflow.status == 3%}
                 <a href="/inbox" type="button" class="btn btn-secondary btn-sm">Close</a>
@@ -206,10 +324,13 @@
                   <button type="button"class="btn btn-info btn-sm" data-toggle="modal" data-target="#uploadreceipts">Attachment</button>
                   {% endif %}
 
+
+
  <!-- Button trigger modal -->
 <button type="button" class="btn btn-success float-right btn-circle btn-md" data-toggle="modal" data-target="#exampleModalCenter">
     <i class="fa fa-receipt" aria-hidden="true"></i>
 </button>
+
 
 <style>
 @media screen {

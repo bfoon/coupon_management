@@ -705,6 +705,12 @@ def approve(request, pk):
     if role[0] == "Approver":
         Requests.objects.filter(rid=pk, status=1).update(status=2,
                                                          ret=0, approverid=current_user)
+        if request.method == "POST":
+            message = request.POST.get('message')
+            if len(message) != 0:
+                mg = comment.objects.create(message=message, username=current_user, rid=pk)
+                mg.save();
+
         try:
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', recipients
@@ -737,6 +743,11 @@ def approve(request, pk):
             return redirect('inbox')
     elif role[0] == "Admin":
         Requests.objects.filter(rid=pk).update(status=2, ret=0, approverid=current_user)
+        if request.method == "POST":
+            message = request.POST.get('message')
+            if len(message) != 0:
+                mg = comment.objects.create(message=message, sername=current_user, rid=pk)
+                mg.save();
         try:
             subject, from_email, to = 'Coupon requested for ' + str(
                 vnum) + ' Approved by ' + current_user, 'service.gm@undp.org', recipients
@@ -786,6 +797,11 @@ def ret(request, pk):
             .values_list('email', flat=True)[0]
     if role[0] == "Approver":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
+        if request.method == "POST":
+            message = request.POST.get('message')
+            if len(message) != 0:
+                mg = comment.objects.create(message=message, sername=current_user, rid=pk)
+                mg.save();
 
         subject, from_email, to = 'Coupon requested for ' + str(
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
@@ -804,6 +820,11 @@ def ret(request, pk):
         return redirect('inbox')
     elif role[0] == "Issuer":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
+        if request.method == "POST":
+            message = request.POST.get('message')
+            if len(message) != 0:
+                mg = comment.objects.create(message=message, sername=current_user, rid=pk)
+                mg.save();
 
         subject, from_email, to = 'Coupon requested for ' + str(
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
@@ -821,6 +842,11 @@ def ret(request, pk):
         return redirect('inbox')
     elif role[0] == "Admin":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
+        if request.method == "POST":
+            message = request.POST.get('message')
+            if len(message) != 0:
+                mg = comment.objects.create(message=message, username=current_user, rid=pk)
+                mg.save();
 
         subject, from_email, to = 'Coupon requested for ' + str(
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
@@ -2352,6 +2378,12 @@ def requestEdit(request, pk):
         vnum = request.POST.get('vnum')
         tankcat = request.POST.get('tankcat')
         comm = request.POST.get('comm')
+        # This is for the comment section
+        message = request.POST.get('message')
+        if len(message) != 0:
+            mg = comment.objects.create(message=message, username=current_user, rid=rid)
+            mg.save();
+        # The comment section ends here!!
 
         stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1), ~Q(rid=rid) | Q(ret=0),
                                                                          Q(vnum=vnum), ~Q(rid=rid)

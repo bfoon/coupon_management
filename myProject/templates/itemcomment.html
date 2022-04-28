@@ -2,6 +2,7 @@
 {% load humanize %}
 {% block content %}
 {% load static %}
+{% load to_space %}
 <div class="container">
 <div class="row bootstrap snippets bootdeys">
     <div class="col-md-12 col-sm-12">
@@ -33,11 +34,12 @@
                             <a href="/approvalflow/{{ i.rid }}" class="pull-left">
                                 <img src="/media/{{ i.pic }}" alt="" class="img-circle zoom">
                             </a>
+                            &nbsp;
                             <div class="media-body">
                                 <span class="text-muted float-right">
                                     <small class="text-muted"> {{i.created_at | naturaltime}}</small>
                                 </span>
-                                <strong class="text-success"> @{{i.username}}</strong>
+                                <strong class="text-success" style="text-transform: capitalize;"> @{{i.username | to_space}}</strong>
                                 <p>
                                     {{i.message}} <a href="/approvalflow/{{ i.rid }}">#{{i.requ}} </a>.
                                 </p>
