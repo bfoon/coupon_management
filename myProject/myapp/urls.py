@@ -47,6 +47,7 @@ urlpatterns = [
     path('approvalflow/search', views.search, name='search'),
     path('coupondetail/search', views.search, name='search'),
     path('coupondetail/<str:pk>', views.coupondetail, name='coupondetail'),
+    path('couponprint', views.couponprint, name='couponprint'),
     path('bookreport/<str:pk>', views.bookreport, name='bookreport'),
     path('deletebook/<str:pk>', views.deletebook, name='deletebook'),
     path('couponbooksreport', views.couponbooksreport, name='couponbooksreport'),

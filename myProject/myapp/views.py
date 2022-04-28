@@ -2184,6 +2184,9 @@ def coupondetail(request, pk):
     except ObjectDoesNotExist:
         return redirect('couponBatch')
 
+@login_required(login_url='login')
+def couponprint(request):
+    return render(request, 'coupons_for_fuel.html')
 
 # This is to soft delete a book with it's leave
 @login_required(login_url='login')
