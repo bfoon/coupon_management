@@ -109,6 +109,8 @@ def preloaddata(request):
         'pcurmark': pcurmark,
         'role': role[0],
         'user_p': user_p,
+        'current_user': current_user,
+        'current_user_id': current_user_id,
         'msg': msg,
         'msg_co': msg_co
 
@@ -298,17 +300,14 @@ def logout(request):
     auth.logout(request)
     return redirect('/')
 
-
 # This is what handles the stock.
 @login_required(login_url='login')
 def stock(request):
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
-    if role[0] == "Driver":
+    if maintemp['role'] == "Driver":
         messages.info(request, "You don't have permission on this page")
         return redirect('404')
-    elif role[0] == "":
+    elif maintemp['role'] == "":
         messages.info(request, "You don't have permission on this page")
         return redirect('404')
     else:
@@ -408,7 +407,6 @@ def stock(request):
             }
             return render(request, 'stock.html', context)
 
-
 @login_required(login_url='login')
 def creditStock(request, pk):
     maintemp = preloaddata(request)
@@ -448,25 +446,21 @@ def creditStock(request, pk):
     else:
         return redirect(perm)
 
-
 @login_required(login_url='login')
 def requestlist(request):
     current_user_id = request.user.id
     user_p = Profile.objects.get(user=current_user_id)
     return render(request, 'requestlist.html', {'user_p': user_p})
 
-
 @login_required(login_url='login')
 def inbox(request):
     today = datetime.datetime.now()
     current_user = request.user.username
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
-    if role[0] == "":
+    if maintemp['role'] == "":
         messages.info(request, "You don't have permission on this page")
         return redirect('404')
-    elif role[0] == "Driver":
+    elif maintemp['role'] == "Driver":
         unapprove = Requests.objects.filter(Q(status=1, ret=0) | Q(status=1, ret=1)).filter(requesterid=current_user)
         paginator_una = Paginator(unapprove, 10)  # Show 10 contacts per page.
         page_number_una = request.GET.get('page')
@@ -545,12 +539,9 @@ def inbox(request):
 @login_required(login_url='login')
 def requester(request):
     current_user = request.user.username
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
-    # defualtveh = Vehicle.objects.values('vnum', 'ftype')
     vlist = Vehicle.objects.all()
-    if role[0] == "Driver" or role[0] == "Admin":
+    if maintemp['role'] == "Driver" or maintemp['role'] == "Admin":
         if request.method == 'POST':
             vnum = request.POST.get('vnum')
             comm = request.POST.get('comm')
@@ -700,9 +691,7 @@ def approve(request, pk):
     email = \
         Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
             .values_list('email', flat=True)[0]
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
-    if role[0] == "Approver":
+    if maintemp['role'] == "Approver":
         Requests.objects.filter(rid=pk, status=1).update(status=2,
                                                          ret=0, approverid=current_user)
         if request.method == "POST":
@@ -741,7 +730,7 @@ def approve(request, pk):
         except TimeoutError:
             messages.warning(request, "Unable to send email but request Approved!!")
             return redirect('inbox')
-    elif role[0] == "Admin":
+    elif maintemp['role'] == "Admin":
         Requests.objects.filter(rid=pk).update(status=2, ret=0, approverid=current_user)
         if request.method == "POST":
             message = request.POST.get('message')
@@ -790,12 +779,14 @@ def ret(request, pk):
     current_user = request.user.username
     vnum = Requests.objects.values_list('vnum', flat=True).get(rid=pk)
     req = Requests.objects.values_list('requesterid', flat=True).get(rid=pk)
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     email = \
         Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1=req, status='active') \
             .values_list('email', flat=True)[0]
-    if role[0] == "Approver":
+    email2 = \
+        Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(user1 = maintemp['current_user'], status='active') \
+            .values_list('email', flat=True)[0]
+
+    if maintemp['role'] == "Approver":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
         if request.method == "POST":
             message = request.POST.get('message')
@@ -812,13 +803,25 @@ def ret(request, pk):
                        '<br>' \
                        f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
                        '<p> Thank you 😊 </p>'
-        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])  # Am having error on this line saying
-        # 'EmailMultiAlternatives' object has no attribute 'user'
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
+        if req != maintemp['current_user']:
+            subject, from_email, to = 'Coupon requested for ' + str(
+                vnum) + ' Returned by ' + req, 'service.gm@undp.org', email2
+            text_content = 'This is an important message.'
+            html_content = f'<p>Dear {req}, </p>' \
+                           f'&nbsp; &nbsp;'f' &nbsp; &nbsp; {req} coupon request was returned by Approver <strong>' + current_user + \
+                           '</strong> go to the link below.' \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
 
         return redirect('inbox')
-    elif role[0] == "Issuer":
+    elif maintemp['role'] == "Issuer":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
         if request.method == "POST":
             message = request.POST.get('message')
@@ -839,8 +842,22 @@ def ret(request, pk):
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
 
+        if req != maintemp['current_user']:
+            subject, from_email, to = 'Coupon requested for ' + str(
+                vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email2
+            text_content = 'This is an important message.'
+            html_content = f'<p>Dear {current_user}, </p>' \
+                           '&nbsp; &nbsp;'f' &nbsp; &nbsp; {req} coupon request was returned by Issuer <strong> {current_user}' \
+                           '</strong> go to the link below.' \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
+
         return redirect('inbox')
-    elif role[0] == "Admin":
+    elif maintemp['role'] == "Admin":
         Requests.objects.filter(rid=pk).update(status=1, ret=1, retid=current_user)
         if request.method == "POST":
             message = request.POST.get('message')
@@ -852,7 +869,7 @@ def ret(request, pk):
             vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
         html_content = f'<p>Dear {req}, </p>' \
-                       '&nbsp; &nbsp;'' &nbsp; &nbsp; Your coupon request was returned by <strong>' + current_user + \
+                       '&nbsp; &nbsp;'f' &nbsp; &nbsp; Your coupon request was returned by <strong>{current_user}' \
                        '</strong> go to the link below.' \
                        '<br>' \
                        f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
@@ -860,6 +877,20 @@ def ret(request, pk):
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
+
+        if req != maintemp['current_user']:
+            subject, from_email, to = 'Coupon requested for ' + str(
+                vnum) + ' Returned by ' + current_user, 'service.gm@undp.org', email2
+            text_content = 'This is an important message.'
+            html_content = f'<p>Dear {current_user}, </p>' \
+                           '&nbsp; &nbsp;'f' &nbsp; &nbsp; {req} coupon request was returned by <strong> {current_user}' \
+                           '</strong> go to the link below.' \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/approvalflow/{pk}">Request Item</a></p>' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
 
         return redirect('inbox')
     else:
@@ -1120,7 +1151,7 @@ def requests(request):
         r = Requests.objects.filter(Q(status=1, ret=0) |
                                     Q(status=1, ret=1) |
                                     Q(status=2, ret=0) |
-                                    Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-created_at')
+                                    Q(status=3, ret=0)).filter(requesterid=current_user).order_by('-datemodified')
         context = {
             'requests': r,
             'settings': maintemp['setting'],
@@ -1137,7 +1168,7 @@ def requests(request):
             Q(status=1, ret=0) |
             Q(status=1, ret=1) |
             Q(status=2, ret=0) |
-            Q(status=3, ret=0)).order_by('-created_at')
+            Q(status=3, ret=0)).order_by('-datemodified')
         context = {
             'requests': r,
             'settings': maintemp['setting'],
@@ -1179,12 +1210,9 @@ def nav(request):
     }
     return render(request, 'nav.html', context)
 
-
 @login_required(login_url='login')
 def comments(request):
     current_user = request.user.username
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
     if request.method == 'POST':
         rid = request.POST.get('rid')
@@ -1203,7 +1231,7 @@ def comments(request):
 
         subject, from_email, to = ' Comment by ' + current_user, 'service.gm@undp.org', email
         text_content = 'This is an important message.'
-        html_content = message + '<p> go to the link below.' \
+        html_content = f'{message} <br> <p> go to the link below.' \
                                  '<br>' \
                                  f'<a href="{maintemp["server_url"]}/comments">Request Item</a></p>' \
                                  '<br> ' \
@@ -1211,9 +1239,20 @@ def comments(request):
         msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
         msg.attach_alternative(html_content, "text/html")
         EmailThreading(msg).start()
+        if requestid[0] != maintemp['current_user']:
+            subject, from_email, to = f' Comment by  {current_user}', 'service.gm@undp.org', email2
+            text_content = 'This is an important message.'
+            html_content = f'{message} <br> <p> go to the link below.' \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/comments">Request Item</a></p>' \
+                           '<br> ' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
 
         return redirect('comments')
-    elif role[0] == "Driver":
+    elif maintemp['role'] == "Driver":
 
         req = Requests.objects.filter(Q(ret=0) | Q(ret=1),
                                       Q(status=1) | Q(status=2),
@@ -1279,10 +1318,8 @@ def comments(request):
         }
         return render(request, 'comment.html', context)
 
-
 @login_required(login_url='login')
 def itemcomment(request, pk):
-    current_user = request.user.username
     maintemp = preloaddata(request)
     imgid = []
     req = Requests.objects.filter(Q(ret=0) | Q(ret=1))
@@ -1311,10 +1348,8 @@ def itemcomment(request, pk):
 
 @login_required(login_url='login')
 def vehicles(request):
-    current_user_id = request.user.id
-    role = Profile.objects.values_list('role', flat=True).filter(user=current_user_id)
     maintemp = preloaddata(request)
-    if role[0] == 'Admin' or role[0] == 'Issuer':
+    if maintemp['role'] == 'Admin':
         if request.method == 'POST':
             vnum = request.POST.get('vnum')
             ftype = request.POST.get('ftype')
@@ -1407,7 +1442,7 @@ def delstock(request):
 @login_required(login_url='login')
 def delst(request, pk):
     maintemp = preloaddata(request)
-    if maintemp['role'] == 'Admin' or maintemp['role'] == 'Issuer':
+    if maintemp['role'] == 'Admin':
         Coupons.objects.filter(cid=pk).delete()
         return redirect('delstock')
     else:
@@ -1876,7 +1911,6 @@ def user_profile(request, pk):
     else:
         return redirect('404')
 
-
 @login_required(login_url='login')
 def user_pic(request, pk):
     maintemp = preloaddata(request)
@@ -1888,7 +1922,6 @@ def user_pic(request, pk):
             return redirect('user_profile', str(pk))
     else:
         return redirect('404')
-
 
 @login_required(login_url='login')
 def login404(request):
@@ -2033,9 +2066,8 @@ def translog(request):
         return render(request, 'translog.html', context)
 
 
-# ------ This is to genrate a unique ID ------
+# ------ This is to genrate a unique ID for the books------
 import uuid
-
 
 @login_required(login_url='login')
 def couponBatch(request):
@@ -2185,8 +2217,16 @@ def coupondetail(request, pk):
         return redirect('couponBatch')
 
 @login_required(login_url='login')
-def couponprint(request):
-    return render(request, 'coupons_for_fuel.html')
+def couponprint(request, pk):
+    maintemp = preloaddata(request)
+    bkid = CouponBatch.objects.filter(id=pk)[0]
+    coupleaves = fueldump.objects.filter(book_id=bkid.bookref)
+    context ={
+        'leaves':coupleaves,
+        'bookurl':f"{maintemp['setting'].appurl}/coupondetail/{pk}",
+        'bkid':bkid
+    }
+    return render(request, 'coupons_for_fuel.html',context)
 
 # This is to soft delete a book with it's leave
 @login_required(login_url='login')
@@ -2200,18 +2240,46 @@ def deletebook(request, pk):
         CouponBatch.objects.filter(id=pk, used=0).update(bdel=1)
         return redirect('couponBatch')
 
-
+# This is for issuing or retrieving books
 @login_required(login_url='login')
 def hidebook(request, pk):
     maintemp = preloaddata(request)
     if maintemp['role'] == "Admin" or maintemp['role'] == "Owner":
-        if CouponBatch.objects.filter(id=pk, used=0, hide=0):
-            CouponBatch.objects.filter(id=pk).update(hide=1)
-            return redirect('coupondetail', pk)
-        else:
-            CouponBatch.objects.filter(id=pk, used=0, hide=1).update(hide=0)
-            return redirect('coupondetail', pk)
+        if CouponBatch.objects.filter(id=pk, used=0, hide=1):
+            CouponBatch.objects.filter(id=pk).update(hide=0)
+            book = CouponBatch.objects.filter(id=pk, used=0, hide=0)
+            email = Profile.objects.filter(role='Issuer',
+                status='active').values_list('email', flat=True)[0]
+            email2 = Profile.objects.filter(role='Admin', status='active').values_list(
+                'email', flat=True)[0]
 
+            subject, from_email, to = ' Book issued by ' + maintemp['current_user'], 'service.gm@undp.org', email
+            text_content = 'This is an important message.'
+            html_content = f"<p> The book number <strong>{book.values_list('book_id', flat=True)[0]}</strong> has been issued with <strong>{int(book.values_list('serial_end', flat=True)[0]) - int(book.values_list('serial_start', flat=True)[0])+1 }</strong> Leaves. Access the platform from the link below." \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/">Coupon Management system</a></p>' \
+                           '<br> ' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
+
+            subject, from_email, to = ' Book issued by ' + maintemp['current_user'], 'service.gm@undp.org', email2
+            text_content = 'This is an important message.'
+            html_content = f"<p> The book number <strong>{book.values_list('book_id', flat=True)[0]}</strong> has been issued with <strong>{int(book.values_list('serial_end', flat=True)[0]) - int(book.values_list('serial_start', flat=True)[0])+1 }</strong> Leaves. Access the platform from the link below." \
+                           '<br>' \
+                           f'<a href="{maintemp["server_url"]}/">Coupon Management system</a></p>' \
+                           '<br> ' \
+                           '<p> Thank you 😊 </p>'
+            msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+            msg.attach_alternative(html_content, "text/html")
+            EmailThreading(msg).start()
+
+
+        else:
+            CouponBatch.objects.filter(id=pk, used=0, hide=0).update(hide=1)
+
+        return redirect('coupondetail', pk)
 
 # This is for the search
 @login_required(login_url='login')
