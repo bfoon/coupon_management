@@ -86,6 +86,8 @@
       <td><div class="progress zoom">
       <div class="progress-bar progress-bar-striped active bg-info" role="progressbar" style="width: 100%" aria-valuenow="{% widthratio book.totalAmount book.dim 1 %}" aria-valuemin="0" aria-valuemax="{% widthratio book.totalAmount book.dim 1 %}">{% widthratio book.totalAmount book.dim 1 %}</div>
       </div></td>
+      <td>{{settings.currency}}{{book.totalAmount | intcomma}}</td>
+      <td>{{book.created_at | date:'Y-m-d'}}</td>
       {% elif book.used == 0 and book.hide == "0" %}
       <td><a href="coupondetail/{{book.id}}" class="btn btn-info btn-sm" >Book {{book.book_id}}</a></td>
       <td>{{book.serial_start}}-{{book.serial_end}}</td>

@@ -1967,7 +1967,7 @@ def passwordreset(request, pk):
 @login_required(login_url='login')
 def getfile(request):
     maintemp = preloaddata(request)
-    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         response['Content-Disposition'] = f'attachment; filename="report {now}.csv"'
@@ -1985,7 +1985,7 @@ def getfile(request):
 @login_required(login_url='login')
 def bookreport(request, pk):
     maintemp = preloaddata(request)
-    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         response['Content-Disposition'] = f'attachment; filename="bookreport {now}.csv"'
@@ -2014,7 +2014,7 @@ def bookreport(request, pk):
 @login_required(login_url='login')
 def couponbooksreport(request):
     maintemp = preloaddata(request)
-    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
         response = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         response['Content-Disposition'] = f'attachment; filename="couponbooksreport {now}.csv"'
@@ -2035,7 +2035,7 @@ def couponbooksreport(request):
 @login_required(login_url='login')
 def fuelconsreport(request):
     maintemp = preloaddata(request)
-    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer":
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Issuer" or maintemp['role'] == "Owner":
         responsed = HttpResponse(content_type='text/csv')
         now = time.strftime('%d-%m-%Y %H:%M:%S')
         responsed['Content-Disposition'] = f'attachment; filename="fuelconsreport {now}.csv"'
@@ -2076,7 +2076,7 @@ def couponBatch(request):
         maintemp = preloaddata(request)
         role = maintemp['role']
 
-        if role == "Driver" or role == "Approver" or role == "Owner":
+        if role == "Driver" or role == "Approver":
             return redirect('404')
         else:
             if request.method == "POST":
@@ -2119,35 +2119,36 @@ def couponBatch(request):
                                       dim=dim, used=0, trans_id=0, transac=0) for e in b])
                         return redirect("couponBatch")
 
-            elif role == "Owner" or role == "Admin":
-                # now = datetime.datetime.now()
-                # one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
-                # month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
-                # two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
+            # elif role == "Owner" or role == "Admin":
+            #     # now = datetime.datetime.now()
+            #     # one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
+            #     # month_end = datetime.datetime(now.year, now.month, 1) - datetime.timedelta(seconds=1)
+            #     # two_month_end = datetime.datetime(now.year, now.month, 2) - datetime.timedelta(seconds=1)
+            #
+            #     # # This is what is handling the book render.
+            #     books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
+            #                                          percent=100 - (F('rbal') * 100) / (
+            #                                                  F('totalAmount') / (F('dim')))).filter(bdel=0). \
+            #         all()
+            #
+            #     # This is for calculating months
+            #
+            #     ulist = Unit.objects.all()
+            #     context = {
+            #         'role': maintemp['role'],
+            #         'settings': maintemp['setting'],
+            #         'dcurmark': maintemp['dcurmark'],
+            #         'pcurmark': maintemp['pcurmark'],
+            #         'books': books,
+            #         'msg': maintemp['msg'],
+            #         'msg_co': maintemp['msg_co'],
+            #         'ulist': ulist,
+            #         'user_p': maintemp['user_p']
+            #     }
+            #     return render(request, 'couponbatch.html', context)
 
-                # # This is what is handling the book render.
-                books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
-                                                     percent=100 - (F('rbal') * 100) / (
-                                                             F('totalAmount') / (F('dim')))).filter(bdel=0). \
-                    all()
-
-                # This is for calculating months
-
-                ulist = Unit.objects.all()
-                context = {
-                    'role': maintemp['role'],
-                    'settings': maintemp['setting'],
-                    'dcurmark': maintemp['dcurmark'],
-                    'pcurmark': maintemp['pcurmark'],
-                    'books': books,
-                    'msg': maintemp['msg'],
-                    'msg_co': maintemp['msg_co'],
-                    'ulist': ulist,
-                    'user_p': maintemp['user_p']
-                }
-                return render(request, 'couponbatch.html', context)
-
-            elif role == "Issuer":
+            # elif role == "Issuer":
+            elif role == "Issuer" or role == "Owner" or role == "Admin":
                 # This is for calculating months
                 # now = datetime.datetime.now()
                 # one_month_ago = datetime.datetime(now.year, now.month - 1, 1)
@@ -2177,13 +2178,35 @@ def couponBatch(request):
     except IndexError:
         return redirect('couponBatch')
 
+@login_required(login_url='login')
+def couponNew(request):
+    maintemp = preloaddata(request)
+    if maintemp['role'] == "Admin" or maintemp['role'] == "Owner":
+        books = CouponBatch.objects.annotate(quan=(F('totalAmount') / F('dim')) - (F('rbal')),
+                                             percent=100 - (F('rbal') * 100) / (
+                                                     F('totalAmount') / (F('dim')))).filter(used=0, bdel=0). \
+            all()
+
+        ulist = Unit.objects.all()
+        context = {
+            'role': maintemp['role'],
+            'settings': maintemp['setting'],
+            'dcurmark': maintemp['dcurmark'],
+            'pcurmark': maintemp['pcurmark'],
+            'books': books,
+            'msg': maintemp['msg'],
+            'msg_co': maintemp['msg_co'],
+            'ulist': ulist,
+            'user_p': maintemp['user_p']
+        }
+        return render(request, 'couponbatch.html', context)
 
 @login_required(login_url='login')
 def coupondetail(request, pk):
     try:
         maintemp = preloaddata(request)
         role = maintemp['role']
-        if role == "Driver" or role == "Issuer" or role == "Approver" or role == "Owner":
+        if role == "Driver" or role == "Approver":
             return redirect('404')
         else:
 
@@ -2635,7 +2658,7 @@ def email_stock(request, pk):
         subject = request.POST.get('subject')
         message = request.POST.get('message')
         emial_group = Profile.objects.values_list('email', flat=True).filter(
-            Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
+            Q(role='Admin') | Q(role='Owner') | Q(role='Issuer') | Q(role='Approver'), status='active').distinct()
         recipients = list(i for i in emial_group if bool(i))
         subject, from_email, to = subject + ' from ' + current_user, 'service.gm@undp.org', recipients
         text_content = 'This is an important message.'

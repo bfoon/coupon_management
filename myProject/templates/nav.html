@@ -79,19 +79,28 @@
                 Coupons
             </div>
 
-
+{% if role == "Issuer" or role == "Admin" or role == "Owner" or role == "Approver" %}
             <!-- Nav Item - Charts -->
             <li class="nav-item">
                 <a class="nav-link" href="/stock">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Stock</span></a>
             </li>
-{% if role == "Issuer" or role == "Admin" %}
+            {% endif %}
+{% if role == "Issuer" or role == "Admin" or  role == "Owner" %}
             <!-- Nav Item - Books in use for issuer's view -->
             <li class="nav-item">
                 <a class="nav-link" href="/couponBatch">
                     <i class="fas fa-fw fa-book"></i>
                     <span>Books in use</span></a>
+            </li>
+            {% endif %}
+            {% if role == "Owner" or role == "Admin" %}
+                        <!-- Nav Item - Books in use for issuer's view -->
+            <li class="nav-item">
+                <a class="nav-link" href="/couponNew">
+                    <i class="fas fa-fw fa-book"></i>
+                    <span>Books not used</span></a>
             </li>
 {% endif %}
             <!-- Nav Item - Tables -->
@@ -101,6 +110,7 @@
                     <span>Transactions</span></a>
             </li>
 {% endif %}
+            {% if role == "Admin" or role == "Issuer" or role == "Approver"  or role == "Driver" %}
             <!-- Divider -->
             <hr class="sidebar-divider d-none d-md-block">
              <!-- Heading -->
@@ -134,9 +144,10 @@
                     <i class="fas fa-fw fa-table"></i>
                     <span>My Requests</span></a>
             </li>
-
+{% endif %}
 
         </ul>
+
 
         <!-- End of Sidebar -->
 
@@ -231,7 +242,8 @@
                                         The current market price for Petrol is {{settings.currency}}{{pcurmark.marketrate}} per litre!!
                                     </div>
                                 </a>
-                                {% if stocks.current_balance == 1 %}
+                                {% for stock in stocks %}
+                                {% if stock.current_balance == 1 %}
                                 <a class="dropdown-item d-flex align-items-center" href="/stock">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-warning">
@@ -246,10 +258,11 @@
 
                                 </a>
                                 {% endif %}
+                                {% endfor %}
                                 <a class="dropdown-item text-center small text-gray-500" href="#">Show All Alerts</a>
                             </div>
                         </li>
-
+                    {% if role != "Owner" %}
                         <!-- Nav Item - Messages -->
                         <li class="nav-item dropdown no-arrow mx-1">
                             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
@@ -306,7 +319,7 @@
 
                                 {% endif %}
 {% endfor %}
-
+{% endif %}
                         <div class="topbar-divider d-none d-sm-block"></div>
 
                         <!-- Nav Item - User Information -->
@@ -334,11 +347,14 @@
                                     <i class="fas fa-cogs fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Settings
                                 </a>
+                                {% endif %}
+                                {% if role == "Admin" or role == "Owner"%}
                                 <a class="dropdown-item" href="/activityreport">
                                     <i class="fas fa-list fa-sm fa-fw mr-2 text-gray-400"></i>
                                     Activity Log
                                 </a>
                                 {% endif %}
+
                                 <div class="dropdown-divider"></div>
                                 {% if user.is_authenticated %}
                                 <a class="dropdown-item" href="/logout" data-toggle="modal" data-target="#logoutModal">
