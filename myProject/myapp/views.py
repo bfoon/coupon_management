@@ -2570,8 +2570,11 @@ def activityDetail(request, pk):
             annotate(month=TruncMonth('created_at')).\
             values('month').\
             annotate(total_litre=Sum('litre')).order_by('month')
+        totallit = activityReport.objects.filter(vnum=activitydtl.vnum).\
+            aggregate(total_litre=Sum('litre'))
         context = {
             'activitydetail': activitydtl,
+            'totallit': totallit,
             'actlist': actlist,
             'actchart': actchart,
             'settings': maintemp['setting'],
