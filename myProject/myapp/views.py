@@ -2117,7 +2117,7 @@ def couponBatch(request):
                         fueldump.objects.bulk_create(
                             [fueldump(lnum=e, book_id=bookref, book=book_id, unit=unit, ftype=ftype,
                                       dim=dim, used=0, trans_id=0, transac=0) for e in b])
-                        return redirect("couponBatch")
+                        return redirect("couponNew")
 
             # elif role == "Owner" or role == "Admin":
             #     # now = datetime.datetime.now()
@@ -2422,7 +2422,11 @@ def reportpdf(request):
             credit_debit=F('credit') - F('debit')).order_by('unit', 'ftype',
                                                             'cdimension')
 
-        chckempty = Coupons.objects.values_list('credit', flat=True).annotate(credit_sum=F('credit') - F('debit'))
+        ce = Coupons.objects.filter(credit__gte=1).last()
+        if len(ce.ftype) > 0:
+            chckempty = 1
+        else:
+            chckempty = 0
 
         return render_to_pdf(
             template_name,
