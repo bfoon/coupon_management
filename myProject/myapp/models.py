@@ -35,6 +35,7 @@ class Vehicle(models.Model):
     driver = models.ForeignKey(Profile, on_delete=models.CASCADE)
     ftype = models.CharField(max_length= 100)
     tankcap = models.FloatField(blank=True)
+    cpm = models.FloatField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     datemodified = models.DateField(auto_now=True)
 

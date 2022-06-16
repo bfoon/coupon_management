@@ -79,6 +79,10 @@
                                     <label for="tankcap" class="col-form-label">Tank Capacity:</label>
                                     <input type="number" class="form-control" id="tankcap" name="tankcap" style="text-transform: capitalize;" required>
                                   </div>
+                                              <div class="form-group">
+                                    <label for="cpm" class="col-form-label">Consumption per Mile:</label>
+                                    <input type="number" class="form-control" id="cpm" name="cpm" style="text-transform: capitalize;" required>
+                                  </div>
 
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -106,6 +110,7 @@
                                 <th class="text-center"><span>Unit</span></th>
                                 <th><span>Fuel Type</span></th>
                                 <th><span>Tank(Liter)</span></th>
+                                <th><span>CPM(Liter)</span></th>
                                 <th>&nbsp;</th>
                                 </tr>
                             </thead>
@@ -126,6 +131,7 @@
                                         <a href="#">{{v.ftype}}</a>
                                     </td>
                                     <td style="text-transform:uppercase;">{{v.tankcap | intcomma}}</td>
+                                    <td style="text-transform:uppercase;">{{v.cpm | intcomma}}</td>
                                     <td style="width: 20%;">
                                         <a href="#" class="table-link text-warning">
                                             <span class="fa-stack" data-toggle="modal" data-target="#viewvehicle{{v.vid}}">
@@ -134,7 +140,7 @@
                                             </span>
                                         </a>
 
-                                        <div class="modal fade" id="viewvehicle{{v.vid}}" tabindex="-1" role="dialog" aria-labelledby="viewvehicleLabel{{v.vid}}" aria-hidden="true">
+                          <div class="modal fade" id="viewvehicle{{v.vid}}" tabindex="-1" role="dialog" aria-labelledby="viewvehicleLabel{{v.vid}}" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
                               <div class="modal-header">
@@ -173,10 +179,15 @@
                                     <label for="vtype" class="col-form-label">Vehicle Type:</label>
                                     <input type="text" class="form-control" value="{{v.vtype}}" style="text-transform: capitalize;" required readonly>
                                   </div>
-                                        <div class="form-group">
+                                    <div class="form-group">
                                     <label for="tankcap" class="col-form-label">Tank Capacity:</label>
                                     <input type="number" class="form-control" value="{{v.tankcap}}" style="text-transform: capitalize;" required readonly>
                                   </div>
+                                        <div class="form-group">
+                                    <label for="cpm" class="col-form-label">Consumption Per Mile:</label>
+                                    <input type="number" class="form-control" value="{{v.cpm}}" style="text-transform: capitalize;" required readonly>
+                                  </div>
+
 
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -256,6 +267,10 @@
                                         <div class="form-group">
                                     <label for="tankcap" class="col-form-label">Tank Capacity:</label>
                                     <input type="number" class="form-control" value="{{v.tankcap}}" name="tankcap" style="text-transform: capitalize;" required>
+                                  </div>
+                                      <div class="form-group">
+                                    <label for="cpm" class="col-form-label">Consumption Per Mile:</label>
+                                    <input type="number" class="form-control" value="{{v.cpm}}" name="cpm" style="text-transform: capitalize;" required>
                                   </div>
 
                               <div class="modal-footer">

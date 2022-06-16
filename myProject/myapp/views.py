@@ -546,7 +546,8 @@ def requester(request):
             vnum = request.POST.get('vnum')
             comm = request.POST.get('comm')
             mread = request.POST.get('mread')
-            tankcat = request.POST.get('tankcat')
+            # tankcat = request.POST.get('mread')
+
 
             stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1) | Q(ret=0),
                                                                              Q(vnum=vnum)
@@ -555,50 +556,74 @@ def requester(request):
                                                                               Q(vnum=vnum)
                                                                               ).last()
             inmileage = Vehicle.objects.values_list('imile', flat=True).filter(vnum=vnum)[0]
+            incpm = Vehicle.objects.values_list('cpm', flat=True).filter(vnum=vnum)[0]
+            # t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0] # Tank capacity
+
+            tncat = int(mread) - int(mileage)
+
+            # This is for tank status algorithm
+            # if (t / (tncat * incpm)) <= 1:
+            #     tankcat = "empty"
+            # elif (t / (tncat * incpm)) > 1 and (t /  (tncat * incpm)) <= 2:
+            #     tankcat = "half"
+            # elif (t / (tncat * incpm)) > 2 and (t / (tncat * incpm)) <= 3:
+            #     tankcat = "3quarter"
+            # elif (t / (tncat * incpm)) > 3 and (t / (tncat * incpm)) <= 4:
+            #     tankcat = "quarter"
+
+
             if stats == 3 or stats == None:
 
                 if stats == 3 and int(mileage) < int(mread) or \
                         stats == None and int(inmileage) < int(mread):
-
-                    if tankcat == 'empty':
-                        tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.filter(vnum=vnum)
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                    tank = (tncat * incpm)
+                        # tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                    fuel = Vehicle.objects.filter(vnum=vnum)
+                    req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
                                                       mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                                                      unit=fuel.values_list('asunit', flat=True),
                                                       amount=tank, comm=comm, status=1, ret=0)
-                        req.save();
-                    elif tankcat == 'quarter':
-                        t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.filter(vnum=vnum)
-                        tankmath = float(t) / 4
-                        tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
-                                                      mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
-                                                      amount=tank, comm=comm, status=1, ret=0)
-                        req.save();
-                    elif tankcat == 'half':
-                        t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.objects.filter(vnum=vnum)
-                        tankmath = float(t) / 2
-                        tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
-                                                      mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
-                                                      amount=tank, comm=comm, status=1, ret=0)
-                        req.save();
-                    elif tankcat == '3quarter':
-                        t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                        fuel = Vehicle.filter(vnum=vnum)
-                        s = 3 / 4
-                        tankmath = float(s) * float(t)
-                        tank = t - tankmath
-                        req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
-                                                      mread=mread, requesterid=current_user,
-                                                      tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
-                                                      amount=tank, comm=comm, status=1, ret=0)
-                        req.save();
+                    req.save();
+                    # if tankcat == 'empty':
+                    #     tank = t
+                    #     # tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                    #     fuel = Vehicle.objects.filter(vnum=vnum)
+                    #     req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                    #                                   mread=mread, requesterid=current_user,
+                    #                                   tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                    #                                   amount=tank, comm=comm, status=1, ret=0)
+                    #     req.save();
+                    # # elif tankcat == 'quarter':
+                    #     # t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                    #     fuel = Vehicle.objects.filter(vnum=vnum)
+                    #     tankmath = float(t) / 4
+                    #     tank = t - tankmath
+                    #     req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                    #                                   mread=mread, requesterid=current_user,
+                    #                                   tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                    #                                   amount=tank, comm=comm, status=1, ret=0)
+                    #     req.save();
+                    # elif tankcat == 'half':
+                    #     # t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                    #     fuel = Vehicle.objects.filter(vnum=vnum)
+                    #     tankmath = float(t) / 2
+                    #     tank = t - tankmath
+                    #     req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                    #                                   mread=mread, requesterid=current_user,
+                    #                                   tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                    #                                   amount=tank, comm=comm, status=1, ret=0)
+                    #     req.save();
+                    # elif tankcat == '3quarter':
+                    #     # t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                    #     fuel = Vehicle.filter(vnum=vnum)
+                    #     s = 3 / 4
+                    #     tankmath = float(s) * float(t)
+                    #     tank = t - tankmath
+                    #     req = Requests.objects.create(vnum=vnum, ftype=fuel.values_list('ftype', flat=True),
+                    #                                   mread=mread, requesterid=current_user,
+                    #                                   tankcat=tankcat, unit=fuel.values_list('asunit', flat=True),
+                    #                                   amount=tank, comm=comm, status=1, ret=0)
+                    #     req.save();
                     email = \
                         Profile.objects.select_related('user').annotate(user1=F('user_id__username')).filter(
                             user1=current_user, status='active') \
@@ -1358,8 +1383,10 @@ def vehicles(request):
             asunit = request.POST.get('asunit')
             driver = request.POST.get('driver')
             tankcap = request.POST.get('tankcap')
+            cpm = request.POST.get('cpm') # Consumption per miles
             veh = Vehicle.objects.create(vnum=vnum, ftype=ftype,
-                                         vtype=vtype, imile=imile, asunit=asunit, driver_id=driver, tankcap=tankcap)
+                                         vtype=vtype, imile=imile, asunit=asunit,
+                                         driver_id=driver, tankcap=tankcap, cpm=cpm)
             veh.save();
             messages.success(request, 'Request Successfully Submitted!')
             return redirect('vehicles')
@@ -1399,9 +1426,10 @@ def vehedit(request, pk):
             asunit = request.POST.get('asunit')
             driver = request.POST.get('driver')
             tankcap = request.POST.get('tankcap')
+            cpm = request.POST.get('cpm')
             Vehicle.objects.filter(vid=pk).update(vnum=vnum, ftype=ftype,
                                                   vtype=vtype, imile=imile, asunit=asunit, driver=driver,
-                                                  tankcap=tankcap)
+                                                  tankcap=tankcap, cpm=cpm)
             return redirect('vehicles')
 
     else:
@@ -2474,7 +2502,6 @@ def requestEdit(request, pk):
         rid = request.POST.get('rid')
         mread = request.POST.get('mread')
         vnum = request.POST.get('vnum')
-        tankcat = request.POST.get('tankcat')
         comm = request.POST.get('comm')
         # This is for the comment section
         message = request.POST.get('message')
@@ -2483,70 +2510,48 @@ def requestEdit(request, pk):
             mg.save();
         # The comment section ends here!!
 
-        stats = Requests.objects.values_list('status', flat=True).filter(Q(vnum=vnum), Q(ret=1), ~Q(rid=rid) | Q(ret=0),
+        stats = Requests.objects.values_list('status', flat=True).filter(Q(ret=0),
                                                                          Q(vnum=vnum), ~Q(rid=rid)
                                                                          ).last()
-        mileage = Requests.objects.values_list('mread', flat=True).filter(Q(vnum=vnum), Q(ret=1),
-                                                                          ~Q(rid=rid) | Q(ret=0),
+        mileage = Requests.objects.values_list('mread', flat=True).filter(Q(ret=0),
                                                                           Q(vnum=vnum), ~Q(rid=rid)
                                                                           ).last()
         inmileage = Vehicle.objects.values_list('imile', flat=True).filter(vnum=vnum)[0]
-        if stats == 3 or stats == None:
+        incpm = Vehicle.objects.values_list('cpm', flat=True).filter(vnum=vnum)[0]
+        try:
+            if mileage == None:
+                tncat = int(mread) - int(inmileage)
+            else:
+                tncat = int(mread) - int(mileage)
 
-            if stats == 3 and int(mileage) < int(mread) or \
-                    stats == None and int(inmileage) < int(mread):
+            if stats == 3 or stats == None:
 
-                if tankcat == 'empty':
-                    tank = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
+                if stats == 3 and int(mileage) < int(mread) or \
+                        stats == None and int(inmileage) < int(mread):
+
+                    tank = (tncat * incpm)
                     Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                                       tankcat=tankcat,
                                                                                                        amount=float(
-                                                                                                           tank),
-                                                                                                       comm=comm, ret=0)
+                                                                                                           tank), comm=comm, ret=0)
+                    emial_group = Profile.objects.values_list('email', flat=True).filter(
+                        Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
+                    recipients = list(i for i in emial_group if bool(i))
+                    subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
+                    text_content = 'This is an important message.'
+                    html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
+                                                                             '<br>' \
+                                                                             f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
+                                                                             '<br> ' \
+                                                                             '<p> Thank you 😊 </p>'
+                    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                    msg.attach_alternative(html_content, "text/html")
+                    EmailThreading(msg).start()
 
-                elif tankcat == 'quarter':
-                    t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                    tankmath = float(t) / 4
-                    tank = t - tankmath
-                    Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                                       tankcat=tankcat,
-                                                                                                       amount=tank,
-                                                                                                       comm=comm, ret=0)
+                return redirect('approvalflow', rid)
 
-                elif tankcat == 'half':
-                    t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                    tankmath = float(t) / 2
-                    tank = t - tankmath
-                    Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                                       tankcat=tankcat,
-                                                                                                       amount=tank,
-                                                                                                       comm=comm, ret=0)
 
-                elif tankcat == '3quarter':
-                    t = Vehicle.objects.values_list('tankcap', flat=True).filter(vnum=vnum)[0]
-                    s = 3 / 4
-                    tankmath = float(s) * float(t)
-                    tank = t - tankmath
-                    Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                                       tankcat=tankcat,
-                                                                                                       amount=tank,
-                                                                                                       comm=comm, ret=0)
-
-                emial_group = Profile.objects.values_list('email', flat=True).filter(
-                    Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
-                recipients = list(i for i in emial_group if bool(i))
-                subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
-                text_content = 'This is an important message.'
-                html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
-                                                                         '<br>' \
-                                                                         f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
-                                                                         '<br> ' \
-                                                                         '<p> Thank you 😊 </p>'
-                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-                msg.attach_alternative(html_content, "text/html")
-                EmailThreading(msg).start()
-
-        return redirect('approvalflow', rid)
+        except TypeError:
+              messages.warning(request, "Unable to send email but you request is issued!!!")
 
 
     else:
