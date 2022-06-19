@@ -2518,40 +2518,71 @@ def requestEdit(request, pk):
                                                                           ).last()
         inmileage = Vehicle.objects.values_list('imile', flat=True).filter(vnum=vnum)[0]
         incpm = Vehicle.objects.values_list('cpm', flat=True).filter(vnum=vnum)[0]
-        try:
-            if mileage == None:
-                tncat = int(mread) - int(inmileage)
-            else:
-                tncat = int(mread) - int(mileage)
+        if mileage == None:
+            tncat = int(mread) - int(inmileage)
+        else:
+            tncat = int(mread) - int(mileage)
 
-            if stats == 3 or stats == None:
+        if stats == 3 or stats == None:
 
-                if stats == 3 and int(mileage) < int(mread) or \
-                        stats == None and int(inmileage) < int(mread):
+            if stats == 3 and int(mileage) < int(mread) or \
+                    stats == None and int(inmileage) < int(mread):
+                tank = (tncat * incpm)
+                Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
+                                                                                                   amount=float(
+                                                                                                       tank), comm=comm,
+                                                                                                   ret=0)
+                emial_group = Profile.objects.values_list('email', flat=True).filter(
+                    Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
+                recipients = list(i for i in emial_group if bool(i))
+                subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
+                text_content = 'This is an important message.'
+                html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
+                                                                         '<br>' \
+                                                                         f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
+                                                                         '<br> ' \
+                                                                         '<p> Thank you 😊 </p>'
+                msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+                msg.attach_alternative(html_content, "text/html")
+                EmailThreading(msg).start()
 
-                    tank = (tncat * incpm)
-                    Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
-                                                                                                       amount=float(
-                                                                                                           tank), comm=comm, ret=0)
-                    emial_group = Profile.objects.values_list('email', flat=True).filter(
-                        Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
-                    recipients = list(i for i in emial_group if bool(i))
-                    subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
-                    text_content = 'This is an important message.'
-                    html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
-                                                                             '<br>' \
-                                                                             f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
-                                                                             '<br> ' \
-                                                                             '<p> Thank you 😊 </p>'
-                    msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-                    msg.attach_alternative(html_content, "text/html")
-                    EmailThreading(msg).start()
+            return redirect('approvalflow', rid)
 
-                return redirect('approvalflow', rid)
+        # try:
+        #     if mileage == None:
+        #         tncat = int(mread) - int(inmileage)
+        #     else:
+        #         tncat = int(mread) - int(mileage)
+        #
+        #     if stats == 3 or stats == None:
+        #
+        #         if stats == 3 and int(mileage) < int(mread) or \
+        #                 stats == None and int(inmileage) < int(mread):
+        #
+        #             tank = (tncat * incpm)
+        #             Requests.objects.filter(status=1, requesterid=current_user, ret=1, rid=rid).update(mread=mread,
+        #                                                                                                amount=float(
+        #                                                                                                    tank), comm=comm, ret=0)
+        #             emial_group = Profile.objects.values_list('email', flat=True).filter(
+        #                 Q(role='Admin') | Q(role='Approver') | Q(role='Issuer'), status='active').distinct()
+        #             recipients = list(i for i in emial_group if bool(i))
+        #             subject, from_email, to = 'Request for Coupon was returned by ' + current_user, 'service.gm@undp.org', recipients
+        #             text_content = 'This is an important message.'
+        #             html_content = '<p>Coupon request for <strong>' + vnum + '</strong> go to the link below.' \
+        #                                                                      '<br>' \
+        #                                                                      f'<a href="{maintemp["server_url"]}/approvalflow/{rid}">Request Item</a></p>' \
+        #                                                                      '<br> ' \
+        #                                                                      '<p> Thank you 😊 </p>'
+        #             msg = EmailMultiAlternatives(subject, text_content, from_email, to)
+        #             msg.attach_alternative(html_content, "text/html")
+        #             EmailThreading(msg).start()
+        #
+        #         return redirect('approvalflow', rid)
 
 
-        except TypeError:
-              messages.warning(request, "Unable to send email but you request is issued!!!")
+        # except TypeError:
+        #       messages.warning(request, "Unable to send email but you request is issued!!!")
+        # return redirect('requestEdit', rid)
 
 
     else:
